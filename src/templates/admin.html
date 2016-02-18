@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foundation</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{options.webroot}}/stylesheets/admin.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+</head>
+<body>
+<div class="top-bar admin">
+<div class="top-bar-left">
+<ul class="menu">
+<li class="menu-text">Admin</li>
+<li><a data-open="uploadModal" href="#">Upload Photos</a></li>
+<li><a href="#">Manage Portfolios</a></li>
+</ul>
+</div>
+</div>
+
+<div class="xxx">
+	<div id="foldersView" class="admin-panel left">
+  </div>
+
+	<div class="admin-panel right">
+    RIGHT
+	</div>
+
+</div>
+
+<div class="reveal" id="uploadModal" data-reveal>
+      <p>Drop files here:</p>
+      <div class="filedrop"></div>
+      <button class="close-button" data-close aria-label="Close modal" type="button">
+          <span aria-hidden="true">&times;</span>
+      </button>
+</div>
+
+
+ <script>
+  var folders = {{folders|json_encode|raw}};
+  var photos = {{photos|json_encode|raw}};
+ </script>
+ <script src="{{options.webroot}}/js/admin.bundle.js"></script>
+</body>
+</html>
+
+
+
+
+

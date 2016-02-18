@@ -1,0 +1,92 @@
+@charset 'utf-8';
+
+@import 'settings';
+@import "../../node_modules/foundation-sites/scss/foundation";
+
+@include foundation-global-styles;
+@include foundation-grid;
+@include foundation-typography;
+@include foundation-button;
+@include foundation-forms;
+@include foundation-visibility-classes;
+@include foundation-float-classes;
+@include foundation-accordion;
+@include foundation-accordion-menu;
+@include foundation-badge;
+@include foundation-breadcrumbs;
+@include foundation-button-group;
+@include foundation-callout;
+@include foundation-close-button;
+@include foundation-drilldown-menu;
+@include foundation-dropdown;
+@include foundation-dropdown-menu;
+@include foundation-flex-video;
+@include foundation-label;
+@include foundation-media-object;
+@include foundation-menu;
+@include foundation-off-canvas;
+//@include foundation-orbit;
+@include foundation-pagination;
+@include foundation-progress-bar;
+@include foundation-slider;
+@include foundation-sticky;
+@include foundation-reveal;
+@include foundation-switch;
+@include foundation-table;
+@include foundation-tabs;
+@include foundation-thumbnail;
+@include foundation-title-bar;
+@include foundation-tooltip;
+@include foundation-top-bar;
+
+@import "../../node_modules/slick-carousel/slick/slick.scss";
+@import "../../node_modules/slick-carousel/slick/slick-theme.scss";
+
+.slick-slide {
+    padding: 2px;
+    outline: none;
+    background-color: $body-background;
+    text-align:center;
+    img {
+    	opacity: 0.8;
+		  &:hover {
+			 opacity: 1;
+		  }
+    }
+}
+
+.top-bar.client {
+  //margin: rem-calc(10) rem-calc(-60) rem-calc(10) rem-calc(-60);
+  margin-top: rem-calc(10);
+  border-top: 3px solid $primary-color;
+  a {
+    color: $body-font-color;
+  }
+
+  .menu-text {
+    .title-main { 
+      display: inline;
+      font-size: 4rem;
+      //font-family: Kameron;
+      &:hover {
+        color: $secondary-color;
+      }
+    }
+    .title-sub {
+      margin-left: 0.5rem;
+      color: $secondary-color;
+      font-size: 1.25rem;
+    }
+  }
+
+  .top-bar-right {
+    margin-top: 5rem;
+    a {
+      border-top: 2px solid $body-background;
+      &:hover {
+        border-top: 2px solid $secondary-color;
+        color: $white;
+      }
+    }
+  }
+}

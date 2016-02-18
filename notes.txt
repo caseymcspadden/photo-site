@@ -1,0 +1,3 @@
+SQL queries
+
+SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, P.id as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery INNER JOIN galleryphotos GP ON GP.idgallery = G.id INNER JOIN photos P ON P.id=GP.idphoto

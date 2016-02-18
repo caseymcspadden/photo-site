@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foundation</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{options.webroot}}/stylesheets/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+</head>
+<body>
+  <div class="row large-12 columns">
+  <div class="top-bar client">
+  <div class="top-bar-left">
+  <ul class="menu">
+  <li class="menu-text"><a class="title-main" href="{{options.webroot}}/">Cross River</a><span class="title-sub">photography by Casey McSpadden</span></li>
+  </ul>
+  </div>
+  <div class="top-bar-right">
+  <ul class="menu">
+  <li><a href="{{options.webroot}}/portfolio">PORTFOLIO</a></li>
+  <li><a href="{{options.webroot}}/about">ABOUT</a></li>
+  <li><a href="{{options.webroot}}/contact">CONTACT</a></li>
+  </ul>
+  </div>
+  </div>
+  </div>
+  {% block content %}
+  {% endblock %}
+  {% block bundle %}
+  <script src="{{options.webroot}}/js/home.bundle.js"></script>
+  {% endblock %}
+</body>
+</html>

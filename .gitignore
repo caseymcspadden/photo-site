@@ -1,0 +1,6 @@
+build/
+require/
+fileroot/
+node_modules/
+vendor/
+.DS_Store
