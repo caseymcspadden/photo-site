@@ -11,10 +11,15 @@ module.exports = Backbone.View.extend
 	selectedFolder: null
 	selectedGallery: null
 	$tree: null
+	collapsed: true
+	close_same_level: false
+	duration: 400
+	listAnim: true
+	easing: 'easeOutQuart'
+
 	events:
 		'click .add-folder': 'addFolder'
 		'click .add-gallery': 'addGallery'
-		'click li > *:first-child' : 'test1'
 		'click .folder > *:first-child' : 'folderClicked'
 		'click .gallery > *:first-child' : 'galleryClicked'
 
@@ -73,8 +78,35 @@ module.exports = Backbone.View.extend
 	test1: ->
 		console.log "test1 called"
 
-	folderClicked: ->
-		console.log "folder clicked"
+	setNodeClass: (elem, isOpen) ->
+		if isOpen
+			elem.removeClass('mtree-open').addClass('mtree-closed')
+		else
+			elem.removeClass('mtree-closed').addClass('mtree-open')
 
+	folderClicked: (f) ->
+		$li = $(f.target).parent()
+		if $li.hasClass 'mtree-closed'
+			this.$('.mtree-active').not($li).removeClass('mtree-active')
+			$li.addClass 'mtree-active'
+		else if $li.hasClass 'mtree-open'
+			$li.removeClass 'mtree-active'
+		else
+			this.$('.mtree-active').not($li).removeClass('mtree-active')
+			$li.toggleClass 'mtree-active'
+
+		$ul = $li.children('ul').first()
+		console.log $ul
+		isOpen = $li.hasClass('mtree-open')
+
+		if this.close_same_level and not isOpen
+			$close_items.delay(100).slideToggle this.duration, ->
+				this.setNodeClass($li, true)
+
+		this.setNodeClass($li, isOpen)
+		$ul.slideToggle(this.duration)
+
+
+ 
 	galleryClicked: ->
 		console.log "gallery clicked"

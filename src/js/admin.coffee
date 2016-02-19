@@ -48,19 +48,19 @@ if $('ul.mtree').length
    
     
   #Set mtree-active class on list items for last opened element
-  $('.mtree li > *:first-child').on 'click.mtree-active', (e) ->
-    console.log "This happened"
-    if $(this).parent().hasClass('mtree-closed')
-      $('.mtree-active').not($(this).parent()).removeClass('mtree-active')
-      $(this).parent().addClass('mtree-active')
-    else if $(this).parent().hasClass('mtree-open')
-      $(this).parent().removeClass('mtree-active') 
-    else
-      $('.mtree-active').not($(this).parent()).removeClass('mtree-active')
-      $(this).parent().toggleClass('mtree-active') 
+ # $('.mtree li > *:first-child').on 'click.mtree-active', (e) ->
+  #  console.log "This happened"
+   # if $(this).parent().hasClass('mtree-closed')
+    #  $('.mtree-active').not($(this).parent()).removeClass('mtree-active')
+    #  $(this).parent().addClass('mtree-active')
+    #else if $(this).parent().hasClass('mtree-open')
+     # $(this).parent().removeClass('mtree-active') 
+    #else
+     # $('.mtree-active').not($(this).parent()).removeClass('mtree-active')
+      #$(this).parent().toggleClass('mtree-active') 
         
   #Set node click elements, preferably <a> but node links can be <span> also
-  node.children(':first-child').on 'click.mtree', (e) ->
+  node.children('div').on 'click.mtree', (e) ->
         
     #element vars
     el = $(this).parent().children('ul').first()
