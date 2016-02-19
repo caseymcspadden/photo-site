@@ -13,7 +13,6 @@ Photos = new PhotoCollection(photos)
 console.log folders
 
 foldersview = new FoldersView({el: '#foldersView', initfolders: folders })
-foldersview.render()
 
 $(".filedrop").dropzone
   url: "services/upload"
@@ -50,6 +49,7 @@ if $('ul.mtree').length
     
   #Set mtree-active class on list items for last opened element
   $('.mtree li > *:first-child').on 'click.mtree-active', (e) ->
+    console.log "This happened"
     if $(this).parent().hasClass('mtree-closed')
       $('.mtree-active').not($(this).parent()).removeClass('mtree-active')
       $(this).parent().addClass('mtree-active')

@@ -8,13 +8,24 @@ Gallery = require './gallery'
 
 module.exports = Backbone.View.extend
 	initfolders: []
+	selectedFolder: null
+	selectedGallery: null
+	$tree: null
 	events:
 		'click .add-folder': 'addFolder'
 		'click .add-gallery': 'addGallery'
 		'click li > *:first-child' : 'test1'
+		'click .folder > *:first-child' : 'folderClicked'
+		'click .gallery > *:first-child' : 'galleryClicked'
 
 	initialize: (options) ->
 		this.template = templates['folders-view']
+
+		this.$el.html(this.template());
+
+		this.$tree = this.$('.mtree');
+
+		console.log this.$tree
 
 		console.log options.initfolders
 
@@ -33,26 +44,37 @@ module.exports = Backbone.View.extend
 			
 	render: ->
 		console.log this.collection.toJSON()
-		this.$el.html this.template(this.collection.toJSON())
 
-	folderAdded: ->
+	folderAdded: (f) ->
 		console.log "Folder Added"
+		this.selectedFolder = f.cid
+		console.log f
+		test = this.$tree.append('<li id="folder-' + f.cid + '" class="folder mtree-node mtree-closed"><a href="#">' + f.get('Name') + '</a><ul class="mtree-level-1"></ul></li>')
+		console.log(test);		
 
-	folderRemoved: ->
+	folderRemoved: (f) ->
 		console.log "Folder Removed"
 
 	galleryAdded: (g) -> 
 		console.log "Gallery Added"
 		console.log g
+		this.$('#folder-' + this.selectedFolder + ' ul').append('<li id="gallery-' + g.cid + '" class="gallery"><a href="#">' + g.get('Name') + '</a></li>')
 
 	galleryRemoved: (g) ->
 		console.log g
 
 	addFolder: ->
 		console.log "Add Folder"
+		this.collection.add(new Folder({Name: 'New Folder'}))
 
 	addGallery: ->
 		console.log "Add Gallery"
 
 	test1: ->
 		console.log "test1 called"
+
+	folderClicked: ->
+		console.log "folder clicked"
+
+	galleryClicked: ->
+		console.log "gallery clicked"

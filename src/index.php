@@ -6,9 +6,9 @@ require './vendor/autoload.php';
 // $photoroot = path used by PHP to write to thumbnail folder
 // $webroot = root of httpd file structure
 
-$fileroot = '/Users/caseymcspadden/sites/foundation6/fileroot';
-$photoroot = '/Users/caseymcspadden/sites/foundation6/build/photos';
-$webroot = '/foundation6/build';
+$fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
+$photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
+$webroot = '/photo-site/build';
 
 $config = array();
 
