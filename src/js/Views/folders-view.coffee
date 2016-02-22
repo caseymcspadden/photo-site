@@ -5,17 +5,15 @@ templates = require './jst'
 Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
+PhotoApp = require './photoapp'
 
 module.exports = Backbone.View.extend
-	initfolders: []
-	selectedFolder: null
-	selectedGallery: null
+	app: null
 	$tree: null
 	collapsed: true
 	close_same_level: false
 	duration: 400
 	listAnim: true
-	easing: 'easeOutQuart'
 
 	events:
 		'click .add-folder': 'addFolder'
@@ -26,54 +24,64 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['folders-view']
 
+		this.app = options.app
+
 		this.$el.html(this.template());
 
 		this.$tree = this.$('.mtree');
 
-		console.log this.$tree
-
-		console.log options.initfolders
-
-		this.collection = new Folders()
-
-		this.listenTo(this.collection, 'add', this.folderAdded)
-		this.listenTo(this.collection, 'remove', this.folderRemoved)
-
-		for folder in options.initfolders
-		  f = new Folder(folder)
-		  this.listenTo(f.Galleries, 'add', this.galleryAdded)
-		  this.listenTo(f.Galleries, 'remove', this.galleryRemoved)
-		  this.collection.add f		
-		  for gallery in folder.Galleries
-		    f.Galleries.add new Gallery(gallery)
+		this.listenTo(this.app.folders, 'add', this.folderAdded)
+		this.listenTo(this.app.folders, 'remove', this.folderRemoved)
 			
 	render: ->
-		console.log this.collection.toJSON()
+		this.$tree.html('');
+		self = this
+		this.app.folders.each (folder) ->
+			self.app.set({selectedFolder: folder})
+			self.folderAdded folder
+			folder.Galleries.each (gallery) ->
+				self.galleryAdded(gallery)
+
+		this.$tree.find('ul').css
+			'overflow':'hidden'
+			'height': if this.collapsed then 0 else 'auto'
+			'display': if this.collapsed then 'none' else 'block'
 
 	folderAdded: (f) ->
-		console.log "Folder Added"
-		this.selectedFolder = f.cid
-		console.log f
+		this.listenTo(f.Galleries, 'add', this.galleryAdded)
+		this.listenTo(f.Galleries, 'remove', this.galleryRemoved)
 		test = this.$tree.append('<li id="folder-' + f.cid + '" class="folder mtree-node mtree-closed"><a href="#">' + f.get('Name') + '</a><ul class="mtree-level-1"></ul></li>')
-		console.log(test);		
 
 	folderRemoved: (f) ->
 		console.log "Folder Removed"
 
 	galleryAdded: (g) -> 
-		console.log "Gallery Added"
-		console.log g
-		this.$('#folder-' + this.selectedFolder + ' ul').append('<li id="gallery-' + g.cid + '" class="gallery"><a href="#">' + g.get('Name') + '</a></li>')
+		this.listenTo(g.Photos, 'remove', this.photoRemoved)
+		sel = this.app.get('selectedFolder')
+		this.$('#folder-' + sel.cid + ' ul').append('<li id="gallery-' + g.cid + '" class="gallery"><a href="#">' + g.get('Name') + '</a></li>')
 
 	galleryRemoved: (g) ->
-		console.log g
+		console.log 'Gallery Removed'
+
+	photoRemoved: (p) ->
+		console.log "photo removed from gallery"
 
 	addFolder: ->
-		console.log "Add Folder"
-		this.collection.add(new Folder({Name: 'New Folder'}))
+		this.app.folders.add(new Folder({Name: 'New Folder'}))
 
 	addGallery: ->
-		console.log "Add Gallery"
+		$active = this.$('.folder.mtree-active')
+		if $active.length > 0
+			isOpen = $active.hasClass 'mtree-open'
+			this.setNodeClass $active, false
+
+			$ul = $active.children('ul').first()
+			if $ul.children().length > 0 and not isOpen
+				$ul.slideToggle(this.duration)
+			cid = $active.attr('id').replace(/^folder-/,'')
+			this.app.selectFolder cid
+			sel = this.app.get 'selectedFolder'
+			sel.Galleries.add new Gallery({Name: 'New Gallery'})
 
 	test1: ->
 		console.log "test1 called"
@@ -84,29 +92,41 @@ module.exports = Backbone.View.extend
 		else
 			elem.removeClass('mtree-closed').addClass('mtree-open')
 
-	folderClicked: (f) ->
-		$li = $(f.target).parent()
-		if $li.hasClass 'mtree-closed'
-			this.$('.mtree-active').not($li).removeClass('mtree-active')
-			$li.addClass 'mtree-active'
-		else if $li.hasClass 'mtree-open'
-			$li.removeClass 'mtree-active'
-		else
-			this.$('.mtree-active').not($li).removeClass('mtree-active')
-			$li.toggleClass 'mtree-active'
+	folderClicked: (e) ->
+		$li = $(e.target).parent()
+		this.$('.gallery.mtree-active').removeClass('mtree-active')		
+		this.app.selectFolder $li.attr('id').replace(/^folder-/,'')
+		this.app.selectGallery 0
+		
+		this.$('.folder.mtree-active').not($li).removeClass('mtree-active')
+		$li.addClass 'mtree-active'
 
 		$ul = $li.children('ul').first()
-		console.log $ul
 		isOpen = $li.hasClass('mtree-open')
 
-		if this.close_same_level and not isOpen
-			$close_items.delay(100).slideToggle this.duration, ->
-				this.setNodeClass($li, true)
+		$ul.css
+			'height': 'auto'
 
-		this.setNodeClass($li, isOpen)
-		$ul.slideToggle(this.duration)
+		if $ul.children().length > 0
+			this.setNodeClass($li, isOpen)
+			$ul.slideToggle(this.duration)
+
+		e.preventDefault()
+
+	galleryClicked: (e) ->
+		$li = $(e.target).parent()
+		$folder = $li.parent().parent()
+		
+		this.$('.folder.mtree-active').not($folder).removeClass('mtree-active')
+		$folder.addClass 'mtree-active'
+		this.app.selectFolder $folder.attr('id').replace(/^folder-/,'')
+
+		this.$('.gallery.mtree-active').not($li).removeClass('mtree-active')
+		$li.addClass('mtree-active')
+		this.app.selectGallery $li.attr('id').replace(/^gallery-/,'')
+
+		e.preventDefault()
 
 
- 
-	galleryClicked: ->
-		console.log "gallery clicked"
+
+

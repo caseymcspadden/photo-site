@@ -84,10 +84,12 @@ $app->get('/admin', function ($request, $response, $args) {
     $folders = array();
     $galleries = array();
     $mysqli = $this->options['mysqli'];
-    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery");
+    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery INNER JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
 
-    $currentfolder=NULL;
-    $currentgallery=NULL; 
+    $currentfolder=0;
+    $currentgallery=0; 
+    $findex=0;
+    $gindex=0;
 
     while ($row = $result->fetch_assoc())
     {
@@ -96,15 +98,19 @@ $app->get('/admin', function ($request, $response, $args) {
       $fname = $row['fname'];
       $gname = $row['gname'];
 
-      if ($currentfolder==NULL || $currentfolder['id']!=$fid) {
-        $currentfolder = ['id'=>$fid, 'Name'=>$fname, 'Galleries'=>array()];
-        array_push($folders, $currentfolder);
+      if ($currentfolder==0 || $currentfolder!=$fid) {
+        $currentfolder = $fid;
+        array_push($folders, ['id'=>$fid, 'Name'=>$fname, 'Galleries'=>array()]);
+        $findex = count($folders)-1;
       }
 
-      if ($currentgallery==NULL || $currentgallery['id']!=$gid) {
-        $currentgallery = ['id'=>$gid, 'Name'=>$gname, 'Photos'=>array()];
-        array_push($folders[count($folders)-1]['Galleries'], $currentgallery);
-      }
+      if ($currentgallery==0 || $currentgallery!=$gid) {
+        $currentgallery = $gid;
+        array_push($folders[$findex]['Galleries'], ['id'=>$gid, 'Name'=>$gname, 'Photos'=>[]]);
+        $gindex = count($folders[$findex]['Galleries'])-1;
+       }
+
+      array_push($folders[$findex]['Galleries'][$gindex]['Photos'],$row['pid']);
     }
 
     $result = $mysqli->query("SELECT * FROM photos");

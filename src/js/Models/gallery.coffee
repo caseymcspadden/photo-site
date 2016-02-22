@@ -10,3 +10,14 @@ module.exports = Backbone.Model.extend
 		Photos: null
 	initialize: (attributes, options) ->
 		this.Photos = new Photos()
+
+	addPhoto: (p) ->
+		this.listenTo p, 'destroy', this.photoDestroyed
+		this.Photos.add p
+
+	photoDestroyed: (p) ->
+		console.log 'photo destroyed'
+		console.log p
+		this.Photos.remove p
+		#this.stopListening p
+		console.log this.Photos

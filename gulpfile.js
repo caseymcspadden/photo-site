@@ -168,7 +168,7 @@ gulp.task('sass', function() {
 // browser sync server for live reload
 gulp.task('serve', function() {
   browserSync.init({
-    proxy: 'localhost:8888/foundation6/build'
+    proxy: 'localhost:8888/photo-site/build'
     //server: {
       //baseDir: './build'
     //}
