@@ -18,12 +18,12 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		folder = this.app.get 'selectedFolder'
+		console.log this.app.get 'selectedGallery'
 		console.log folder.toJSON()
 		this.$el.html(folder.get 'Name')
 
 	folderChanged: (app) ->
 		console.log 'folder changed'
-		this.listenTo app.get('selectedFolder'), 'change:selectedGallery', this.galleryChanged
 		this.render()
 
 	galleryChanged: (folder) ->

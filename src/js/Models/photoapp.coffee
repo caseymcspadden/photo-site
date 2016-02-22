@@ -7,7 +7,7 @@ Gallery = require('./gallery')
 module.exports = Backbone.Model.extend
 	defaults :
 		selectedFolder: null
-		selectedGallery: -1
+		selectedGallery: 0
 		photos: null
 		folders: null
 	
@@ -30,9 +30,4 @@ module.exports = Backbone.Model.extend
 
 	selectGallery: (id) ->
 		selectedFolder = this.get 'selectedFolder'
-
-		if (selectedFolder)
-			g = selectedFolder.Galleries.get id
-			index = if g then selectedFolder.Galleries.indexOf(g) else -1
-			this.set {selectedGallery: g}
-			selectedFolder.set {selectedGallery: index}
+		this.set {selectedGallery: id}

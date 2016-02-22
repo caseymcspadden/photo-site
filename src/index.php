@@ -84,7 +84,7 @@ $app->get('/admin', function ($request, $response, $args) {
     $folders = array();
     $galleries = array();
     $mysqli = $this->options['mysqli'];
-    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery INNER JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
+    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery LEFT JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
 
     $currentfolder=0;
     $currentgallery=0; 
