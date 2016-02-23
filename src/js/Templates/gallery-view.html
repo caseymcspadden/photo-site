@@ -1,5 +1,14 @@
+<% if (typeof(Galleries)!=='undefined') { %>
 <div class="galleryview folder">
+<%= Name %>
 </div>
-
+<% } else { %>
 <div class="galleryview gallery">
-<div>
+<p><%= Name %></p>
+<% _.forEach(Photos, function(photo) { if (photo) { %>
+<div class="photo-thumbnail">
+<img id="image-<%= photo.id %>" src="photos/T/<%= photo.id %>.jpg" alt="<%= photo.id %>"></img>
+</div>
+<% }}); %>
+</div>
+<% } %>

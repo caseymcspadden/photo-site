@@ -21,3 +21,8 @@ module.exports = Backbone.Model.extend
 		this.Photos.remove p
 		#this.stopListening p
 		console.log this.Photos
+
+	getJSON: ->
+		json = this.toJSON()
+		json.Photos = this.Photos.toJSON()
+		return json

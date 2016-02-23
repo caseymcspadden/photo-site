@@ -10,17 +10,31 @@ PhotoApp = require './photoapp'
 module.exports = Backbone.View.extend
 	app: null
 
+	events:
+		'click .thumbnail > img' : 'photoClicked'
+
 	initialize: (options) ->
 		this.app = options.app
+		this.template = templates['gallery-view']
 
 		this.listenTo this.app, 'change:selectedFolder', this.folderChanged
 		this.listenTo this.app, 'change:selectedGallery', this.galleryChanged
 
 	render: ->
 		folder = this.app.get 'selectedFolder'
-		console.log this.app.get 'selectedGallery'
-		console.log folder.toJSON()
-		this.$el.html(folder.get 'Name')
+		if not folder
+			return
+
+		gid = this.app.get 'selectedGallery'
+		gallery = folder.Galleries.get gid
+		if gid and gallery is undefined
+			return
+
+		console.log folder
+		if gallery
+			console.log gallery.getJSON()
+
+		this.$el.html this.template(if gid then gallery.getJSON() else folder.toJSON())
 
 	folderChanged: (app) ->
 		console.log 'folder changed'
@@ -29,3 +43,6 @@ module.exports = Backbone.View.extend
 	galleryChanged: (folder) ->
 		console.log 'gallery changed'
 		this.render()
+
+	photoClicked: (e) ->
+		console.log e

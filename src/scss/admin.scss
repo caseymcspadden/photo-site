@@ -100,9 +100,10 @@
 .admin-panel {
 	float: left;
 	&.left {
-		width: 400px;
+		width: 25%;
 	}
 	&.right {
+    width: 70%;
 	}
 }
 
@@ -118,4 +119,16 @@
   }
 }
 
-
+.photo-thumbnail {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  float: left;
+  margin: 5px;
+  img {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+}

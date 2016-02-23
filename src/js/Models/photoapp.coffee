@@ -7,7 +7,7 @@ Gallery = require('./gallery')
 module.exports = Backbone.Model.extend
 	defaults :
 		selectedFolder: null
-		selectedGallery: 0
+		selectedGallery: null
 		photos: null
 		folders: null
 	
@@ -20,10 +20,10 @@ module.exports = Backbone.Model.extend
 			this.folders.add f   
 			for gallery in folder.Galleries
 				g = new Gallery(gallery)
-				f.Galleries.add g
 				for idphoto in gallery.Photos
 					p = this.photos.get(idphoto)
 					g.addPhoto p
+				f.Galleries.add g
 
 	selectFolder: (id) ->
 		this.set({selectedFolder: this.folders.get(id)})

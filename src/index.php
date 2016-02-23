@@ -128,8 +128,8 @@ $app->get('/admin', function ($request, $response, $args) {
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
       //'X3'=>[1600,1200],
-      //'X2'=>[1280,960],
-      'X'=>[1024,768],
+      'X'=>[1280,960],
+      //'X'=>[1024,768],
       'L'=>[800,600],
       'M'=>[600,450],
       'S'=>[400,300],
@@ -239,16 +239,22 @@ $app->post('/services/upload', function($request, $response, $args) {
                 }
 
                 if ($w<=$size[0] || $h<=$size[1]) { // only make the image if smaller than the original
-                  $im2 = imagecreatetruecolor($w, $h);
                   if ($imlarger===FALSE) {
                     $imlarger = $im;
                     $wlarger = $size[0];
                     $hlarger = $size[1];
-                    //imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
-                    //imagecopy($im2, $watermark, ($w-$wmsize[0])/2, $h-3*$wmsize[1], 0, 0, $wmsize[0], $wmsize[1]);
                   }
-                  //else
-                  imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
+                  if ($postfix=='T') {   //Make a square thumbnail
+                    $srcx = ($hlarger > $wlarger) ? 0 : ($wlarger-$hlarger)/2;
+                    $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
+                    $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
+                    $im2 = imagecreatetruecolor($wh[0], $wh[0]);
+                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $wh[0], $wh[0], $srcw, $srcw);
+                  }
+                  else {
+                    $im2 = imagecreatetruecolor($w, $h);
+                    imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
+                  }
                   imagejpeg($im2, $photoroot . '/' . $id . "_$postfix" . '.jpg');
                   $imlarger=$im2;
                   $wlarger = $w;

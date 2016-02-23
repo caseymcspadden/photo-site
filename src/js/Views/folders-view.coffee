@@ -96,7 +96,7 @@ module.exports = Backbone.View.extend
 		$li = $(e.target).parent()
 		this.$('.gallery.mtree-active').removeClass('mtree-active')		
 		this.app.selectFolder $li.attr('id').replace(/^folder-/,'')
-		this.app.selectGallery 0
+		this.app.selectGallery null
 		
 		this.$('.folder.mtree-active').not($li).removeClass('mtree-active')
 		$li.addClass 'mtree-active'
