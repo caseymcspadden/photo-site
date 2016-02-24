@@ -1,11 +1,11 @@
 # Folder model contains a collection of galleries
 
 Backbone = require 'backbone'
+Gallery = require './gallery' 
 Galleries = require './galleries'
 
-module.exports = Backbone.Model.extend
+module.exports = Backbone.RelationalModel.extend
 	defaults :
-		Name: ""
-		Galleries: null
+		name: ""
 	initialize: (attributes, options) ->
-		this.Galleries = new Galleries()
+		this.set({galleries: new Galleries()})

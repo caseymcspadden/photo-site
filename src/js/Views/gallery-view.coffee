@@ -21,28 +21,31 @@ module.exports = Backbone.View.extend
 		this.listenTo this.app, 'change:selectedGallery', this.galleryChanged
 
 	render: ->
+		console.log 'rendering'
 		folder = this.app.get 'selectedFolder'
 		if not folder
 			return
 
-		gid = this.app.get 'selectedGallery'
-		gallery = folder.Galleries.get gid
-		if gid and gallery is undefined
+		gallery = this.app.get 'selectedGallery'
+
+		console.log(gallery)
+
+		if gallery is null
 			return
 
-		console.log folder
-		if gallery
-			console.log gallery.getJSON()
-
-		this.$el.html this.template(if gid then gallery.getJSON() else folder.toJSON())
+		this.$el.html this.template(if gallery then gallery.getJSON() else folder.toJSON())
 
 	folderChanged: (app) ->
-		console.log 'folder changed'
 		this.render()
 
-	galleryChanged: (folder) ->
-		console.log 'gallery changed'
+	galleryChanged: (app) ->
+		if app.get('selectedGallery')
+			this.listenTo app.get('selectedGallery').get('photos'), 'add', this.photoAdded 
+
 		this.render()
+
+	photoAdded: (p) ->
+		console.log p
 
 	photoClicked: (e) ->
 		console.log e

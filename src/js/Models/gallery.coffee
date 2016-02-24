@@ -1,28 +1,34 @@
 # Gallery model contains a collection of photos
 
 Backbone = require 'backbone'
+Photo = require './photo'
 Photos = require './photos'
 
 module.exports = Backbone.Model.extend
 	defaults :
-		Name: ""
-		FeaturedPhoto: ""
-		Photos: null
+		name: ""
+		populated: false
+		featuredPhoto: ""
+	
 	initialize: (attributes, options) ->
-		this.Photos = new Photos()
+		photos = new Photos()
+		photos.url = 'services/gallery/' + this.id + '/photos/'
+		this.set {photos: photos}
+
+	populate: ->
+		if this.get('populated') is false
+			this.get('photos').fetch()
+		this.set {populated: true}
 
 	addPhoto: (p) ->
 		this.listenTo p, 'destroy', this.photoDestroyed
-		this.Photos.add p
+		this.get('photos').add p
 
 	photoDestroyed: (p) ->
-		console.log 'photo destroyed'
-		console.log p
-		this.Photos.remove p
+		this.get('photos').remove p
 		#this.stopListening p
-		console.log this.Photos
 
 	getJSON: ->
 		json = this.toJSON()
-		json.Photos = this.Photos.toJSON()
+		json.photos = this.get('photos').toJSON()
 		return json

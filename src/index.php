@@ -84,7 +84,8 @@ $app->get('/admin', function ($request, $response, $args) {
     $folders = array();
     $galleries = array();
     $mysqli = $this->options['mysqli'];
-    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery LEFT JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
+    //$result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery LEFT JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
+    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname FROM folders F LEFT JOIN foldergalleries FG On FG.idfolder = F.id LEFT JOIN galleries G ON G.id=FG.idgallery ORDER BY fid, gid");
 
     $currentfolder=0;
     $currentgallery=0; 
@@ -100,30 +101,62 @@ $app->get('/admin', function ($request, $response, $args) {
 
       if ($currentfolder==0 || $currentfolder!=$fid) {
         $currentfolder = $fid;
-        array_push($folders, ['id'=>$fid, 'Name'=>$fname, 'Galleries'=>array()]);
+        array_push($folders, ['id'=>$fid, 'name'=>$fname, 'galleries'=>array()]);
         $findex = count($folders)-1;
       }
 
       if ($currentgallery==0 || $currentgallery!=$gid) {
         $currentgallery = $gid;
-        array_push($folders[$findex]['Galleries'], ['id'=>$gid, 'Name'=>$gname, 'Photos'=>[]]);
-        $gindex = count($folders[$findex]['Galleries'])-1;
+        if (!is_null($gid))
+          array_push($folders[$findex]['galleries'], ['id'=>$gid, 'name'=>$gname]);
+        $gindex = count($folders[$findex]['galleries'])-1;
        }
 
-      array_push($folders[$findex]['Galleries'][$gindex]['Photos'],$row['pid']);
+      //array_push($folders[$findex]['galleries'][$gindex]['photos'],$row['pid']);
     }
 
-    $result = $mysqli->query("SELECT * FROM photos");
+    //$result = $mysqli->query("SELECT * FROM photos");
 
-    while ($row = $result->fetch_assoc())
-      array_push($photos, $row);
+    //while ($row = $result->fetch_assoc())
+      //array_push($photos, $row);
 
     return $this->view->render($response, 'admin.html' , [
         'options'=>$this->options,
         'folders'=>$folders,
-        'photos'=> $photos
+        //'photos'=> $photos
     ]);
 })->setName('admin');
+
+
+$app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $query = "SELECT * FROM photos WHERE " . ($args['id'] ? "id=$args[id]" : '1');
+
+  $arr = array();
+
+  $result = $mysqli->query($query);
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
+
+$app->get('/services/gallery/{gid:[0-9]+}/photos/{id:[0-9]*}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $query = "SELECT P.* FROM photos P INNER JOIN galleryphotos GP ON GP.idgallery=$args[gid] AND GP.idphoto=P.id WHERE " . ($args['id'] ? "P.id=$args[id]" : '1');
+
+  $arr = array();
+
+  $result = $mysqli->query($query);
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
 
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
@@ -182,8 +215,8 @@ $app->post('/services/upload', function($request, $response, $args) {
           $extension = pathinfo($name,PATHINFO_EXTENSION);
 
           $mysqli->query("INSERT INTO photos 
-           (FileName, FileSize, Width, Height, Extension, ExifImageDescription, ExifMake, ExifModel, ExifArtist, ExifCopyright, ExifExposureTime,
-            ExifFNumber, ExifExposureProgram, ExifISOSpeedRatings, ExifDateTimeOriginal, ExifMeteringMode, ExifFlash, ExifFocalLength) VALUES ("
+           (fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
+            exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
             ."'$name',"
             .filesize($tmp) . ','
             .$size[0] . ','
