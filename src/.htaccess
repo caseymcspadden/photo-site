@@ -2,9 +2,9 @@ RewriteEngine On
 
 RewriteCond %{HTTP_REFERER} !^$  
 RewriteCond %{HTTP_REFERER} !^http://(www.)?crossriver.com/ [NC]  
-#RewriteRule .(gif|jpg|png)$ - [R=403]
+RewriteRule .(gif|jpg|png)$ - [R=403]
 
-ReWriteRule ^photos/(T|S|M|L|X)/([0-9]+).jpg photos/$2_$1.jpg [NC]
+RewriteRule ^photos/(T|S|M|L|X)/([a-f0-9]+([a-f0-9][a-f0-9])).jpg photos/$3/$2_$1.jpg [NC,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* index.php [L]

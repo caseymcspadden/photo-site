@@ -127,6 +127,9 @@ $app->get('/admin', function ($request, $response, $args) {
     ]);
 })->setName('admin');
 
+$app->get('/services/test/{id:[0-9]+}', function($request, $response, $args) {
+  $response->getBody()->write("MD5=".substr(md5(mt_rand()),0,8));
+});
 
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
@@ -143,7 +146,7 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
-$app->get('/services/gallery/{gid:[0-9]+}/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->get('/services/gallery/{gid:[0-9]+}/photos/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $query = "SELECT P.* FROM photos P INNER JOIN galleryphotos GP ON GP.idgallery=$args[gid] AND GP.idphoto=P.id WHERE " . ($args['id'] ? "P.id=$args[id]" : '1');
@@ -195,8 +198,6 @@ $app->post('/services/upload', function($request, $response, $args) {
     //$watermark = imagecreatefrompng($fileroot . '/watermark.png');
     //$wmsize = getimagesize($fileroot . '/watermark.png');
 
-    $text .= "watermark w=$wmsize[0], h=$wmsize[1]\n";
-
     for ($i=0; $i<count($_FILES['file']['tmp_name']);$i++) {
         $tmp = $_FILES['file']['tmp_name'][$i];
         $name = $_FILES['file']['name'][$i];
@@ -214,9 +215,15 @@ $app->post('/services/upload', function($request, $response, $args) {
           $size = getimagesize($tmp);
           $extension = pathinfo($name,PATHINFO_EXTENSION);
 
+          $idhex = substr(md5(mt_rand()),0,8);
+          $subdirectory = substr($idhex,6,2);
+          mkdir($photoroot . "/$subdirectory");
+          mkdir($fileroot . "/photos/$subdirectory");
+
           $mysqli->query("INSERT INTO photos 
-           (fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
+           (idhex, fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
             exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
+            ."'$idhex',"
             ."'$name',"
             .filesize($tmp) . ','
             .$size[0] . ','
@@ -235,8 +242,6 @@ $app->post('/services/upload', function($request, $response, $args) {
             ."'$exif[MeteringMode]',"
             ."'$exif[Flash]',"
             ."'$exif[FocalLength]')");
-
-            $id = $mysqli->insert_id;
 
             $im=FALSE;
             
@@ -288,13 +293,13 @@ $app->post('/services/upload', function($request, $response, $args) {
                     $im2 = imagecreatetruecolor($w, $h);
                     imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
                   }
-                  imagejpeg($im2, $photoroot . '/' . $id . "_$postfix" . '.jpg');
+                  imagejpeg($im2, $photoroot . "/$subdirectory/" . $idhex . "_$postfix" . '.jpg');
                   $imlarger=$im2;
                   $wlarger = $w;
                   $hlarger = $h;
                 }
               }
-            move_uploaded_file( $tmp , $fileroot . '/photos/' . $id . "_$name");
+            move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $idhex . "_$name");
         }
         $text .= "\n";
     }
