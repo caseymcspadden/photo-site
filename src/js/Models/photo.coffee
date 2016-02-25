@@ -1,7 +1,6 @@
 Backbone = require 'backbone'
-require 'backbone-relational'
 
-module.exports = Backbone.RelationalModel.extend
+module.exports = Backbone.Model.extend
 	url: '/'
 	defaults :
 		fileName: ""

@@ -1,8 +1,8 @@
 RewriteEngine On
 
-RewriteCond %{HTTP_REFERER} !^$  
-RewriteCond %{HTTP_REFERER} !^http://(www.)?crossriver.com/ [NC]  
-RewriteRule .(gif|jpg|png)$ - [R=403]
+#RewriteCond %{HTTP_REFERER} !^$  
+#RewriteCond %{HTTP_REFERER} !^http://(www.)?crossriver.com/ [NC]  
+#RewriteRule .(gif|jpg|png)$ - [R=403]
 
 RewriteRule ^photos/(T|S|M|L|X)/([a-f0-9]+([a-f0-9][a-f0-9])).jpg photos/$3/$2_$1.jpg [NC,L]
 

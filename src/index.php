@@ -127,10 +127,6 @@ $app->get('/admin', function ($request, $response, $args) {
     ]);
 })->setName('admin');
 
-$app->get('/services/test/{id:[0-9]+}', function($request, $response, $args) {
-  $response->getBody()->write("MD5=".substr(md5(mt_rand()),0,8));
-});
-
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
@@ -146,7 +142,7 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
-$app->get('/services/gallery/{gid:[0-9]+}/photos/{id}', function($request, $response, $args) {
+$app->get('/services/galleries/{gid:[0-9]+}/photos/{id:[0-9]*}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $query = "SELECT P.* FROM photos P INNER JOIN galleryphotos GP ON GP.idgallery=$args[gid] AND GP.idphoto=P.id WHERE " . ($args['id'] ? "P.id=$args[id]" : '1');

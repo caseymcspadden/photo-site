@@ -4,7 +4,7 @@ Backbone = require 'backbone'
 Gallery = require './gallery' 
 Galleries = require './galleries'
 
-module.exports = Backbone.RelationalModel.extend
+module.exports = Backbone.Model.extend
 	defaults :
 		name: ""
 	initialize: (attributes, options) ->

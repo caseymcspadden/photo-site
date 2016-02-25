@@ -5,47 +5,34 @@ templates = require './jst'
 Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
-PhotoApp = require './photoapp'
+PhotoView = require './photo-view'
 
 module.exports = Backbone.View.extend
-	app: null
-
-	events:
-		'click .thumbnail > img' : 'photoClicked'
+	currentGallery: null
+	photoViews: []
 
 	initialize: (options) ->
-		this.app = options.app
 		this.template = templates['gallery-view']
 
-		this.listenTo this.app, 'change:selectedFolder', this.folderChanged
-		this.listenTo this.app, 'change:selectedGallery', this.galleryChanged
+	changeGallery: (g) ->
+		this.stopListening()
+		this.currentGallery = g
+		this.render()
+
+		if this.currentGallery
+			this.listenTo this.currentGallery.get('photos'), 'reset', this.addAll 
+			this.listenTo this.currentGallery.get('photos'), 'add', this.addOne
+			this.addAll()
 
 	render: ->
-		console.log 'rendering'
-		folder = this.app.get 'selectedFolder'
-		if not folder
-			return
+		if this.currentGallery
+			this.$el.html this.template(this.currentGallery.toJSON())
 
-		gallery = this.app.get 'selectedGallery'
+	addOne: (photo) ->
+		view = new PhotoView {model:photo}
+		view.render()
+		this.$('#photo-list').append view.el
 
-		console.log(gallery)
-
-		if gallery is null
-			return
-
-		this.$el.html this.template(if gallery then gallery.getJSON() else folder.toJSON())
-
-	folderChanged: (app) ->
-		this.render()
-
-	galleryChanged: (app) ->
-		if app.get('selectedGallery')
-			this.listenTo app.get('selectedGallery').get('photos'), 'add', this.photoAdded 
-
-		this.render()
-
-	photoAdded: (p) ->
-		console.log p
-
-	photoClicked: (e) ->
-		console.log e
+	addAll: ->
+		this.$('#photo-list').html ''
+		this.currentGallery.get('photos').each this.addOne, this

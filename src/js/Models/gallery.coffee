@@ -11,13 +11,12 @@ module.exports = Backbone.Model.extend
 		featuredPhoto: ""
 	
 	initialize: (attributes, options) ->
-		photos = new Photos()
-		photos.url = 'services/gallery/' + this.id + '/photos/'
+		photos = new Photos null, {url:'services/galleries/' + this.id + '/photos/'}
 		this.set {photos: photos}
 
 	populate: ->
 		if this.get('populated') is false
-			this.get('photos').fetch()
+			this.get('photos').fetch({reset: true})
 		this.set {populated: true}
 
 	addPhoto: (p) ->

@@ -3,18 +3,19 @@ foundation = require 'foundation'
 _ = require('underscore')
 dropzone = require('dropzone')
 Backbone = require('backbone')
-PhotoApp = require('../../require/photoapp')
-FoldersView = require('../../require/folders-view')
-GalleryView = require('../../require/gallery-view')
+Admin = require('../../require/admin')
+AdminFoldersView = require('../../require/admin-folders-view')
+AdminMainView = require('../../require/admin-main-view')
 
 $(document).foundation()
 
-photoApp = new PhotoApp({}, {photos: photos, folders: folders})
+admin = new Admin({}, {folders: folders})
 
-foldersview = new FoldersView({el: '#foldersView', app: photoApp})
-galleryview = new GalleryView({el: '#galleryView', app: photoApp})
+adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', admin: admin})
+adminMainView = new AdminMainView({el: '#adminMainView', admin: admin})
 
-foldersview.render();
+adminFoldersView.render();
+adminMainView.render();
 
 $(".filedrop").dropzone
   url: "services/upload"
