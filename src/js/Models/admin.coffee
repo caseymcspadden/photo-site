@@ -9,15 +9,19 @@ module.exports = Backbone.Model.extend
 		selectedFolder: null
 		selectedGallery: null
 		folders: null
+		photos: null
 
 	initialize: (attributes, options) ->
-		this.set({folders: new FolderCollection()})
+		this.set {folders: new FolderCollection()}
+		photos = new PhotoCollection
+		photos.fetch()
+		this.set {photos: photos}
 
 		for folder in options.folders
 			f = new Folder(folder)
 			this.get('folders').add f   
 			for gallery in folder.galleries
-				g = new Gallery(gallery)
+				g = new Gallery gallery,{master:photos}
 				f.get('galleries').add g
 
 	selectFolder: (id) ->
