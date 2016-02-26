@@ -26,7 +26,7 @@ module.exports = Backbone.Model.extend
 
 	selectGallery: (id) ->
 		selectedFolder = this.get 'selectedFolder'
-		galllery = null
+		gallery = null
 		if selectedFolder
 			gallery = selectedFolder.get('galleries').get id
 			if gallery

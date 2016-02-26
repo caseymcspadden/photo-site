@@ -2,5 +2,5 @@ Backbone = require 'backbone'
 Folder = require './folder'
 
 module.exports = Backbone.Collection.extend
-	url: "/"
+	url: "services/folders/"
 	model: Folder

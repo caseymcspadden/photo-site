@@ -42,13 +42,10 @@ module.exports = Backbone.View.extend
 			this.$('#admin-folder').hide()
 
 	folderChanged: (admin) ->
-		console.log "admin main view folder changed"
-		console.log admin.get('selectedFolder')
 		this.setVisibility()
 		this.folderView.changeFolder admin.get('selectedFolder')
 
 	galleryChanged: (admin) ->
-		console.log "admin main view gallery changed"
 		this.setVisibility()
 		this.galleryView.changeGallery admin.get('selectedGallery')
 

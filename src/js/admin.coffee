@@ -6,6 +6,7 @@ Backbone = require('backbone')
 Admin = require('../../require/admin')
 AdminFoldersView = require('../../require/admin-folders-view')
 AdminMainView = require('../../require/admin-main-view')
+AdminPhotosView = require('../../require/admin-photos-view')
 
 $(document).foundation()
 
@@ -13,9 +14,14 @@ admin = new Admin({}, {folders: folders})
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', admin: admin})
 adminMainView = new AdminMainView({el: '#adminMainView', admin: admin})
+adminPhotosView = new AdminPhotosView({el: '#adminPhotosView', model: admin})
 
 adminFoldersView.render();
 adminMainView.render();
+adminPhotosView.render();
+
+admin.photos.fetch {reset:true}
+
 
 $(".filedrop").dropzone
   url: "services/upload"

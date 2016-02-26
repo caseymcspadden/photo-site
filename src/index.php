@@ -142,30 +142,30 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
-$app->get('/services/galleries/{gid:[0-9]+}/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
-  $query = "SELECT P.* FROM photos P INNER JOIN galleryphotos GP ON GP.idgallery=$args[gid] AND GP.idphoto=P.id WHERE " . ($args['id'] ? "P.id=$args[id]" : '1');
+  $query = "SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id]";
 
   $arr = array();
 
   $result = $mysqli->query($query);
 
-  while ($row = $result->fetch_assoc())
-    array_push($arr,$row);
+  while ($row = $result->fetch_row())
+    array_push($arr,$row[0]);
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
       //'X3'=>[1600,1200],
-      'X'=>[1280,960],
+      'X'=>1280,
       //'X'=>[1024,768],
-      'L'=>[800,600],
-      'M'=>[600,450],
-      'S'=>[400,300],
-      'T'=>[150,150],
+      'L'=>800,
+      'M'=>600,
+      'S'=>400,
+      'T'=>150,
       //'TS'=>[100,100],
     ];
 
@@ -210,16 +210,10 @@ $app->post('/services/upload', function($request, $response, $args) {
         else {
           $size = getimagesize($tmp);
           $extension = pathinfo($name,PATHINFO_EXTENSION);
-
-          $idhex = substr(md5(mt_rand()),0,8);
-          $subdirectory = substr($idhex,6,2);
-          mkdir($photoroot . "/$subdirectory");
-          mkdir($fileroot . "/photos/$subdirectory");
-
+ 
           $mysqli->query("INSERT INTO photos 
-           (idhex, fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
+           (fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
             exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
-            ."'$idhex',"
             ."'$name',"
             .filesize($tmp) . ','
             .$size[0] . ','
@@ -238,6 +232,13 @@ $app->post('/services/upload', function($request, $response, $args) {
             ."'$exif[MeteringMode]',"
             ."'$exif[Flash]',"
             ."'$exif[FocalLength]')");
+
+            $id = $mysqli->insert_id;
+            $subdirectory = sprintf("%02d",$id%100);         
+            if (!file_exists($photoroot . "/$subdirectory/"))
+              mkdir($photoroot . "/$subdirectory");
+            if (!file_exists($fileroot . "/photos/$subdirectory/"))
+              mkdir($fileroot . "/photos/$subdirectory");
 
             $im=FALSE;
             
@@ -263,16 +264,11 @@ $app->post('/services/upload', function($request, $response, $args) {
               $wlarger=0;
               $hlarger=0;
  
-              foreach ($fileSizes as $postfix => $wh) {
-                $w = $wh[0];
-                $h = $w * $aspect;
+              foreach ($fileSizes as $postfix => $sz) {
+                $w = ($aspect<1) ? $sz : $sz/$aspect;
+                $h = ($aspect<1) ? $sz*$aspect : $sz;
 
-                if ($h > $wh[1]) {
-                  $h = $wh[1];
-                  $w = $h/$aspect;
-                }
-
-                if ($w<=$size[0] || $h<=$size[1]) { // only make the image if smaller than the original
+                if ($w<=$size[0] && $h<=$size[1]) { // only make the image if smaller than the original
                   if ($imlarger===FALSE) {
                     $imlarger = $im;
                     $wlarger = $size[0];
@@ -282,20 +278,20 @@ $app->post('/services/upload', function($request, $response, $args) {
                     $srcx = ($hlarger > $wlarger) ? 0 : ($wlarger-$hlarger)/2;
                     $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
                     $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
-                    $im2 = imagecreatetruecolor($wh[0], $wh[0]);
-                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $wh[0], $wh[0], $srcw, $srcw);
+                    $im2 = imagecreatetruecolor($sz, $sz);
+                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $sz, $sz, $srcw, $srcw);
                   }
                   else {
                     $im2 = imagecreatetruecolor($w, $h);
                     imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
                   }
-                  imagejpeg($im2, $photoroot . "/$subdirectory/" . $idhex . "_$postfix" . '.jpg');
+                  imagejpeg($im2, $photoroot . "/$subdirectory/" . $id . "_$postfix" . '.jpg');
                   $imlarger=$im2;
                   $wlarger = $w;
                   $hlarger = $h;
                 }
               }
-            move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $idhex . "_$name");
+            move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $id . "_$name");
         }
         $text .= "\n";
     }

@@ -121,16 +121,19 @@
 
 .photo-thumbnail {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 104px;
+  height: 104px;
   overflow: hidden;
   float: left;
-  margin: 5px;
+  margin: 4px;
   padding: 0;
   list-style: none;
   img {
-    border: 0;
+    border: 2px solid $body-background;
     padding: 0;
     margin: 0;
+    &.selected {
+      border: 2px solid $white;
+    }
   }
 }

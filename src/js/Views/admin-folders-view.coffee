@@ -30,13 +30,13 @@ module.exports = Backbone.View.extend
 
 		this.$tree = this.$('.mtree');
 
-		this.listenTo(this.admin.get('folders'), 'add', this.folderAdded)
-		this.listenTo(this.admin.get('folders'), 'remove', this.folderRemoved)
+		this.listenTo(this.admin.folders, 'add', this.folderAdded)
+		this.listenTo(this.admin.folders, 'remove', this.folderRemoved)
 			
 	render: ->
 		this.$tree.html('');
 		self = this
-		this.admin.get('folders').each (folder) ->
+		this.admin.folders.each (folder) ->
 			self.admin.set({selectedFolder: folder})
 			self.folderAdded folder
 			folder.get('galleries').each (gallery) ->
@@ -67,7 +67,7 @@ module.exports = Backbone.View.extend
 		console.log "photo removed from gallery"
 
 	addFolder: ->
-		this.admin.get('folders').add(new Folder({name: 'New Folder'}))
+		this.admin.folders.add(new Folder({name: 'New Folder'}))
 
 	addGallery: ->
 		$active = this.$('.folder.mtree-active')

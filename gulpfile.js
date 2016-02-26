@@ -62,7 +62,7 @@ gulp.task('jst', function() {
   gulp.src(['src/js/Templates/*.html'])
 
     // Minify the HTML prior to converting to JST
-    .pipe(processhtml({ collapseWhitespace: true, removeComments: true, removeCommentsFromCDATA: true }))
+    .pipe(processhtml({ collapseWhitespace: false, removeComments: true, removeCommentsFromCDATA: true }))
 
     // Convert to JST and assign to app.templates which we'll define once all files are concatenated in
     .pipe(jst({ prepend: 'templates["%s"] = ' }))

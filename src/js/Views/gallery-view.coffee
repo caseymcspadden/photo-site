@@ -9,10 +9,11 @@ PhotoView = require './photo-view'
 
 module.exports = Backbone.View.extend
 	currentGallery: null
-	photoViews: []
+	photoViews: {}
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
+		console.log "Inititalizing GalleryView"
 
 	changeGallery: (g) ->
 		this.stopListening()
@@ -20,8 +21,8 @@ module.exports = Backbone.View.extend
 		this.render()
 
 		if this.currentGallery
-			this.listenTo this.currentGallery.get('photos'), 'reset', this.addAll 
-			this.listenTo this.currentGallery.get('photos'), 'add', this.addOne
+			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
+			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.addAll()
 
 	render: ->
@@ -29,10 +30,12 @@ module.exports = Backbone.View.extend
 			this.$el.html this.template(this.currentGallery.toJSON())
 
 	addOne: (photo) ->
-		view = new PhotoView {model:photo}
+		if !(this.photoViews.hasOwnProperty photo.id)
+			this.photoViews[photo.id] = new PhotoView {model:photo}
+		view = this.photoViews[photo.id]
 		view.render()
 		this.$('#photo-list').append view.el
 
 	addAll: ->
 		this.$('#photo-list').html ''
-		this.currentGallery.get('photos').each this.addOne, this
+		this.currentGallery.photos.each this.addOne, this

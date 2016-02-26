@@ -11,23 +11,20 @@ module.exports = Backbone.Model.extend
 		featuredPhoto: ""
 	
 	initialize: (attributes, options) ->
-		this.set {photos: new Photos}
-		this.set {master: options.photos}
+		this.photos = new Photos
+		this.master = options.master
+		console.log options
 
 	populate: ->
 		#if this.get('populated') is false
 		#	this.get('photos').fetch({reset: true})
+		self = this
+		$.getJSON('services/galleries/' + this.id + '/photos/', (data) ->
+			_.each data, (id) ->
+				self.addPhoto id
+		)
 		this.set {populated: true}
 
-	addPhoto: (p) ->
-		this.listenTo p, 'destroy', this.photoDestroyed
-		this.get('photos').add p
-
-	photoDestroyed: (p) ->
-		this.get('photos').remove p
-		#this.stopListening p
-
-	getJSON: ->
-		json = this.toJSON()
-		json.photos = this.get('photos').toJSON()
-		return json
+	addPhoto: (id) ->
+		p = this.master.get(id)
+		this.photos.add p if p
