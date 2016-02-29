@@ -3,6 +3,7 @@ Backbone = require 'backbone'
 module.exports = Backbone.Model.extend
 	url: '/'
 	defaults :
+		selected: false
 		fileName: ""
 		title: ""
 		description: ""

@@ -12,8 +12,8 @@ $(document).foundation()
 
 admin = new Admin({}, {folders: folders})
 
-adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', admin: admin})
-adminMainView = new AdminMainView({el: '#adminMainView', admin: admin})
+adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: admin})
+adminMainView = new AdminMainView({el: '#adminMainView', model: admin})
 adminPhotosView = new AdminPhotosView({el: '#adminPhotosView', model: admin})
 
 adminFoldersView.render();

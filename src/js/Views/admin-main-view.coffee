@@ -10,17 +10,15 @@ FolderView = require './folder-view'
 GalleryView = require './gallery-view'
 
 module.exports = Backbone.View.extend
-	admin: null
 
 	initialize: (options) ->
-		this.admin = options.admin
 		this.template = templates['admin-main-view']
 
-		this.listenTo this.admin, 'change:selectedFolder', this.folderChanged
-		this.listenTo this.admin, 'change:selectedGallery', this.galleryChanged
+		this.listenTo this.model, 'change:selectedFolder', this.setVisibility
+		this.listenTo this.model, 'change:selectedGallery', this.setVisibility
 
-		this.folderView = new FolderView()
-		this.galleryView = new GalleryView()
+		this.folderView = new FolderView {model: this.model}
+		this.galleryView = new GalleryView {model: this.model}
 
 	assign: (view, selector) ->
 		view.setElement(this.$(selector)).render();
@@ -31,23 +29,15 @@ module.exports = Backbone.View.extend
 		this.assign this.galleryView, '#admin-gallery'
 
 	setVisibility: ->
-		if this.admin.get('selectedGallery')
+		if this.model.get('selectedGallery')
 			this.$('#admin-folder').hide()
 			this.$('#admin-gallery').show()
-		else if this.admin.get('selectedFolder')
+		else if this.model.get('selectedFolder')
 			this.$('#admin-gallery').hide()
 			this.$('#admin-folder').show()
 		else
 			this.$('#admin-gallery').hide()
 			this.$('#admin-folder').hide()
-
-	folderChanged: (admin) ->
-		this.setVisibility()
-		this.folderView.changeFolder admin.get('selectedFolder')
-
-	galleryChanged: (admin) ->
-		this.setVisibility()
-		this.galleryView.changeGallery admin.get('selectedGallery')
 
 
 

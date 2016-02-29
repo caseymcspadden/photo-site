@@ -12,9 +12,15 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['photo-view']
+		this.listenTo this.model, 'change:selected', this.toggleSelected
 
 	render: ->
 		this.$el.html this.template(this.model.toJSON())
+		if this.model.get('selected')
+			this.$('img').addClass 'selected'
+
+	toggleSelected: ->
+		this.$('img').toggleClass('selected')
 
 	photoClicked: (e) ->
-		$(e.target).toggleClass('selected')
+		this.model.set 'selected', !this.model.get('selected')

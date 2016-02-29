@@ -19,6 +19,7 @@ module.exports = Backbone.Model.extend
 		#if this.get('populated') is false
 		#	this.get('photos').fetch({reset: true})
 		self = this
+		console.log 'populate'
 		$.getJSON('services/galleries/' + this.id + '/photos/', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id

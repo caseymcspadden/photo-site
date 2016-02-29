@@ -13,10 +13,11 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['folder-view']
+		this.listenTo this.model, 'change:selectedFolder', this.changeFolder
 
 	changeFolder: (f) ->
 		this.stopListening()
-		this.currentFolder = f
+		this.currentFolder = this.model.get 'selectedFolder'
 		this.render()
 
 	render: ->

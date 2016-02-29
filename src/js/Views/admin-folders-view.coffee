@@ -8,7 +8,6 @@ Gallery = require './gallery'
 Admin = require './admin'
 
 module.exports = Backbone.View.extend
-	admin: null
 	$tree: null
 	collapsed: true
 	close_same_level: false
@@ -24,20 +23,18 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['admin-folders-view']
 
-		this.admin = options.admin
-
 		this.$el.html(this.template());
 
 		this.$tree = this.$('.mtree');
 
-		this.listenTo(this.admin.folders, 'add', this.folderAdded)
-		this.listenTo(this.admin.folders, 'remove', this.folderRemoved)
+		this.listenTo(this.model.folders, 'add', this.folderAdded)
+		this.listenTo(this.model.folders, 'remove', this.folderRemoved)
 			
 	render: ->
 		this.$tree.html('');
 		self = this
-		this.admin.folders.each (folder) ->
-			self.admin.set({selectedFolder: folder})
+		this.model.folders.each (folder) ->
+			self.model.set({selectedFolder: folder})
 			self.folderAdded folder
 			folder.get('galleries').each (gallery) ->
 				self.galleryAdded(gallery)
@@ -57,7 +54,7 @@ module.exports = Backbone.View.extend
 
 	galleryAdded: (g) -> 
 		this.listenTo(g.get('photos'), 'remove', this.photoRemoved)
-		sel = this.admin.get('selectedFolder')
+		sel = this.model.get('selectedFolder')
 		this.$('#folder-' + sel.cid + ' ul').append('<li id="gallery-' + g.cid + '" class="gallery" draggable="true"><a href="#">' + g.get('name') + '</a></li>')
 
 	galleryRemoved: (g) ->
@@ -67,12 +64,12 @@ module.exports = Backbone.View.extend
 		console.log "photo removed from gallery"
 
 	addFolder: ->
-		this.admin.folders.add(new Folder({name: 'New Folder'}))
+		this.model.folders.add(new Folder({name: 'New Folder'}))
 
 	addGallery: ->
 		$active = this.$('.folder.mtree-active')
 		if $active.length > 0
-			sel = this.admin.get 'selectedFolder'
+			sel = this.model.get 'selectedFolder'
 			sel.get('galleries').add new Gallery({name: 'New Gallery'})
 			isOpen = $active.hasClass 'mtree-open'
 			this.setNodeClass $active, false
@@ -81,7 +78,7 @@ module.exports = Backbone.View.extend
 			if $ul.children().length > 0 and not isOpen
 				$ul.slideToggle(this.duration)
 			cid = $active.attr('id').replace(/^folder-/,'')
-			this.admin.selectFolder cid
+			this.model.selectFolder cid
 
 	setNodeClass: (elem, isOpen) ->
 		if isOpen
@@ -90,8 +87,8 @@ module.exports = Backbone.View.extend
 			elem.removeClass('mtree-closed').addClass('mtree-open')
 
 	openFolder: ($li) ->
-		this.admin.selectFolder $li.attr('id').replace(/^folder-/,'')
-		this.admin.selectGallery null
+		this.model.selectFolder $li.attr('id').replace(/^folder-/,'')
+		this.model.selectGallery null
 		
 		this.$('.folder.mtree-active').not($li).removeClass('mtree-active')
 		$li.addClass 'mtree-active'
@@ -117,11 +114,11 @@ module.exports = Backbone.View.extend
 		
 		this.$('.folder.mtree-active').not($folder).removeClass('mtree-active')
 		$folder.addClass 'mtree-active'
-		this.admin.selectFolder $folder.attr('id').replace(/^folder-/,'')
+		this.model.selectFolder $folder.attr('id').replace(/^folder-/,'')
 
 		this.$('.gallery.mtree-active').not($li).removeClass('mtree-active')
 		$li.addClass('mtree-active')
-		this.admin.selectGallery $li.attr('id').replace(/^gallery-/,'')
+		this.model.selectGallery $li.attr('id').replace(/^gallery-/,'')
 
 		e.preventDefault()
 
