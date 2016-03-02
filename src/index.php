@@ -58,7 +58,7 @@ $container['options'] = [
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'main.html' , [
         'options'=>$this->options
-	]);
+  ]);
 })->setName('main');
 
 $app->get('/portfolio', function ($request, $response, $args) {
@@ -122,8 +122,6 @@ $app->get('/admin', function ($request, $response, $args) {
 
     return $this->view->render($response, 'admin.html' , [
         'options'=>$this->options,
-        'folders'=>$folders,
-        //'photos'=> $photos
     ]);
 })->setName('admin');
 
@@ -140,6 +138,33 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
+
+
+$app->get('/services/folders/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $arr = array();
+
+  $result = $mysqli->query("SELECT id, name, description FROM folders");
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
+});
+
+$app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $arr = array();
+
+  $result = $mysqli->query("SELECT id, name, description FROM galleries G INNER JOIN foldergalleries FG ON FG.idfolder=$args[id]");
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
 });
 
 $app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {

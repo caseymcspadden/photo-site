@@ -11,15 +11,24 @@ module.exports = Backbone.Model.extend
 		addingPhotos: false
 
 	initialize: (attributes, options) ->
-		this.folders = new FolderCollection
 		this.photos = new PhotoCollection
+		this.folders = new FolderCollection [] , [{master: this.photos}]
+		self = this
 
-		for folder in options.folders
-			f = new Folder(folder)
-			this.folders.add f   
-			for gallery in folder.galleries
-				g = new Gallery gallery,{master:this.photos}
-				f.galleries.add g
+		this.folders.fetch(
+			success: (collection) ->
+				console.log collection
+				collection.each (folder) ->
+					console.log folder
+
+		)
+
+		#for folder in options.folders
+		#	f = new Folder(folder)
+		#	this.folders.add f   
+		#	for gallery in folder.galleries
+		#		g = new Gallery gallery,{master:this.photos}
+		#		f.galleries.add g
 
 	selectFolder: (id) ->
 		this.set {selectedFolder: this.folders.get(id)}

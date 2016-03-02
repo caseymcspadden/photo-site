@@ -1,4 +1,4 @@
-#Gallery View manages a gallery or folder
+#admin-photos-view manages all images in the database
 
 Backbone = require 'backbone'
 templates = require './jst'

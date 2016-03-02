@@ -11,7 +11,7 @@ AdminDropzoneView = require('../../require/admin-dropzone-view')
 
 $(document).foundation()
 
-admin = new Admin({}, {folders: folders})
+admin = new Admin()
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: admin})
 adminMainView = new AdminMainView({el: '#adminMainView', model: admin})
