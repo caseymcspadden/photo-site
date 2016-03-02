@@ -13,7 +13,6 @@ module.exports = Backbone.Model.extend
 	initialize: (attributes, options) ->
 		this.photos = new Photos
 		this.master = options.master
-		console.log options
 
 	populate: ->
 		#if this.get('populated') is false
@@ -29,3 +28,29 @@ module.exports = Backbone.Model.extend
 	addPhoto: (id) ->
 		p = this.master.get(id)
 		this.photos.add p if p
+
+	addPhotos: (arr) ->
+		$.ajax(
+			url: 'services/galleries/' + this.id + '/photos/'
+			type: 'POST'
+			context: this
+			data: {ids: arr.join(',')}
+			success: (result) ->
+				json = $.parseJSON(result)
+				ids = json.ids.split ','
+				for id in ids
+					this.addPhoto id
+		)
+
+	deletePhotos: (arr) ->
+		$.ajax(
+			url: 'services/galleries/' + this.id + '/photos/'
+			type: 'DELETE'
+			context: this
+			data: {ids: arr.join(',')}
+			success: (result) ->
+				json = $.parseJSON(result)
+				ids = json.ids.split ','
+				for id in ids
+					this.photos.remove id
+		)

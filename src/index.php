@@ -157,6 +157,25 @@ $app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $respons
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
+$app->post('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+  foreach($ids as $id)
+    $mysqli->query("INSERT INTO galleryphotos (idgallery,idphoto) VALUES ($args[id],$id)");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+$app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = $parsedBody['ids'];
+  $mysqli->query("DELETE FROM galleryphotos WHERE idgallery=$args[id] AND idphoto IN (" . $ids . ')');
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
       //'X3'=>[1600,1200],
@@ -187,27 +206,24 @@ $app->post('/services/upload', function($request, $response, $args) {
     ];
     $mysqli = $this->options['mysqli'];
 
-    $text = '';
     $fileroot = $this->options['fileroot'];
     $photoroot = $this->options['photoroot'];
 
     //$watermark = imagecreatefrompng($fileroot . '/watermark.png');
     //$wmsize = getimagesize($fileroot . '/watermark.png');
 
+    $insertIds = array();
+
     for ($i=0; $i<count($_FILES['file']['tmp_name']);$i++) {
         $tmp = $_FILES['file']['tmp_name'][$i];
         $name = $_FILES['file']['name'][$i];
-
-        $text .=  "$tmp\n";
 
         $exif =  array_merge($exifDefaults, exif_read_data($tmp));
    
         $allowedTypes = array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF);
         $detectedType = exif_imagetype($tmp);
         $error = !in_array($detectedType, $allowedTypes);
-        if ($error)
-            $text .= "NOT AN IMAGE\n";
-        else {
+        if (!$error) {
           $size = getimagesize($tmp);
           $extension = pathinfo($name,PATHINFO_EXTENSION);
  
@@ -234,6 +250,8 @@ $app->post('/services/upload', function($request, $response, $args) {
             ."'$exif[FocalLength]')");
 
             $id = $mysqli->insert_id;
+            array_push($insertIds, $id);
+
             $subdirectory = sprintf("%02d",$id%100);         
             if (!file_exists($photoroot . "/$subdirectory/"))
               mkdir($photoroot . "/$subdirectory");
@@ -245,7 +263,6 @@ $app->post('/services/upload', function($request, $response, $args) {
             switch($size["mime"]) {
               case "image/jpeg":
                 $im = imagecreatefromjpeg($tmp); //jpeg file
-                $text .= "jpg file\n";
                 break;
               case "image/gif":
                 $im = imagecreatefromgif($tmp); //gif file
@@ -293,12 +310,18 @@ $app->post('/services/upload', function($request, $response, $args) {
               }
             move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $id . "_$name");
         }
-        $text .= "\n";
     }
+  
+    $query = 'SELECT * FROM photos WHERE id IN (' . implode(',', $insertIds) . ')';
 
-    $response->getBody()->write($text);
-    return $response;
+    $arr = array();
 
+    $result = $mysqli->query($query);
+
+    while ($row = $result->fetch_assoc())
+      array_push($arr,$row);
+
+    return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
     //return $response->withHeader('Content-type', 'application/json');
 });
 

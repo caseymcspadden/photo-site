@@ -36,7 +36,7 @@ module.exports = Backbone.View.extend
 		this.model.folders.each (folder) ->
 			self.model.set({selectedFolder: folder})
 			self.folderAdded folder
-			folder.get('galleries').each (gallery) ->
+			folder.galleries.each (gallery) ->
 				self.galleryAdded(gallery)
 
 		this.$tree.find('ul').css
@@ -45,15 +45,15 @@ module.exports = Backbone.View.extend
 			'display': if this.collapsed then 'none' else 'block'
 
 	folderAdded: (f) ->
-		this.listenTo(f.get('galleries'), 'add', this.galleryAdded)
-		this.listenTo(f.get('galleries'), 'remove', this.galleryRemoved)
+		this.listenTo(f.galleries, 'add', this.galleryAdded)
+		this.listenTo(f.galleries, 'remove', this.galleryRemoved)
 		this.$tree.append('<li id="folder-' + f.cid + '" class="folder mtree-node mtree-closed"><a href="#">' + f.get('name') + '</a><ul class="mtree-level-1"></ul></li>')
 
 	folderRemoved: (f) ->
 		console.log "Folder Removed"
 
 	galleryAdded: (g) -> 
-		this.listenTo(g.get('photos'), 'remove', this.photoRemoved)
+		this.listenTo g.photos, 'remove', this.photoRemoved
 		sel = this.model.get('selectedFolder')
 		this.$('#folder-' + sel.cid + ' ul').append('<li id="gallery-' + g.cid + '" class="gallery" draggable="true"><a href="#">' + g.get('name') + '</a></li>')
 

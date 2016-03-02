@@ -8,4 +8,4 @@ module.exports = Backbone.Model.extend
 	defaults :
 		name: ""
 	initialize: (attributes, options) ->
-		this.set({galleries: new Galleries()})
+		this.galleries = new Galleries

@@ -16,7 +16,6 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'change:selectedFolder', this.changeFolder
 
 	changeFolder: (f) ->
-		this.stopListening()
 		this.currentFolder = this.model.get 'selectedFolder'
 		this.render()
 

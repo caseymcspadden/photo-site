@@ -12,7 +12,8 @@ module.exports = Backbone.View.extend
 	photoViews: {}
 
 	events:
-		'click .add-photos' : 'addPhotos'		
+		'click .add-photos' : 'addPhotos'
+		'click .remove-photos' : 'removePhotos'
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
@@ -30,7 +31,11 @@ module.exports = Backbone.View.extend
 		if this.currentGallery
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
+			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
+
+	removePhotos: ->
+		this.model.removeSelectedPhotosFromGallery()
 
 	addPhotos: ->
 		this.model.set {addingPhotos: !this.model.get('addingPhotos')}
@@ -38,6 +43,9 @@ module.exports = Backbone.View.extend
 	render: ->
 		if this.currentGallery
 			this.$el.html this.template(this.currentGallery.toJSON())
+
+	removeOne: (photo) ->
+		console.log photo
 
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
