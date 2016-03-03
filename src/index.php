@@ -80,46 +80,6 @@ $app->get('/contact', function ($request, $response, $args) {
 })->setName('contact');
 
 $app->get('/admin', function ($request, $response, $args) {
-    $photos = array();
-    $folders = array();
-    $galleries = array();
-    $mysqli = $this->options['mysqli'];
-    //$result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname, GP.idphoto as pid FROM folders F INNER JOIN foldergalleries FG On FG.idfolder = F.id INNER JOIN galleries G ON G.id=FG.idgallery LEFT JOIN galleryphotos GP ON GP.idgallery=G.id ORDER BY fid, gid, pid");
-    $result = $mysqli->query("SELECT F.id AS fid, F.name AS fname, G.id as gid, G.name as gname FROM folders F LEFT JOIN foldergalleries FG On FG.idfolder = F.id LEFT JOIN galleries G ON G.id=FG.idgallery ORDER BY fid, gid");
-
-    $currentfolder=0;
-    $currentgallery=0; 
-    $findex=0;
-    $gindex=0;
-
-    while ($row = $result->fetch_assoc())
-    {
-      $fid = $row['fid'];
-      $gid = $row['gid'];
-      $fname = $row['fname'];
-      $gname = $row['gname'];
-
-      if ($currentfolder==0 || $currentfolder!=$fid) {
-        $currentfolder = $fid;
-        array_push($folders, ['id'=>$fid, 'name'=>$fname, 'galleries'=>array()]);
-        $findex = count($folders)-1;
-      }
-
-      if ($currentgallery==0 || $currentgallery!=$gid) {
-        $currentgallery = $gid;
-        if (!is_null($gid))
-          array_push($folders[$findex]['galleries'], ['id'=>$gid, 'name'=>$gname]);
-        $gindex = count($folders[$findex]['galleries'])-1;
-       }
-
-      //array_push($folders[$findex]['galleries'][$gindex]['photos'],$row['pid']);
-    }
-
-    //$result = $mysqli->query("SELECT * FROM photos");
-
-    //while ($row = $result->fetch_assoc())
-      //array_push($photos, $row);
-
     return $this->view->render($response, 'admin.html' , [
         'options'=>$this->options,
     ]);
@@ -154,18 +114,54 @@ $app->get('/services/folders/', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
 });
 
+$app->post('/services/folders/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $mysqli->query("INSERT INTO folders (name, description) VALUES ('$vals[name]','$vals[description]')");
+
+  $vals['id'] = $mysqli->insert_id;
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
 $app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, name, description FROM galleries G INNER JOIN foldergalleries FG ON FG.idfolder=$args[id]");
+  $result = $mysqli->query("SELECT id, idfolder, name, description FROM galleries WHERE idfolder=$args[id]");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
 });
+
+$app->get('/services/galleries/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $arr = array();
+
+  $result = $mysqli->query("SELECT id, idfolder, name, description FROM galleries");
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
+});
+
+$app->post('/services/galleries/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $mysqli->query("INSERT INTO galleries (idfolder, name, description) VALUES ($vals[idfolder],'$vals[name]','$vals[description]')");
+
+  $vals['id'] = $mysqli->insert_id;
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
 
 $app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];

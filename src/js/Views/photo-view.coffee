@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend
 	className: 'photo-thumbnail'
 
 	events:
-		'click img' : 'photoClicked'		
+		'click img' : 'photoClicked'
 
 	initialize: (options) ->
 		this.template = templates['photo-view']

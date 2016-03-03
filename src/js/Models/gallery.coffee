@@ -6,13 +6,15 @@ Photos = require './photos'
 
 module.exports = Backbone.Model.extend
 	defaults :
+		idfolder: 0
 		name: ""
+		description: ""
 		populated: false
 		featuredPhoto: ""
 	
 	initialize: (attributes, options) ->
 		this.photos = new Photos
-		this.master = options.master
+		#this.master = options.master
 
 	populate: ->
 		#if this.get('populated') is false

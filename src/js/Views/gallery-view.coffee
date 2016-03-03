@@ -14,14 +14,13 @@ module.exports = Backbone.View.extend
 	events:
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
+		'keydown' : 'doDelete'	
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
-		console.log this.model
 
 	changeGallery: ->
-		console.log "Changing gallery"
 		if (this.currentGallery)
 			this.stopListening this.currentGallery.photos
 	
@@ -33,6 +32,10 @@ module.exports = Backbone.View.extend
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
+
+	doDelete: (e) ->
+		#if e.keyCode==100
+		console.log e
 
 	removePhotos: ->
 		this.model.removeSelectedPhotosFromGallery()

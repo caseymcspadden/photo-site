@@ -6,9 +6,7 @@ Galleries = require './galleries'
 
 module.exports = Backbone.Model.extend
 	defaults :
-		name: ""
+		name: ''
+		description: ''
 	initialize: (options) ->
-		console.log "Initializing folder"
-		console.log options
-		#this.galleries = new Galleries null , {url: 'services/folders/' + this.id + '/galleries/'}
-		#this.galleries.fetch()
+		this.galleries = new Galleries

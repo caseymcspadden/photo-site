@@ -23,4 +23,4 @@ adminMainView.render();
 adminPhotosView.render();
 adminDropzoneView.render();
 
-admin.photos.fetch {reset:true}
+admin.fetchAll()
