@@ -9,8 +9,6 @@ AdminMainView = require('../../require/admin-main-view')
 AdminPhotosView = require('../../require/admin-photos-view')
 AdminDropzoneView = require('../../require/admin-dropzone-view')
 
-$(document).foundation()
-
 admin = new Admin()
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: admin})
@@ -24,3 +22,5 @@ adminPhotosView.render();
 adminDropzoneView.render();
 
 admin.fetchAll()
+
+$(document).foundation()

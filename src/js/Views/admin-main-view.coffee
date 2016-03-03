@@ -24,9 +24,11 @@ module.exports = Backbone.View.extend
 		view.setElement(this.$(selector)).render();
 
 	render: ->
+		console.log "Rendering admin-main-view"
 		this.$el.html this.template()
 		this.assign this.folderView, '#admin-folder'
 		this.assign this.galleryView, '#admin-gallery'
+		this.setVisibility()
 
 	setVisibility: ->
 		if this.model.get('selectedGallery')

@@ -1,14 +1,31 @@
 <!-- controls -->
 <div class="row">
   <div class="large-12 columns">
-	<i class="fa fa-folder fa-lg add-folder"></i>
-	<i class="fa fa-picture-o fa-lg add-gallery"></i>
+	<div class="small button-group">
+		<a href="#" class="button" data-open="afv-addFolder">Add Folder</a>
+	</div>
   </div>
 </div>
 
 <!-- tree view -->
 <div class="row">
-<div class="large-12 columns">
-	<ul class="mtree transit"></ul>
+	<div class="large-12 columns">
+		<ul class="mtree transit"></ul>
+	</div>
 </div>
+
+<div class="reveal" id="afv-addFolder" data-reveal>
+	<h2>Add a Folder</h2>
+	<form>
+		<label>Name
+			<input type="text" name="name">
+		</label>
+		<label>Description
+			<input type="text" name="description">
+		</label>
+		<input type="submit" class="button" value="Submit">
+		<button type="button" class="close-button" data-close aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</form>
 </div>

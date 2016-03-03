@@ -25,7 +25,7 @@ module.exports = Backbone.View.extend
 			this.stopListening this.currentGallery.photos
 	
 		this.currentGallery = this.model.get('selectedGallery')
-		this.render()
+		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
@@ -44,8 +44,9 @@ module.exports = Backbone.View.extend
 		this.model.set {addingPhotos: !this.model.get('addingPhotos')}
 
 	render: ->
-		if this.currentGallery
-			this.$el.html this.template(this.currentGallery.toJSON())
+		this.$el.html this.template {name: 'Default'}
+		#if this.currentGallery
+		#	this.$el.html this.template(this.currentGallery.toJSON())
 
 	removeOne: (photo) ->
 		console.log photo

@@ -15,11 +15,12 @@ module.exports = Backbone.View.extend
 	listAnim: true
 
 	events:
-		'click .add-folder': 'addFolder'
-		'click .add-gallery': 'addGallery'
+		#'click .add-folder': 'addFolder'
+		#'click .add-gallery': 'addGallery'
 		'click .folder > *:first-child' : 'folderClicked'
 		'click .gallery > *:first-child' : 'galleryClicked'
-		'keypress': 'deleteFolder'
+		'submit #afv-addFolder form' : 'addFolder'
+		#'keypress': 'deleteFolder'
 
 	initialize: (options) ->
 		this.template = templates['admin-folders-view']
@@ -67,16 +68,17 @@ module.exports = Backbone.View.extend
 	#photoRemoved: (p) ->
 	#	console.log "photo removed from gallery"
 
-	addFolder: ->
-		this.model.folders.create {name: 'New Folder'}, {wait: true}
+	addFolder: (e) ->
+		e.preventDefault()
+		arr = $(e.target).serializeArray()
+		data = {}
+		for elem in arr
+			data[elem.name]=elem.value
+		this.model.createFolder data
+		this.$('#afv-addFolder .close-button').trigger('click')
 
 	deleteFolder: (e) ->
 		console.log $(e.target).parent().attr('id')
-
-	addGallery: ->
-		sel = this.model.get 'selectedFolder'
-		if sel
-			this.model.galleries.create {idfolder: sel.id, name: 'New Gallery'}, {wait: true}
 
 	setNodeClass: (elem, isOpen) ->
 		if isOpen

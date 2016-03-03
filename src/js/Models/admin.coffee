@@ -31,6 +31,17 @@ module.exports = Backbone.Model.extend
 				)
 		)
 
+	createFolder: (data) ->
+		this.folders.create data, {wait: true}
+
+	createGallery: (data) ->
+		selectedFolder = this.get 'selectedFolder'
+		if selectedFolder
+			data.idfolder = selectedFolder.id
+			g = this.galleries.create data, {wait: true}
+			g.master = this.photos
+			selectedFolder.galleries.add g
+
 	selectFolder: (id) ->
 		this.set {selectedFolder: this.folders.get(id)}
 		this.set {selectedGallery: null}
