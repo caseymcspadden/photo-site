@@ -28,3 +28,4 @@ module.exports = Backbone.View.extend
 
 	photoClicked: (e) ->
 		this.model.set 'selected', !this.model.get('selected')
+		e.preventDefault()

@@ -14,11 +14,17 @@ module.exports = Backbone.View.extend
 	events:
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
+		'click .add-selected' : 'addSelected'	
 		'keydown' : 'doDelete'	
 
 	initialize: (options) ->
+		console.log "Initializing gallery-view"
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
+
+	addSelected: ->
+		this.model.addSelectedPhotosToGallery()
+		this.$('#photosView .close-button').trigger('click')
 
 	changeGallery: ->
 		if (this.currentGallery)
@@ -32,16 +38,19 @@ module.exports = Backbone.View.extend
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
+			this.masterAddAll()
 
 	doDelete: (e) ->
 		#if e.keyCode==100
 		console.log e
 
-	removePhotos: ->
+	removePhotos: (e) ->
 		this.model.removeSelectedPhotosFromGallery()
+		e.preventDefault()
 
-	addPhotos: ->
+	addPhotos: (e) ->
 		this.model.set {addingPhotos: !this.model.get('addingPhotos')}
+		e.preventDefault()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
@@ -62,3 +71,20 @@ module.exports = Backbone.View.extend
 	addAll: ->
 		this.$('.photo-list').html ''
 		this.currentGallery.photos.each this.addOne, this
+
+	masterAddOne: (photo) ->
+		if this.currentGallery && this.currentGallery.photos.get(photo.id)
+			return
+
+		if !(this.photoViews.hasOwnProperty photo.id)
+			view = this.photoViews[photo.id] = new PhotoView {model:photo}
+			view.render()
+
+		view = this.photoViews[photo.id]
+		view.delegateEvents()
+		this.$('.master-photo-list').append view.el
+
+	masterAddAll: ->
+		this.$('.master-photo-list').html ''
+		this.model.photos.each this.masterAddOne, this
+

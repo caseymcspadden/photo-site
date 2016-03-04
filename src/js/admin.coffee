@@ -13,12 +13,12 @@ admin = new Admin()
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: admin})
 adminMainView = new AdminMainView({el: '#adminMainView', model: admin})
-adminPhotosView = new AdminPhotosView({el: '#adminPhotosView', model: admin})
+#adminPhotosView = new AdminPhotosView({el: '#adminPhotosView', model: admin})
 adminDropzoneView = new  AdminDropzoneView {el: '#uploadModal', model: admin}
 
 adminFoldersView.render();
 adminMainView.render();
-adminPhotosView.render();
+#adminPhotosView.render();
 adminDropzoneView.render();
 
 admin.fetchAll()

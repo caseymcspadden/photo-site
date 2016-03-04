@@ -139,6 +139,13 @@
   }
 }
 
+#photosView {
+  background-color: $body-background;
+  .close-button:hover {
+    color: $white
+  }
+}
+
 .hidden {
   display: none;
 }

@@ -2,7 +2,7 @@
 <span class="title">Default</span>
 </div>
 <div class="large-8 columns small button-group">
-	<a href="#" class="button add-photos">Add Photos</a>
+	<a href="#" class="button" data-open="photosView">Add Photos</a>
 	<a href="#" class="button remove-photos">Remove Selected Photos</a>
 </div>
 
@@ -10,3 +10,14 @@
 <ul class="photo-list">
 </ul>
 </div>
+
+<div class="reveal" id="photosView" data-reveal>
+<a href="#" class="button add-selected">Add to Gallery</a>
+<button type="button" class="close-button" data-close aria-label="Close">
+	<span aria-hidden="true">&times;</span>
+</button>
+<div class="master-photo-list">
+</div>
+</div>
+
+
