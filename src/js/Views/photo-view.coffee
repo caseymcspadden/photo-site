@@ -3,9 +3,12 @@ templates = require './jst'
 Photo = require './photo'
 
 module.exports = Backbone.View.extend
-	tagName: 'li'
+	tagName: 'div'
 
 	className: 'photo-thumbnail'
+
+	id: ->
+		'gallery-photo-' + this.model.id
 
 	events:
 		'click img' : 'photoClicked'

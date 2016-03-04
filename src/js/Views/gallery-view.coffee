@@ -1,6 +1,7 @@
 #Gallery View manages a gallery or folder
 
 Backbone = require 'backbone'
+Dragula = require 'dragula'
 templates = require './jst'
 Folders = require './folders'
 Folder = require './folder'
@@ -54,9 +55,21 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
+		this.drag = Dragula [this.$('.photo-list')[0]],
+			moves: this.moves
+			accepts: this.accepts
+			direction: 'horizontal'
+			#mirrorContainer: this.$('.photo-container')[0]
+
 		#if this.currentGallery
 		#	this.$el.html this.template(this.currentGallery.toJSON())
 
+	moves: (el, source, handle, sibling) ->
+		true
+
+	accepts: (el, target, source, sibling) ->
+		true
+  		
 	removeOne: (photo) ->
 		console.log photo
 
