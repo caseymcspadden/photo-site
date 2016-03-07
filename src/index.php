@@ -125,6 +125,24 @@ $app->post('/services/folders/', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
+$app->put('/services/folders/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $mysqli->query("UPDATE folders SET name='$vals[name]', description='$vals[description]' WHERE id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
+$app->delete('/services/folders/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+ 
+  $mysqli->query("DELETE GP.*, G.*, F.* FROM galleryphotos GP INNER JOIN galleries G ON G.id=GP.idgallery INNER JOIN folders F ON F.id=g.idfolder WHERE F.id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
 /*
 $app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];

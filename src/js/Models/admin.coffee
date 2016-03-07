@@ -43,6 +43,10 @@ module.exports = Backbone.Model.extend
 		for gallery in toDelete
 			this.deleteGallery gallery
 
+		this.folders.remove folder
+		this.set {selectedFolder: null}
+		folder.destroy()
+
 	createGallery: (data) ->
 		selectedFolder = this.get 'selectedFolder'
 		if selectedFolder
