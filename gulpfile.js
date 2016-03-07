@@ -137,7 +137,7 @@ gulp.task('root', ['fileroot'], function() {
     if (err)
       console.log(err);
   });
-  gulp.src(['images/**/*.*'])
+  gulp.src(['src/images/**/*.*'])
     .pipe(gulp.dest('build/images'));
  
   return gulp.src(['src/.htaccess', './src/*.*'])

@@ -5,15 +5,18 @@ Photo = require './photo'
 Photos = require './photos'
 
 module.exports = Backbone.Model.extend
+	urlRoot: 'services/galleries/'
+
 	defaults :
-		idfolder: 0
+		idfolder: '0'
 		name: ""
 		description: ""
 		populated: false
-		featuredPhoto: ""
+		featuredPhoto: '0'
 	
 	initialize: (attributes, options) ->
 		this.photos = new Photos
+	
 		#this.master = options.master
 
 	populate: ->
@@ -44,15 +47,40 @@ module.exports = Backbone.Model.extend
 					this.addPhoto id
 		)
 
-	deletePhotos: (arr) ->
+	getSelectedPhotos: (resetSelected) ->
+		ids = []
+
+		this.photos.each((photo) ->
+			if photo.get('selected')
+				photo.set {selected: false} if resetSelected
+				ids.push photo.id
+		)
+		ids
+
+
+	removeSelectedPhotos: ->
+		ids = this.getSelectedPhotos true
 		$.ajax(
 			url: 'services/galleries/' + this.id + '/photos/'
 			type: 'DELETE'
 			context: this
-			data: {ids: arr.join(',')}
+			data: {ids: ids.join(',')}
 			success: (result) ->
 				json = $.parseJSON(result)
 				ids = json.ids.split ','
 				for id in ids
 					this.photos.remove id
 		)
+
+	rearrangePhotos: (ids) ->
+		$.ajax(
+			url: 'services/galleries/' + this.id + '/photos/'
+			type: 'PUT'
+			context: this
+			data: {ids: ids.join(',')}
+		)
+
+	setFeaturedPhoto: ->
+		ids = this.getSelectedPhotos true
+		return if ids.length==0
+		this.save {featuredPhoto: ids[0]} , {wait: true	}

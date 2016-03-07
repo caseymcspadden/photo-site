@@ -2,8 +2,11 @@
 <span class="title">Default</span>
 </div>
 <div class="large-8 columns small button-group">
-	<a href="#" class="button" data-open="photosView">Add Photos</a>
-	<a href="#" class="button remove-photos">Remove Selected Photos</a>
+	<a href="#" class="button" data-open="gv-editGallery">Edit</a>
+	<a href="#" class="button" data-open="gv-addPhotos">Add Photos</a>
+	<a href="#" class="button remove-photos">Remove Selected</a>
+	<a href="#" class="button set-featured">Set Featured</a>
+	<a href="#" class="button delete-gallery">Delete</a>
 </div>
 
 <div class="large-12 columns photo-container">
@@ -11,7 +14,25 @@
 </div>
 </div>
 
-<div class="reveal" id="photosView" data-reveal>
+
+<div class="reveal" id="gv-editGallery" data-reveal>
+	<h2>Edit Gallery</h2>
+	<form>
+		<label>Name
+			<input type="text" name="name">
+		</label>
+		<label>Description
+			<input type="text" name="description">
+		</label>
+		<input type="submit" class="button" value="Submit">
+		<button type="button" class="close-button" data-close aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</form>
+</div>
+
+
+<div class="reveal" id="gv-addPhotos" data-reveal>
 <a href="#" class="button add-selected">Add to Gallery</a>
 <button type="button" class="close-button" data-close aria-label="Close">
 	<span aria-hidden="true">&times;</span>

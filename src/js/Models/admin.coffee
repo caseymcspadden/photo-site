@@ -34,13 +34,32 @@ module.exports = Backbone.Model.extend
 	createFolder: (data) ->
 		this.folders.create data, {wait: true}
 
+	deleteFolder: (folder) ->
+		return if !folder
+		toDelete = []
+		folder.galleries.each (gallery) ->
+			toDelete.push gallery
+
+		for gallery in toDelete
+			this.deleteGallery gallery
+
 	createGallery: (data) ->
 		selectedFolder = this.get 'selectedFolder'
 		if selectedFolder
+			console.log 'creating'
+			console.log data
 			data.idfolder = selectedFolder.id
 			g = this.galleries.create data, {wait: true}
 			g.master = this.photos
 			selectedFolder.galleries.add g
+
+	deleteGallery: (gallery) ->
+		return if !gallery
+		folder = this.folders.get gallery.get('idfolder')
+		folder.galleries.remove gallery
+		this.galleries.remove gallery
+		this.set {selectedGallery: null}
+		gallery.destroy()
 
 	selectFolder: (id) ->
 		this.set {selectedFolder: this.folders.get(id)}
@@ -48,23 +67,21 @@ module.exports = Backbone.Model.extend
 		this.set {addingPhotos: false}
 
 	selectGallery: (id) ->
-		selectedFolder = this.get 'selectedFolder'
-		gallery = null
-		if selectedFolder
-			gallery = selectedFolder.galleries.get id
-			if gallery
-				gallery.populate()
-		this.set {selectedGallery: gallery}
+		gallery = this.galleries.get id
+		return if !gallery
+
+		this.set {selectedFolder : this.folders.get(gallery.get('idfolder'))}
+		this.set {selectedGallery : gallery}
+
+		gallery.populate()
+
 		this.set {addingPhotos: false}
 
 	addPhotos: (photos) ->
 		for photo in photos
 			this.photos.add photo
 
-	addSelectedPhotosToGallery: ->
-		selectedGallery = this.get 'selectedGallery'
-		return if !selectedGallery
-
+	addSelectedPhotosToGallery: (gallery) ->
 		selectedPhotos = []
 
 		this.photos.each((photo) ->
@@ -73,19 +90,4 @@ module.exports = Backbone.Model.extend
 				selectedPhotos.push photo.id
 		)
 
-		selectedGallery.addPhotos selectedPhotos
-
-	removeSelectedPhotosFromGallery: ->
-		selectedGallery = this.get 'selectedGallery'
-		return if !selectedGallery
-
-		selectedPhotos = []
-
-		selectedGallery.photos.each((photo) ->
-			if photo.get('selected')
-				photo.set {selected: false}
-				selectedPhotos.push photo.id
-				#self.photos.add photo
-		)
-
-		selectedGallery.deletePhotos selectedPhotos
+		gallery.addPhotos selectedPhotos

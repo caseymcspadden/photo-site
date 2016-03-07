@@ -6,16 +6,21 @@ Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
 Admin = require './admin'
+FeaturedView = require './featured-view'
 
 module.exports = Backbone.View.extend
 	currentFolder: null
+	featuredViews: {}
 
 	events:
 		'submit #fv-addGallery form' : 'addGallery'
+		'click .featured-thumbnail' : 'galleryClicked'
 
 	initialize: (options) ->
 		this.template = templates['folder-view']
 		this.listenTo this.model, 'change:selectedFolder', this.changeFolder
+		this.listenTo this.model.galleries, 'remove', this.addAll
+		this.listenTo this.model.galleries, 'add', this.addAll
 
 	addGallery: (e) ->
 		e.preventDefault()
@@ -27,8 +32,34 @@ module.exports = Backbone.View.extend
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
 	changeFolder: ->
+		#if (this.currentFolder)
+		#	this.stopListening this.currentFolder.galleries
+
 		this.currentFolder = this.model.get 'selectedFolder'
 		this.$('.title').html(if this.currentFolder then this.currentFolder.get('name') else 'Default')
+		if (this.currentFolder)
+			this.$("#fv-editFolder input[name='name']").val this.currentFolder.get('name')
+			this.$("#fv-editFolder input[name='description']").val this.currentFolder.get('description')
+			this.addAll()
 
 	render: ->
-		this.$el.html this.template {name: "Default"}
+		this.$el.html this.template {name: 'Default'}
+  		
+	addOne: (gallery) ->
+		if !(this.featuredViews.hasOwnProperty gallery.id)
+			view = this.featuredViews[gallery.id] = new FeaturedView {model:gallery, className: 'featured-thumbnail'}
+			view.render()
+		view = this.featuredViews[gallery.id]
+		view.delegateEvents()
+		this.$('.gallery-list').append view.el
+
+	addAll: ->
+		console.log "Add all"
+		this.$('.gallery-list').html ''
+		if this.currentFolder
+			this.currentFolder.galleries.each this.addOne, this
+
+	galleryClicked: (e) ->
+		console.log e
+
+

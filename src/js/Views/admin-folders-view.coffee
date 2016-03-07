@@ -20,6 +20,7 @@ module.exports = Backbone.View.extend
 		'click .folder > *:first-child' : 'folderClicked'
 		'click .gallery > *:first-child' : 'galleryClicked'
 		'submit #afv-addFolder form' : 'addFolder'
+		'click .delete-folder' : 'deleteFolder'
 		#'keypress': 'deleteFolder'
 
 	initialize: (options) ->
@@ -63,7 +64,7 @@ module.exports = Backbone.View.extend
 		this.$('#folder-' + folder.id + ' ul').append('<li id="gallery-' + g.id + '" class="gallery" draggable="true"><a href="#">' + g.get('name') + '</a></li>')
 
 	galleryRemoved: (g) ->
-		console.log 'Gallery Removed'
+		this.$tree.find('#gallery-' + g.id).remove()
 
 	#photoRemoved: (p) ->
 	#	console.log "photo removed from gallery"
@@ -78,7 +79,9 @@ module.exports = Backbone.View.extend
 		this.$('#afv-addFolder .close-button').trigger('click')
 
 	deleteFolder: (e) ->
-		console.log $(e.target).parent().attr('id')
+		selectedFolder = this.model.get 'selectedFolder'
+		this.model.deleteFolder selectedFolder
+		this.$tree.find('#folder-' + selectedFolder.id).remove()
 
 	setNodeClass: (elem, isOpen) ->
 		if isOpen

@@ -125,6 +125,7 @@ $app->post('/services/folders/', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
+/*
 $app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
@@ -137,13 +138,14 @@ $app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $respon
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
 });
+*/
 
 $app->get('/services/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, idfolder, name, description FROM galleries");
+  $result = $mysqli->query("SELECT id, idfolder, featuredPhoto, name, description FROM galleries");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
@@ -162,15 +164,31 @@ $app->post('/services/galleries/', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
+$app->put('/services/galleries/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $mysqli->query("UPDATE galleries SET name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
+$app->delete('/services/galleries/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+ 
+  $mysqli->query("DELETE FROM galleryphotos WHERE idgallery=$args[id]");
+  $mysqli->query("DELETE FROM galleries WHERE id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
 
 $app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
-  $query = "SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id]";
-
   $arr = array();
 
-  $result = $mysqli->query($query);
+  $result = $mysqli->query("SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
 
   while ($row = $result->fetch_row())
     array_push($arr,$row[0]);
@@ -182,10 +200,31 @@ $app->post('/services/galleries/{id:[0-9]+}/photos/', function($request, $respon
   $mysqli = $this->options['mysqli'];
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
-  foreach($ids as $id)
-    $mysqli->query("INSERT INTO galleryphotos (idgallery,idphoto) VALUES ($args[id],$id)");
+
+  $result = $mysqli->query("SELECT MAX(position) FROM galleryphotos WHERE idgallery=$args[id]");
+
+  $row = $result->fetch_row();
+
+  $position = $row ? $row[0]+1 : 1;
+
+  foreach($ids as $id) {
+    $mysqli->query("INSERT INTO galleryphotos (idgallery,idphoto,position) VALUES ($args[id],$id,$position)");
+    $position++;
+  }
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+$app->put('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+
+  $position = 1;
+  foreach($ids as $id) {
+    $mysqli->query("UPDATE galleryphotos SET position=$position WHERE idgallery=$args[id] AND idphoto=$id");
+    $position++;
+  }
 });
 
 $app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
@@ -193,6 +232,18 @@ $app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $resp
   $parsedBody = $request->getParsedBody();
   $ids = $parsedBody['ids'];
   $mysqli->query("DELETE FROM galleryphotos WHERE idgallery=$args[id] AND idphoto IN (" . $ids . ')');
+
+  $ids = array();
+  $result = $mysqli->query ("SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
+
+  while ($row = $result->fetch_row())
+    $ids[] = $row[0];
+
+  $position = 1;
+  foreach($ids as $id) {
+    $mysqli->query("UPDATE galleryphotos SET position=$position WHERE idgallery=$args[id] AND idphoto=$id");
+    $position++;
+  }
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });

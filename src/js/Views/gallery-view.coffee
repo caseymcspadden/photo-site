@@ -16,6 +16,8 @@ module.exports = Backbone.View.extend
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .add-selected' : 'addSelected'	
+		'click .set-featured' : 'setFeaturedPhoto'
+		'click .delete-gallery' : 'deleteGallery'
 		'keydown' : 'doDelete'	
 
 	initialize: (options) ->
@@ -24,51 +26,65 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
 
 	addSelected: ->
-		this.model.addSelectedPhotosToGallery()
-		this.$('#photosView .close-button').trigger('click')
+		this.model.addSelectedPhotosToGallery this.model.get('selectedGallery')
+		this.$('#gv-addPhotos .close-button').trigger('click')
+
+	deleteGallery: ->
+		this.model.deleteGallery this.currentGallery
 
 	changeGallery: ->
-		if (this.currentGallery)
+		if  this.currentGallery
+			this.stopListening this.currentGallery
 			this.stopListening this.currentGallery.photos
 	
 		this.currentGallery = this.model.get('selectedGallery')
 		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery
+			this.listenTo this.currentGallery, 'change', this.galleryChanged 
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
 			this.masterAddAll()
+			this.galleryChanged()
 
 	doDelete: (e) ->
 		#if e.keyCode==100
 		console.log e
 
+	galleryChanged: (e) ->
+		console.log 'gallery changed'
+		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
+		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
+		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
+
 	removePhotos: (e) ->
-		this.model.removeSelectedPhotosFromGallery()
+		this.model.get('selectedGallery').removeSelectedPhotos()
 		e.preventDefault()
 
 	addPhotos: (e) ->
 		this.model.set {addingPhotos: !this.model.get('addingPhotos')}
 		e.preventDefault()
 
+	setFeaturedPhoto: (e) ->
+		this.model.get('selectedGallery').setFeaturedPhoto()
+
 	render: ->
 		this.$el.html this.template {name: 'Default'}
 		this.drag = Dragula [this.$('.photo-list')[0]],
-			moves: this.moves
-			accepts: this.accepts
 			direction: 'horizontal'
-			#mirrorContainer: this.$('.photo-container')[0]
 
-		#if this.currentGallery
-		#	this.$el.html this.template(this.currentGallery.toJSON())
+		self = this
+		this.drag.on('drop', (el, target, source, sibling) ->
+			elements = $(source).find('div').toArray()
+			ids = []
+			for e in elements
+				ids.push $(e).attr('id').replace('gallery-photo-','')
 
-	moves: (el, source, handle, sibling) ->
-		true
-
-	accepts: (el, target, source, sibling) ->
-		true
+			selectedGallery = self.model.get('selectedGallery')
+			selectedGallery.rearrangePhotos ids
+		)
   		
 	removeOne: (photo) ->
 		console.log photo
