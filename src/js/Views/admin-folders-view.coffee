@@ -1,5 +1,6 @@
 #Folders View manages a collection of folders
 
+Dragula = require 'dragula'
 Backbone = require 'backbone'
 templates = require './jst'
 Folders = require './folders'
@@ -34,10 +35,20 @@ module.exports = Backbone.View.extend
 		this.listenTo(this.model.folders, 'remove', this.folderRemoved)
 		this.listenTo(this.model.galleries, 'add', this.galleryAdded)
 		this.listenTo(this.model.galleries, 'remove', this.galleryRemoved)
-			
-	render: ->
-		this.$tree.html('');
+
+		this.dragula = Dragula()
+
 		self = this
+		this.dragula.on('drop', (el, target, source, sibling) ->
+			id = $(el).attr('id').replace('gallery-','')
+			fromFolder = $(source).attr('id').replace('container-','')
+			toFolder = $(target).attr('id').replace('container-','')
+			beforeGallery = if sibling==null then null else $(sibling).attr('id').replace('gallery-','')
+			self.model.moveGallery id, fromFolder, toFolder, beforeGallery
+		)
+
+	render: ->
+		this.$tree.html('')
 		#this.model.folders.each (folder) ->
 		#	self.model.set({selectedFolder: folder})
 		#	self.folderAdded folder
@@ -52,7 +63,12 @@ module.exports = Backbone.View.extend
 	folderAdded: (f) ->
 		#this.listenTo(f.galleries, 'add', this.galleryAdded)
 		#this.listenTo(f.galleries, 'remove', this.galleryRemoved)
-		this.$tree.append('<li id="folder-' + f.id + '" class="folder mtree-node mtree-open"><a href="#">' + f.get('name') + '</a><ul class="mtree-level-1"></ul></li>')
+		#this.dragula.containers.push this.$tree.append('<li id="folder-' + f.id + '" class="folder mtree-node mtree-open"><a href="#">' + f.get('name') + '</a><ul class="mtree-level-1"></ul></li>')
+		this.$tree.append('<li id="folder-' + f.id + '" class="folder mtree-node mtree-open"><a href="#">' + f.get('name') + '</a><ul id="container-' + f.id + '" class="mtree-level-1"></ul></li>')
+		#this.dragula.containers.push this.$tree.find('#folder-'+f.id)[0]
+		this.dragula.containers.push this.$tree.find('#container-'+f.id)[0]
+		#this.dragula.containers.push $li.find('ul')[0]
+		#console.log this.dragula.containers
 
 	folderRemoved: (f) ->
 		console.log "Folder Removed"
@@ -99,8 +115,8 @@ module.exports = Backbone.View.extend
 		$ul = $li.children('ul').first()
 		isOpen = $li.hasClass('mtree-open')
 
-		$ul.css
-			'height': 'auto'
+		#$ul.css
+		#	'height': 'auto'
 
 		if $ul.children().length > 0
 			this.setNodeClass($li, isOpen)

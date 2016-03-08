@@ -143,20 +143,19 @@ $app->delete('/services/folders/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-/*
+
 $app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, idfolder, name, description FROM galleries WHERE idfolder=$args[id]");
+  $result = $mysqli->query("SELECT id, idfolder, position, name, description, featuredPhoto FROM galleries WHERE idfolder=$args[id] ORDER BY position");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
 });
-*/
 
 $app->get('/services/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
@@ -186,7 +185,7 @@ $app->put('/services/galleries/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $vals = $request->getParsedBody();
 
-  $mysqli->query("UPDATE galleries SET name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+  $mysqli->query("UPDATE galleries SET idfolder=$vals[idfolder], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
@@ -195,8 +194,7 @@ $app->delete('/services/galleries/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $parsedBody = $request->getParsedBody();
  
-  $mysqli->query("DELETE FROM galleryphotos WHERE idgallery=$args[id]");
-  $mysqli->query("DELETE FROM galleries WHERE id=$args[id]");
+  $mysqli->query("DELETE GP.*, G.* FROM galleryphotos INNER JOIN galleries G ON G.id=GP.idgallery WHERE G.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });

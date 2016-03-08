@@ -14,6 +14,7 @@ ul.mtree {
   // Styles for all <ul> submenu list elements except ul.mtree root.
   ul {
     margin-left: 1em; // Set default indent level (or set 0)
+    min-height: 1em;
   }
   
   // Styles for all <li> list items.

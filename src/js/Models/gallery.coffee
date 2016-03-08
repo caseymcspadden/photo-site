@@ -73,6 +73,10 @@ module.exports = Backbone.Model.extend
 		)
 
 	rearrangePhotos: (ids) ->
+		index=0
+		for id in ids
+			this.photos.get(id).set {position: index++}
+
 		$.ajax(
 			url: 'services/galleries/' + this.id + '/photos/'
 			type: 'PUT'

@@ -5,6 +5,8 @@ Gallery = require './gallery'
 Galleries = require './galleries'
 
 module.exports = Backbone.Model.extend
+	urlRoot: 'services/folders/'
+
 	defaults :
 		name: ''
 		description: ''
