@@ -138,7 +138,7 @@ $app->delete('/services/folders/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $parsedBody = $request->getParsedBody();
  
-  $mysqli->query("DELETE GP.*, G.*, F.* FROM galleryphotos GP INNER JOIN galleries G ON G.id=GP.idgallery INNER JOIN folders F ON F.id=g.idfolder WHERE F.id=$args[id]");
+  $mysqli->query("DELETE F.*, G.*, GP.* FROM FOLDERS F LEFT JOIN galleries G ON G.idfolder=F.id LEFT JOIN galleryphotos GP ON GP.idgallery= G.id WHERE F.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
@@ -162,7 +162,7 @@ $app->get('/services/galleries/', function($request, $response, $args) {
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, idfolder, featuredPhoto, name, description FROM galleries");
+  $result = $mysqli->query("SELECT id, idfolder, position, featuredPhoto, name, description FROM galleries ORDER BY idfolder, position");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
@@ -194,7 +194,7 @@ $app->delete('/services/galleries/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $parsedBody = $request->getParsedBody();
  
-  $mysqli->query("DELETE GP.*, G.* FROM galleryphotos INNER JOIN galleries G ON G.id=GP.idgallery WHERE G.id=$args[id]");
+  $mysqli->query("DELETE GP.*, G.* FROM galleryphotos GP INNER JOIN galleries G ON G.id=GP.idgallery WHERE G.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });

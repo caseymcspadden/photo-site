@@ -40,11 +40,23 @@ module.exports = Backbone.View.extend
 
 		self = this
 		this.dragula.on('drop', (el, target, source, sibling) ->
-			id = $(el).attr('id').replace('gallery-','')
 			fromFolder = $(source).attr('id').replace('container-','')
 			toFolder = $(target).attr('id').replace('container-','')
-			beforeGallery = if sibling==null then null else $(sibling).attr('id').replace('gallery-','')
-			self.model.moveGallery id, fromFolder, toFolder, beforeGallery
+			
+			obj = {}
+			fromGalleries = []
+			toGalleries = []
+
+			elements = $(source).find('li').toArray()
+			for e in elements
+				fromGalleries.push $(e).attr('id').replace('gallery-','')
+
+			elements = $(target).find('li').toArray()
+			for e in elements
+				toGalleries.push $(e).attr('id').replace('gallery-','')
+
+			
+			self.model.moveGallery {from: {id: fromFolder, galleries: fromGalleries}, to: {id:toFolder, galleries: toGalleries}}
 		)
 
 	render: ->
@@ -72,6 +84,7 @@ module.exports = Backbone.View.extend
 
 	folderRemoved: (f) ->
 		console.log "Folder Removed"
+		this.$tree.find('#folder-' + f.id).remove()
 
 	galleryAdded: (g) -> 
 		#this.listenTo g.photos, 'remove', this.photoRemoved
@@ -97,7 +110,6 @@ module.exports = Backbone.View.extend
 	deleteFolder: (e) ->
 		selectedFolder = this.model.get 'selectedFolder'
 		this.model.deleteFolder selectedFolder
-		this.$tree.find('#folder-' + selectedFolder.id).remove()
 
 	setNodeClass: (elem, isOpen) ->
 		if isOpen

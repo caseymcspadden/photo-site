@@ -2,7 +2,7 @@
 
 Backbone = require 'backbone'
 Gallery = require './gallery' 
-Galleries = require './galleries'
+FolderGalleries = require './foldergalleries'
 
 module.exports = Backbone.Model.extend
 	urlRoot: 'services/folders/'
@@ -11,4 +11,4 @@ module.exports = Backbone.Model.extend
 		name: ''
 		description: ''
 	initialize: (options) ->
-		this.galleries = new Galleries
+		this.galleries = new FolderGalleries

@@ -2,21 +2,21 @@
 
 Backbone = require 'backbone'
 Photo = require './photo'
-Photos = require './photos'
+GalleryPhotos = require './galleryphotos'
 
 module.exports = Backbone.Model.extend
 	urlRoot: 'services/galleries/'
 
 	defaults :
 		idfolder: '0'
+		position: '0'
 		name: ""
 		description: ""
 		populated: false
 		featuredPhoto: '0'
 	
 	initialize: (attributes, options) ->
-		this.photos = new Photos
-	
+		this.photos = new GalleryPhotos
 		#this.master = options.master
 
 	populate: ->
@@ -76,6 +76,7 @@ module.exports = Backbone.Model.extend
 		index=0
 		for id in ids
 			this.photos.get(id).set {position: index++}
+		this.photos.sort()
 
 		$.ajax(
 			url: 'services/galleries/' + this.id + '/photos/'

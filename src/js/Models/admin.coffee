@@ -81,8 +81,24 @@ module.exports = Backbone.Model.extend
 
 		this.set {addingPhotos: false}
 
-	moveGallery: (id, fromFolder, toFolder, beforeGallery) ->
-		console.log id + ' from ' + fromFolder + ' to ' + toFolder + ' before ' + beforeGallery
+	moveGallery: (obj) ->
+		fromFolder = this.folders.get(obj.from.id)
+		toFolder = this.folders.get(obj.to.id)
+
+		fromFolder.galleries.reset()
+		toFolder.galleries.reset()
+
+		position = 1
+		for id in obj.from.galleries
+			g = this.galleries.get id
+			g.save {idfolder: obj.from.id, position: position++}
+			fromFolder.galleries.add g
+
+		position = 1
+		for id in obj.to.galleries
+			g = this.galleries.get id
+			g.save {idfolder: obj.to.id, position: position++}
+			toFolder.galleries.add g
 
 	addPhotos: (photos) ->
 		for photo in photos

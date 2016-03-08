@@ -7,9 +7,11 @@ Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
 PhotoView = require './photo-view'
+PhotoViewerModel= require './photoviewer'
+PhotoViewer = require './photoviewer-view'
 
 module.exports = Backbone.View.extend
-	currentGallery: null
+	currentGallery: null	
 	photoViews: {}
 
 	events:
@@ -18,12 +20,16 @@ module.exports = Backbone.View.extend
 		'click .add-selected' : 'addSelected'	
 		'click .set-featured' : 'setFeaturedPhoto'
 		'click .delete-gallery' : 'deleteGallery'
-		'keydown' : 'doDelete'	
+		'dblclick' : 'openViewer'
 
 	initialize: (options) ->
 		console.log "Initializing gallery-view"
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
+		this.photoViewer = new PhotoViewer({model: new PhotoViewerModel})
+
+	openViewer: (e) ->
+		$('#gv-addPhotos').foundation 'open'
 
 	addSelected: ->
 		this.model.addSelectedPhotosToGallery this.model.get('selectedGallery')
@@ -43,18 +49,15 @@ module.exports = Backbone.View.extend
 		if this.currentGallery
 			this.listenTo this.currentGallery, 'change', this.galleryChanged 
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
+			this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
 			this.masterAddAll()
 			this.galleryChanged()
-
-	doDelete: (e) ->
-		#if e.keyCode==100
-		console.log e
+			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
 	galleryChanged: (e) ->
-		console.log 'gallery changed'
 		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
@@ -72,6 +75,10 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
+		console.log this.$('#gv-photoViewer')
+		this.photoViewer.setElement this.$('#gv-photoViewer')
+		this.photoViewer.render()
+
 		this.drag = Dragula [this.$('.photo-list')[0]],
 			direction: 'horizontal'
 
@@ -91,7 +98,7 @@ module.exports = Backbone.View.extend
 
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
 			view.render()
 		view = this.photoViews[photo.id]
 		view.delegateEvents()
@@ -106,7 +113,7 @@ module.exports = Backbone.View.extend
 			return
 
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
 			view.render()
 
 		view = this.photoViews[photo.id]

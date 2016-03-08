@@ -32,14 +32,15 @@ module.exports = Backbone.View.extend
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
 	changeFolder: ->
-		#if (this.currentFolder)
-		#	this.stopListening this.currentFolder.galleries
+		if (this.currentFolder)
+			this.stopListening this.currentFolder.galleries
 
 		this.currentFolder = this.model.get 'selectedFolder'
 		this.$('.title').html(if this.currentFolder then this.currentFolder.get('name') else 'Default')
 		if (this.currentFolder)
 			this.$("#fv-editFolder input[name='name']").val this.currentFolder.get('name')
 			this.$("#fv-editFolder input[name='description']").val this.currentFolder.get('description')
+			this.listenTo this.currentFolder.galleries ,'sort' , this.addAll
 			this.addAll()
 
 	render: ->

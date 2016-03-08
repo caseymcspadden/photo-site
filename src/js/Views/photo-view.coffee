@@ -12,11 +12,22 @@ module.exports = Backbone.View.extend
 
 	events:
 		'click img' : 'photoClicked'
+		'mouseover' : 'setFocus'
+		'keypress' : 'keyPressed'
+		#'dblclick' : 'keyPressed'
 
 	initialize: (options) ->
+		this.photoViewer = options.viewer
 		this.template = templates['photo-view']
 		this.listenTo this.model, 'change:selected', this.toggleSelected
 		this.listenTo this.model, 'remove', this.removeView
+
+	setFocus: (e) ->
+		this.$('a').focus()
+
+	keyPressed: (e) ->
+		console.log 'key pressed on photo ' + this.model.id
+		this.photoViewer.viewModel this.model
 
 	render: ->
 		this.$el.html this.template(this.model.toJSON())
