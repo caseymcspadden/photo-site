@@ -26,10 +26,9 @@ module.exports = Backbone.View.extend
 		console.log "Initializing gallery-view"
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
-		this.photoViewer = new PhotoViewer({model: new PhotoViewerModel})
 
 	openViewer: (e) ->
-		$('#gv-addPhotos').foundation 'open'
+		this.photoViewer.open this.currentGallery.photos.at(0), this.currentGallery.photos
 
 	addSelected: ->
 		this.model.addSelectedPhotosToGallery this.model.get('selectedGallery')
@@ -74,9 +73,10 @@ module.exports = Backbone.View.extend
 		this.model.get('selectedGallery').setFeaturedPhoto()
 
 	render: ->
+		console.log "rendering photoviewer"
 		this.$el.html this.template {name: 'Default'}
 		console.log this.$('#gv-photoViewer')
-		this.photoViewer.setElement this.$('#gv-photoViewer')
+		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer')}
 		this.photoViewer.render()
 
 		this.drag = Dragula [this.$('.photo-list')[0]],

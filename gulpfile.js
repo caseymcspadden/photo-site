@@ -59,7 +59,7 @@ gulp.task('fileroot', function() {
 
 gulp.task('jst', function() {
 
-  gulp.src(['src/js/Templates/*.html'])
+  return gulp.src(['src/js/Templates/*.html'])
 
     // Minify the HTML prior to converting to JST
     .pipe(processhtml({ collapseWhitespace: false, removeComments: true, removeCommentsFromCDATA: true }))

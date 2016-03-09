@@ -6,5 +6,6 @@ GalleryPhotos = require './galleryphotos'
 
 module.exports = Backbone.Model.extend
 	defaults :
-		index: 0
-		gallery: null	
+		size: 'L'
+		photo: null
+		collection: null	
