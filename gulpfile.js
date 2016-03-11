@@ -80,7 +80,6 @@ gulp.task('jst', function() {
     .pipe(uglify())
 
     .pipe(gulp.dest('require'));
-
 });
 
 // scripts
