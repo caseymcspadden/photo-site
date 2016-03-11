@@ -71,7 +71,7 @@ ul.mtree {
 ul.mtree.transit {
   //background: #111;
   ul {margin-left: 0;}
-  ul > li {font-size:.9em; }
+  //ul > li {font-size:.9em; }
   li.mtree-node {position:relative;}
   li.mtree-node > a:before { color:#CCC; font-weight:normal; position: absolute; right: 20px; }
   li.mtree-open > a:before { content: '-';}
@@ -81,10 +81,11 @@ ul.mtree.transit {
   li > a:hover, li.mtree-active > a {background: #333; color: #FFF; }
   li.mtree-node > ul > li:last-child { margin-bottom: .5em; padding-bottom: .5em; border-bottom: 1px solid #333;}
   li.mtree-node:last-child > ul > li:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none;}
-  $indent: .8em;
+  $indent: 1em;
   a { padding: 5px 0px 5px $indent; color: #CCC; }
-  li li > a { padding-left: $indent*2; }
-  li li li > a { padding-left: $indent*3; }
-  li li li li > a { padding-left: $indent*4; }
-  li li li li li > a { padding-left: $indent*5; } 
+  .level-2 > a { padding-left: $indent*2; }
+  .level-3 > a { padding-left: $indent*3; }
+  .level-4 > a { padding-left: $indent*4; }
+  .level-5 > a { padding-left: $indent*5; }
+  .level-6 > a { padding-left: $indent*6; }
 }

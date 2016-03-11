@@ -106,7 +106,7 @@ $app->get('/services/folders/', function($request, $response, $args) {
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, name, description FROM folders");
+  $result = $mysqli->query("SELECT id, idfolder, position, name, description FROM folders");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);

@@ -20,8 +20,10 @@ module.exports = Backbone.Model.extend
 	fetchAll: ->
 		self = this
 		this.folders.fetch(
+			reset: true
 			success: (foldercollection) ->
 				self.galleries.fetch(
+					reset: true
 					success: (gallerycollection) ->
 						gallerycollection.each (g) ->
 							g.master = self.photos
