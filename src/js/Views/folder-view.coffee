@@ -13,6 +13,7 @@ module.exports = Backbone.View.extend
 	featuredViews: {}
 
 	events:
+		'submit #fv-editFolder form' : 'editFolder'
 		'submit #fv-addGallery form' : 'addGallery'
 		'click .featured-thumbnail' : 'galleryClicked'
 
@@ -21,6 +22,9 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'change:selectedFolder', this.changeFolder
 		this.listenTo this.model.galleries, 'remove', this.addAll
 		this.listenTo this.model.galleries, 'add', this.addAll
+
+	editFolder: (e) ->
+		console.log e
 
 	addGallery: (e) ->
 		e.preventDefault()

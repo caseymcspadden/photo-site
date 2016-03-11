@@ -7,8 +7,8 @@ module.exports = Backbone.View.extend
 	tagName: 'div'
 
 	events:
-		'click .scroll.left a' : 'scrollLeft'
-		'click .scroll.right a' : 'scrollRight'
+		'click .scroll.left' : 'scrollLeft'
+		'click .scroll.right' : 'scrollRight'
 		'click input:radio[name=view-size]' : 'changeImageSize'
 
 	initialize: (options) ->

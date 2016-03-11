@@ -267,11 +267,11 @@ $app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $resp
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
       //'X3'=>[1600,1200],
-      'X'=>1280,
+      'X'=>960,
       //'X'=>[1024,768],
-      'L'=>800,
-      'M'=>600,
-      'S'=>400,
+      'L'=>600,
+      'M'=>450,
+      'S'=>300,
       'T'=>150,
       //'TS'=>[100,100],
     ];
@@ -369,9 +369,10 @@ $app->post('/services/upload', function($request, $response, $args) {
               $wlarger=0;
               $hlarger=0;
  
-              foreach ($fileSizes as $postfix => $sz) {
-                $w = ($aspect<1) ? $sz : $sz/$aspect;
-                $h = ($aspect<1) ? $sz*$aspect : $sz;
+              foreach ($fileSizes as $postfix => $h) {
+                //$w = ($aspect<1) ? $sz : $sz/$aspect;
+                //$h = ($aspect<1) ? $sz*$aspect : $sz;
+                $w = $h/$aspect;
 
                 if ($w<=$size[0] && $h<=$size[1]) { // only make the image if smaller than the original
                   if ($imlarger===FALSE) {
@@ -383,8 +384,8 @@ $app->post('/services/upload', function($request, $response, $args) {
                     $srcx = ($hlarger > $wlarger) ? 0 : ($wlarger-$hlarger)/2;
                     $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
                     $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
-                    $im2 = imagecreatetruecolor($sz, $sz);
-                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $sz, $sz, $srcw, $srcw);
+                    $im2 = imagecreatetruecolor($h, $h);
+                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $h, $h, $srcw, $srcw);
                   }
                   else {
                     $im2 = imagecreatetruecolor($w, $h);

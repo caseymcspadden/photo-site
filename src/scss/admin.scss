@@ -174,19 +174,7 @@
   @include reveal-dark;
   .photo-viewer {
     a {
-      color: $white
-    }
-    .image-container {
-      display: table;
-      table-layout: auto;
-      width: 100%;
-      div {
-        display: table-cell;
-        vertical-align: middle;
-        &.center {
-          text-align: center;
-        }
-      }
+      color: $white;
     }
   }
 }
