@@ -156,7 +156,7 @@
   }
 }
 
-@mixin reveal-dark {
+.reveal-dark {
   background-color: $body-background;
   .close-button:hover {
     color: $white
@@ -166,12 +166,8 @@
   }
 }
 
-.reveal.dark {
-  @include reveal-dark;
-}
-
 #gv-photoViewer {
-  @include reveal-dark;
+  @extend .reveal-dark;
   .photo-viewer {
     a {
       color: $white;

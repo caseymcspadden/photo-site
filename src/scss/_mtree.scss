@@ -1,23 +1,13 @@
-// ul.mtree : root <ul> list element.
-// li.mtree-node : All <li> list items with children.
-// li.mtree-open : <li> list items that are open
-// li.mtree-closed : <li> list items that are closed
-// ul.mtree-level-1 : Style <ul> list elements at different levels (depth)
-// li.mtree-active : Class for last active <li> list item (experimental)
-
-// All classes listed, with sensible defaults applied
 ul.mtree {
   opacity: 1; // Set to 0 and let mtree display after initialization
   margin-left: 0; // Lets just remove default left margin on root element shall we ...
   padding: 1.2em; // Set a nice padding if your design requires it
-  // background: #333; // Set a background for the menu
-  // Styles for all <ul> submenu list elements except ul.mtree root.
+
   ul {
     margin-left: 1em; // Set default indent level (or set 0)
-    min-height: 1em;
+    //min-height: 1em;
   }
   
-  // Styles for all <li> list items.
   li {
     list-style: none; // Lets remove default bullets for all elements
   }
@@ -48,11 +38,6 @@ ul.mtree {
   ul.mtree-level-2 { }
   ul.mtree-level-3 { }
   //ul.mtree-level-[DEPTH] { }
-  
-  // [EXPERIMENTAL] Class for last active <li> list item.
-  li.mtree-active {
-    // > a { background: #CCC; }
-  }
 }
 
 // Some simple anim for hover, better add with Bourbon or Compass perhaps
@@ -70,22 +55,23 @@ ul.mtree {
 
 ul.mtree.transit {
   //background: #111;
-  ul {margin-left: 0;}
+  ul {margin-left: 0; display: none;}
+  .folder-icon, .gallery-icon { margin-right: .5em; }
   //ul > li {font-size:.9em; }
   li.mtree-node {position:relative;}
-  li.mtree-node > a:before { color:#CCC; font-weight:normal; position: absolute; right: 20px; }
-  li.mtree-open > a:before { content: '-';}
-  li.mtree-closed > a:before { content: '+'; }
+  //li.mtree-node > a:before { color:#CCC; font-weight:normal; position: absolute; right: 20px; }
+  //li.mtree-open > a:before { content: '-';}
+  //li.mtree-closed > a:before { content: '+'; }
   ul > li:first-child { margin-top: 1px; }
-  li.mtree-open > a {background: #222; }
+  //li.mtree-open > a {background: #222; }
   li > a:hover, li.mtree-active > a {background: #333; color: #FFF; }
-  li.mtree-node > ul > li:last-child { margin-bottom: .5em; padding-bottom: .5em; border-bottom: 1px solid #333;}
+  li.droptarget > a {background: #060;}
+  //li.mtree-node > ul > li:last-child { margin-bottom: .5em; padding-bottom: .5em; border-bottom: 1px solid #333;}
   li.mtree-node:last-child > ul > li:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none;}
   $indent: 1em;
   a { padding: 5px 0px 5px $indent; color: #CCC; }
-  .level-2 > a { padding-left: $indent*2; }
-  .level-3 > a { padding-left: $indent*3; }
-  .level-4 > a { padding-left: $indent*4; }
-  .level-5 > a { padding-left: $indent*5; }
-  .level-6 > a { padding-left: $indent*6; }
+  li li > a { padding-left: $indent*2; }
+  li li li  > a { padding-left: $indent*3; }
+  li li li li > a { padding-left: $indent*4; }
+  li li li li li > a { padding-left: $indent*5; }
 }
