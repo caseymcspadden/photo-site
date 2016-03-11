@@ -10,5 +10,8 @@ module.exports = Backbone.Model.extend
 	defaults :
 		name: ''
 		description: ''
+		idfolder: '0'
+		position: '0'
+		
 	initialize: (options) ->
 		this.galleries = new FolderGalleries

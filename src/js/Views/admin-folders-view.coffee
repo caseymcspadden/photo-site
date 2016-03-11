@@ -31,10 +31,12 @@ module.exports = Backbone.View.extend
 
 		this.$tree = this.$('.mtree');
 
-		this.listenTo(this.model.folders, 'add', this.folderAdded)
-		this.listenTo(this.model.folders, 'remove', this.folderRemoved)
-		this.listenTo(this.model.galleries, 'add', this.galleryAdded)
-		this.listenTo(this.model.galleries, 'remove', this.galleryRemoved)
+		#this.listenTo(this.model.folders, 'add', this.folderAdded)
+		#this.listenTo(this.model.folders, 'remove', this.folderRemoved)
+		this.listenTo(this.model.folders, 'reset', this.resetFolders)
+		#this.listenTo(this.model.galleries, 'add', this.galleryAdded)
+		#this.listenTo(this.model.galleries, 'remove', this.galleryRemoved)
+		this.listenTo(this.model.galleries, 'reset', this.resetGalleries)
 
 		this.dragula = Dragula()
 
@@ -71,6 +73,30 @@ module.exports = Backbone.View.extend
 			'overflow':'hidden'
 			'height': if this.collapsed then 0 else 'auto'
 			'display': if this.collapsed then 'none' else 'block'
+
+	addChildFolders: (idParent, level) ->
+		children = this.model.folders.where {idfolder: idParent}
+		for child in children
+			console.log 'parent ' + idParent + ' has child ' + child.id
+			this.testAddFolder child.id, idParent, level
+			this.addChildFolders child.id, level+1
+
+	resetFolders: ->
+		console.log "Reset folders"
+		this.addChildFolders '0', 1
+
+	resetGalleries: ->
+		console.log "Reset galleries"
+
+	testAddFolder: (id, idParent, level) ->
+		f = this.model.folders.get id
+		el = '<li id="folder-' + id + '" class="folder mtree-node mtree-open level-' + level + '"><a href="#">' + f.get('name') + '</a><ul id="container-' + id + '"></ul></li>'
+
+		$li = this.$tree.find '#folder-'+idParent
+		if $li.length==0
+			this.$tree.append el
+		else
+			$li.find('>ul').append el
 
 	folderAdded: (f) ->
 		#this.listenTo(f.galleries, 'add', this.galleryAdded)
