@@ -26,6 +26,7 @@
     "dragula": "^3.6.8",
     "dropzone": "^4.2.0",
     "event-stream": "^3.3.2",
+    "font-awesome": "^4.5.0",
     "foundation-sites": "^6.1.2",
     "glob": "^6.0.4",
     "gulp": "^3.9.0",

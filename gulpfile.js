@@ -154,6 +154,10 @@ gulp.task('html', function() {
 
 // sass
 gulp.task('sass', function() {
+
+  gulp.src('./node_modules/font-awesome/fonts/**/*.*')
+    .pipe(gulp.dest('build/fonts'));
+
   return gulp.src('./src/scss/**/*.scss')
     .pipe(sass({
       includePaths: require('node-bourbon').includePaths

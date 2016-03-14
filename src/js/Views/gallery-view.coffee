@@ -23,11 +23,11 @@ module.exports = Backbone.View.extend
 		'dblclick' : 'openViewer'
 
 	initialize: (options) ->
-		console.log "Initializing gallery-view"
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
 
 	openViewer: (e) ->
+		console.log this.currentGallery.photos
 		this.photoViewer.open this.currentGallery.photos.at(0), this.currentGallery.photos
 
 	addSelected: ->
@@ -47,8 +47,8 @@ module.exports = Backbone.View.extend
 
 		if this.currentGallery
 			this.listenTo this.currentGallery, 'change', this.galleryChanged 
-			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
-			this.listenTo this.currentGallery.photos, 'sort', this.addAll 
+			#this.listenTo this.currentGallery.photos, 'reset', this.addAll 
+			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.addAll()
@@ -73,9 +73,7 @@ module.exports = Backbone.View.extend
 		this.model.get('selectedGallery').setFeaturedPhoto()
 
 	render: ->
-		console.log "rendering photoviewer"
 		this.$el.html this.template {name: 'Default'}
-		console.log this.$('#gv-photoViewer')
 		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer')}
 		this.photoViewer.render()
 

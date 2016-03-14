@@ -43,6 +43,7 @@
 
 @import "../../node_modules/slick-carousel/slick/slick.scss";
 @import "../../node_modules/slick-carousel/slick/slick-theme.scss";
+@import "../../node_modules/font-awesome/scss/font-awesome.scss";
 
 #uploadModal {
   width: 80%;
@@ -165,6 +166,11 @@
     color: $white
   }
 }
+
+#gv-addPhotos {
+  @extend .reveal-dark;
+}
+
 
 #gv-photoViewer {
   @extend .reveal-dark;

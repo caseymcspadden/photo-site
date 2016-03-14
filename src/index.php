@@ -106,7 +106,7 @@ $app->get('/services/folders/', function($request, $response, $args) {
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, idfolder, position, name, description FROM folders");
+  $result = $mysqli->query("SELECT id, idfolder, position, name, description FROM folders ORDER BY idfolder, position");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
@@ -129,7 +129,7 @@ $app->put('/services/folders/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $vals = $request->getParsedBody();
 
-  $mysqli->query("UPDATE folders SET name='$vals[name]', description='$vals[description]' WHERE id=$args[id]");
+  $mysqli->query("UPDATE folders SET idfolder=$vals[idfolder], position=$vals[position], name='$vals[name]', description='$vals[description]' WHERE id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
@@ -204,7 +204,7 @@ $app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $respons
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
+  $result = $mysqli->query("SELECT idphoto, position FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
 
   while ($row = $result->fetch_row())
     array_push($arr,$row[0]);
