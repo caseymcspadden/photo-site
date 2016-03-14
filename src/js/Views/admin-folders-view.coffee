@@ -26,22 +26,22 @@ module.exports = Backbone.View.extend
 		'click .delete-folder' : 'deleteFolder'
 		'mousedown' : 'mouseDown'
 		'mouseup' : 'mouseUp'
-		'mousemove' : 'mouseMove'
-		'mouseenter a' : 'mouseEnter'
-		'mouseleave a' : 'mouseLeave'
+		'mouseleave' : 'mouseUp'
+		'mousemove a' : 'mouseMove'
+		'mouseover a' : 'mouseOver'
+		'mouseout a' : 'mouseOut'
 		#'keypress': 'deleteFolder'
 
 	initialize: (options) ->
 		this.template = templates['admin-folders-view']
 		this.folder_node_template = templates['folder-node-view']
 		this.gallery_node_template = templates['gallery-node-view']
-		this.dragElement = null
-		this.dropTarget = null
-		this.mouseIsDown = false
+		this.dragStarted = false;
+		this.allowDrop = 0
 
 		this.$el.html(this.template());
-
 		this.$tree = this.$('.mtree');
+		#this.$dragWindow = this.$('#drag-window')
 
 		#this.listenTo(this.model.folders, 'add', this.folderAdded)
 		#this.listenTo(this.model.folders, 'remove', this.folderRemoved)
@@ -74,42 +74,79 @@ module.exports = Backbone.View.extend
 			#self.model.moveGallery {from: {id: fromFolder, galleries: fromGalleries}, to: {id:toFolder, galleries: toGalleries}}
 		#)
 
-	getContainingElement: (e)->
+	getContainingElement: (e, elementType)->
 		$e = $(e)
 		while $e
-			return $e if $e.is('li')
+			return $e if $e.is elementType
 			$e = $e.parent()
 
 	mouseDown: (e) ->
-		this.mouseIsDown = true
+		$li = this.getContainingElement e.target, 'li'
+		this.dragStarted = false
+		if $li
+			type = if $li.hasClass('gallery') then 'gallery' else 'folder'
+			this.model.setDragModel $li.attr('id').replace(type+'-',''), type		
 		e.preventDefault()
 
 	mouseUp: (e) ->
-		this.mouseIsDown = false
-		this.dragElement = null
-		this.$('li').removeClass('droptarget')
+		this.$('li').removeClass('dropinside').removeClass('dropbefore')
+		this.model.setDragModel 0
+		this.allowDrop = 0
+		#this.$dragWindow.hide()
+		e.preventDefault()
 
-	mouseEnter: (e) ->
-		if this.dragElement != null
-			$li = this.getContainingElement e.target
-			id = $li.attr('id')
-			console.log id
-			if $li and $li.hasClass('folder') and this.dragElement.find('#'+id).length==0
-				$li.addClass('droptarget')
+	mouseOver: (e) ->
+		if this.model.get('dragModel') != null
+			$li = this.getContainingElement e.target, 'li'
+			type = if $li.hasClass('gallery') then 'gallery' else 'folder'
+			this.allowDrop = this.model.allowDrop type, $li.attr('id').replace(type+'-','')
+			console.log this.allowDrop
+			#id = $li.attr('id')
+			#if $li and this.dragElement.find('#'+id).length==0
+			#	this.dropTarget = $li;
+			#	if $li.hasClass('gallery')
+			#		this.dropInside = false
+			#		this.dropTarget.addClass('dropbefore')
 
-	mouseLeave: (e) ->
-		if this.dragElement != null
-			this.$('li').removeClass('droptarget')
+		e.preventDefault()
+
+	mouseOut: (e) ->
+		this.$('li').removeClass('dropinside').removeClass('dropbefore')
+		this.allowDrop = 0
+		e.preventDefault()
 
 	mouseMove: (e) ->
-		if this.mouseIsDown and this.dragElement==null
-			this.dragElement = this.getContainingElement e.target
+		return if !this.model.get('dragModel')
+		if !this.dragStarted
+			console.log "starting drag"
+			this.dragStarted = true
+			#this.$dragWindow.html $(e.currentTarget).html()
+			#this.$dragWindow.show()
+
+		return if this.allowDrop==0
+		$li = this.getContainingElement e.target, 'li'
+		if e.offsetY < 15 and (this.allowDrop & 2) and !$li.hasClass('dropbefore')
+			$li.removeClass('dropinside').addClass('dropbefore')
+		else if e.offsetY >= 15 and (this.allowDrop & 1) and !$li.hasClass('dropinside')
+			$li.removeClass('dropbefore').addClass('dropinside')
+		#if this.mouseIsDown and this.dragElement==null
+		#	this.dragElement = this.getContainingElement e.target, 'li'
+		#	type = if this.dragElement.hasClass('gallery') then 'gallery' else 'folder'
+		#	this.model.setDragModel this.dragElement.attr('id').replace(type+'-',''), type
+		#if this.dropTarget != null and this.dropTarget.hasClass('folder')
+		#	if e.offsetY < 15 and this.dropInside
+		#		this.dropTarget.removeClass('dropinside').addClass('dropbefore')
+		#		this.dropInside = false
+		#	if e.offsetY >= 15 and !this.dropInside
+		#		this.dropTarget.removeClass('dropbefore').addClass('dropinside')
+		#		this.dropInside = true
+
 		e.preventDefault() 
 
 	dragEnter: (e) ->
 		console.log "dragenter"
 		console.log e.currentTarget
-		#$li = this.getContainingElement e.target
+		#$li = this.getContainingElement e.target, 'li'
 		#return true if this.dropTarget and $li.attr('id') == this.dropTarget.attr('id')
 		#console.log "Drag Enter"
 		#$li.addClass('dragover') if $li
@@ -122,12 +159,12 @@ module.exports = Backbone.View.extend
 		console.log "Leaving"
 		console.log e.target
 		#console.log 'allowDrop'
-		#$li = this.getContainingElement e.target
+		#$li = this.getContainingElement e.target, 'li'
 		#$li.removeClass('dragover') if $li
 		#e.preventDefault()
 
 	dragStart: (e) ->
-		#this.dragElement = this.getContainingElement e.target
+		#this.dragElement = this.getContainingElement e.target, 'li'
 		console.log 'dragstart' 
 		console.log e.target
 

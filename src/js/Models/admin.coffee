@@ -11,11 +11,52 @@ module.exports = Backbone.Model.extend
 		selectedGallery: null
 		addingPhotos: false
 		fetching: false
+		dragModel: null
 
 	initialize: (attributes, options) ->
 		this.photos = new PhotoCollection
 		this.folders = new FolderCollection
 		this.galleries = new GalleryCollection
+		this._dragModelType = null
+
+	getModelFromTypeAndId: (type, id) ->
+		switch
+			when type=='folder' then this.folders.get id
+			when type=='gallery' then this.galleries.get id
+			when type=='photo' then this.photos.get id
+			else null
+
+	isDescendantFolder: (testChild, testParent) ->		
+		while testChild
+			idParent = testChild.get 'idfolder'
+			return true if idParent == testParent.id
+			testChild = this.folders.get idParent
+		false
+
+	setDragModel: (id, type) ->
+		if !id
+			this.set {dragModel: null}
+			this._dragModelType=null
+		else
+			model = this.getModelFromTypeAndId type, id
+			this.set {dragModel: model}
+			this._dragModelType = type
+
+	allowDrop: (type, id) ->
+		ret = 0
+		target = this.getModelFromTypeAndId type, id
+		model = this.get 'dragModel'
+		return 0 if model == target
+		return 2 if type == 'gallery' and this._dragModelType == 'gallery'
+		return 0 if this._dragModelType=='folder' and this.isDescendantFolder target, model
+		return 3 if type=='folder' and this._dragModelType == 'folder'
+		if type == 'folder' and this._dragModelType == 'gallery'
+			return 0 if model.get('idfolder') == id
+			return 1
+		if type == 'gallery' and this._dragModelType == 'folder'
+			position = target.get 'position'
+			return 2 if position <= 1
+		0
 
 	fetchAll: ->
 		self = this

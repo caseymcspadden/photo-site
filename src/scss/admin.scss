@@ -175,6 +175,15 @@
   }
 }
 
+#drag-window {
+  background-color: transparent;
+  color: $white;
+  .folder-icon, .gallery-icon {margin-right: .5rem;}
+  opacity: 0.8
+  //display: none;
+  //position: absolute;
+}
+
 .hidden {
   display: none;
 }

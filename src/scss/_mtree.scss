@@ -41,6 +41,7 @@ ul.mtree {
 }
 
 // Some simple anim for hover, better add with Bourbon or Compass perhaps
+/*
 %mtree-transition {
   -webkit-transition: all 300ms ease-out;
   -moz-transition: all 300ms ease-out;
@@ -48,7 +49,7 @@ ul.mtree {
   -o-transition: all 300ms ease-out;
   transition: all 300ms ease-out;
 }
-
+*/
 
 // ** MTREE SKINS **
 // You can style the list yourself naturally, but here are some demo examples:
@@ -58,14 +59,24 @@ ul.mtree.transit {
   ul {margin-left: 0; display: none;}
   .folder-icon, .gallery-icon { margin-right: .5em; }
   //ul > li {font-size:.9em; }
-  li.mtree-node {position:relative;}
+  li.mtree-node {
+    position:relative;
+    border-top: 3px solid $body-background;
+    &.dropbefore > a {
+      border-top: 3px solid #060;
+    }
+    &.dropinside > a {
+      background: #060;
+    }
+  }
   //li.mtree-node > a:before { color:#CCC; font-weight:normal; position: absolute; right: 20px; }
   //li.mtree-open > a:before { content: '-';}
   //li.mtree-closed > a:before { content: '+'; }
   ul > li:first-child { margin-top: 1px; }
   //li.mtree-open > a {background: #222; }
   li > a:hover, li.mtree-active > a {background: #333; color: #FFF; }
-  li.droptarget > a {background: #060;}
+  //li.dropbefore > a {border-top: 3px solid #060;}
+  //li.dropinside > a {background: #060;}
   //li.mtree-node > ul > li:last-child { margin-bottom: .5em; padding-bottom: .5em; border-bottom: 1px solid #333;}
   li.mtree-node:last-child > ul > li:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none;}
   $indent: 1em;
