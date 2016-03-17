@@ -1,7 +1,6 @@
-# Gallery model contains a collection of photos
-
 Backbone = require 'backbone'
 Photo = require './photo'
+Containeres = require '/containers'
 ContainerPhotos = require './containerphotos'
 
 module.exports = Backbone.Model.extend
@@ -17,7 +16,18 @@ module.exports = Backbone.Model.extend
 		featuredPhoto: '0'
 	
 	initialize: (attributes, options) ->
+		this.containers = new Containers
 		this.photos = new ContainerPhotos
+
+	removeContainer: (id) ->
+		this.containers.remove id
+		position = 1
+		this.containers.each (c)->
+			c.save {position: position++}
+
+	addContainer: (c) ->
+		this.containers.add c
+		c.save {idParent: this.id, position: this.containers.length-1}
 
 	populate: ->
 		self = this
@@ -37,7 +47,7 @@ module.exports = Backbone.Model.extend
 
 	addPhotos: (arr) ->
 		$.ajax(
-			url: 'services/galleries/' + this.id + '/photos/'
+			url: 'services/containers/' + this.id + '/photos/'
 			type: 'POST'
 			context: this
 			data: {ids: arr.join(',')}
@@ -61,7 +71,7 @@ module.exports = Backbone.Model.extend
 	removeSelectedPhotos: ->
 		ids = this.getSelectedPhotos true
 		$.ajax(
-			url: 'services/galleries/' + this.id + '/photos/'
+			url: 'services/containers/' + this.id + '/photos/'
 			type: 'DELETE'
 			context: this
 			data: {ids: ids.join(',')}
@@ -79,7 +89,7 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: 'services/galleries/' + this.id + '/photos/'
+			url: 'services/containers/' + this.id + '/photos/'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}

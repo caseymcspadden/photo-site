@@ -1,131 +1,100 @@
 Backbone = require 'backbone'
-FolderCollection = require './folders'
+Containres = require './containers'
 PhotoCollection = require './photos'
-GalleryCollection = require './galleries'
-Folder = require('./folder')
-Gallery = require('./gallery')
+Container = require('./container')
 
 module.exports = Backbone.Model.extend
 	defaults:
-		selectedFolder: null
-		selectedGallery: null
+		selectedContainer: null
 		addingPhotos: false
 		fetching: false
 		dragModel: null
 
 	initialize: (attributes, options) ->
 		this.photos = new PhotoCollection
-		this.folders = new FolderCollection
-		this.galleries = new GalleryCollection
-		this._dragModelType = null
+		this.containers = new Containers
 
-	getModelFromTypeAndId: (type, id) ->
-		switch
-			when type=='folder' then this.folders.get id
-			when type=='gallery' then this.galleries.get id
-			when type=='photo' then this.photos.get id
-			else null
-
-	isDescendantFolder: (testChild, testParent) ->		
+	isDescendantContainer: (testChild, testParent) ->		
 		while testChild
-			idParent = testChild.get 'idfolder'
+			idParent = testChild.get 'idparent'
 			return true if idParent == testParent.id
-			testChild = this.folders.get idParent
+			testChild = this.containers.get idParent
 		false
 
-	setDragModel: (id, type) ->
+	setDragModel: (id) ->
 		if !id
 			this.set {dragModel: null}
-			this._dragModelType=null
 		else
-			model = this.getModelFromTypeAndId type, id
-			this.set {dragModel: model}
-			this._dragModelType = type
+			this.set {dragModel: this.containers.get id}
 
-	allowDrop: (type, id) ->
+	allowDrop: (id) ->
 		ret = 0
-		target = this.getModelFromTypeAndId type, id
-		model = this.get 'dragModel'
-		return 0 if model == target
-		return 2 if type == 'gallery' and this._dragModelType == 'gallery'
-		return 0 if this._dragModelType=='folder' and this.isDescendantFolder target, model
-		return 3 if type=='folder' and this._dragModelType == 'folder'
-		if type == 'folder' and this._dragModelType == 'gallery'
-			return 0 if model.get('idfolder') == id
+		target = this.containers.get id
+		dragmodel = this.get 'dragModel'
+		return 0 if dragmodel == target
+		return 2 if target.get('type') == 'gallery' and dragmodel.get('type') == 'gallery'
+		return 0 if dragmodel.get('type')=='folder' and this.isDescendantContainer target, dragmodel
+		return 3 if target.get('type')=='folder' and dragmodel.get('type') == 'folder'
+		if target.get('type') == 'folder' and dragmodel.get('type') == 'gallery'
+			return 0 if dragmodel.get('idparent') == id
 			return 1
-		if type == 'gallery' and this._dragModelType == 'folder'
+		if target.get('type') == 'gallery' and dragmodel.get('type') == 'folder'
 			position = target.get 'position'
 			return 2 if position <= 1
 		0
 
 	fetchAll: ->					
 		self = this
-		this.folders.fetch(
+		this.containers.fetch(
 			reset: true
-			success: (foldercollection) ->
-				self.galleries.fetch(
-					reset: true
-					success: (gallerycollection) ->
-						gallerycollection.each (g) ->
-							g.master = self.photos
-							folder = self.folders.get(g.get('idfolder'))
-							folder.galleries.add g
-						self.photos.fetch()
-				)
+			success: (containercollection) ->
+				containercollection.each (c) ->
+					c.master = self.photos
+					container = self.containers.get(c.get('idparent'))
+					container.containers.add c
+				self.photos.fetch()
+			)
 		)
 
-	createFolder: (data) ->
-		this.folders.create data, {wait: true}
+	createContainer: (data) ->
+		selectedContainer = this.get 'selectedContainer'
+		data.idparent = if (selectedContainer and selectedContainer.get('type')=='folder') then selectedContainer.id else 0
+		c = this.containers.create data, {wait: true}
+		c.master = this.photos
+		if (data.idparent)
+			selectedContainer.containers.add c
 
-	deleteFolder: (folder) ->
-		return if !folder
+	deleteContainer: (container) ->
+		return if !container
 		toDelete = []
-		folder.galleries.each (gallery) ->
-			toDelete.push gallery
+		container.containers.each (c) ->
+			toDelete.push c
 
-		for gallery in toDelete
-			this.deleteGallery gallery
+		for c in toDelete
+			this.deleteContainer c
 
-		this.folders.remove folder
-		this.set {selectedFolder: null}
-		folder.destroy()
+		this.containers.remove container
+		this.set {selectedContainer: null}
+		container.destroy()
 
-	createGallery: (data) ->
-		selectedFolder = this.get 'selectedFolder'
-		if selectedFolder
-			console.log data
-			data.idfolder = selectedFolder.id
-			g = this.galleries.create data, {wait: true}
-			g.master = this.photos
-			selectedFolder.galleries.add g
-
-	deleteGallery: (gallery) ->
-		return if !gallery
-		folder = this.folders.get gallery.get('idfolder')
-		folder.galleries.remove gallery
-		this.galleries.remove gallery
-		this.set {selectedGallery: null}
-		gallery.destroy()
-		position = 1
-		folder.galleries.each (g) ->
-			g.save {position: position++}
+	#deleteGallery: (gallery) ->
+	#	return if !gallery
+	#	folder = this.folders.get gallery.get('idfolder')
+	#	folder.galleries.remove gallery
+	#	this.galleries.remove gallery
+	#	this.set {selectedGallery: null}
+	#	gallery.destroy()
+	#	position = 1
+	#	folder.galleries.each (g) ->
+	#		g.save {position: position++}
 
 
-	selectFolder: (id) ->
-		this.set {selectedFolder: this.folders.get(id)}
-		this.set {selectedGallery: null}
+	selectContainer: (id) ->
+		container = this.containers.get id
+		this.set {selectedContainer: container}
 		this.set {addingPhotos: false}
-
-	selectGallery: (id) ->
-		gallery = this.galleries.get id
-		return if !gallery
-
-		this.set {selectedFolder : this.folders.get(gallery.get('idfolder'))}
-		this.set {selectedGallery : gallery}
-
-		gallery.populate()
-
-		this.set {addingPhotos: false}
+		if container.get('type') == 'gallery'
+			container.populate()
 
 	#moveGallery: (obj) ->
 	#	fromFolder = this.folders.get(obj.from.id)
@@ -146,18 +115,18 @@ module.exports = Backbone.Model.extend
 	#		g.save {idfolder: obj.to.id, position: position++}
 	#		toFolder.galleries.add g
 
-	addPhotos: (photos , addToSelectedGallery) ->
-		gallery = this.get 'selectedGallery'
+	addPhotos: (photos , addToSelectedContainer) ->
+		container = this.get 'selectedContainer'
 		added = []
 		for photo in photos
 			this.photos.add photo
-			if addToSelectedGallery and gallery!=null
+			if addToSelectedContainer and container and container.get('type')=='gallery'
 				added.push photo.id
 
 		if added.length>0
-			gallery.addPhotos added
+			container.addPhotos added
 
-	addSelectedPhotosToGallery: (gallery) ->
+	addSelectedPhotosToContainer: (container) ->
 		selectedPhotos = []
 
 		this.photos.each((photo) ->
@@ -166,4 +135,4 @@ module.exports = Backbone.Model.extend
 				selectedPhotos.push photo.id
 		)
 
-		gallery.addPhotos selectedPhotos
+		container.addPhotos selectedPhotos

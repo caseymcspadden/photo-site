@@ -1,38 +1,22 @@
 Backbone = require 'backbone'
-_ = require 'underscore'
-Folder = require './folder'
+templates = require './jst'
 
 module.exports = Backbone.View.extend
-	events:
-		'click .add-folder': 'addFolder'
-		'click .add-gallery': 'addGallery'
-		'click li > *:first-child' : 'test1'
+	tagName: 'li'
+
+	className: ->
+		this.model.get('type') + ' mtree-node'
+
+	id: ->
+		'container-' + this.model.id
 
 	initialize: (options) ->
-		this.template = options.JST['node-view'];
-		console.log(options.template);
-		console.log this.collection
-		_.each this.collection.models, (element,index) ->
-			console.log element
-		this.listenTo(this.collection, 'add', this.folderAdded)
-		this.listenTo(this.collection, 'remove', this.folderRemoved)
+		this.folderTemplate = templates['folder-node-view']
+		this.galleryTemplate = templates['gallery-node-view']
+		this.listenTo this.model, 'change:name', this.render
+		this.listenTo this.model, 'destroy', this.remove
 
 	render: ->
-		this.$el.html this.template()
-
-	folderAdded: ->
-		console.log "Folder Added"
-		console.log this.collection
-
-	folderRemoved: ->
-		console.log "Folder Removed"
-
-	addFolder: ->
-		console.log "Add Folder"
-		console.log this.collection
-
-	addGallery: ->
-		console.log "Add Gallery"
-
-	test1: ->
-		console.log "test1 called"
+		template = if this.model.get('type') == 'gallery' then this.galleryTemplate else this.folderTemplate
+		this.$el.html template(this.model.toJSON())
+		this
