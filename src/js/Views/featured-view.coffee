@@ -19,10 +19,11 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		json = this.model.toJSON()
-		json.imageSource = if json.featuredPhoto!='0' then 'photos/T/' + json.featuredPhoto + '.jpg' else 'images/0_T.jpg'
+		json.imageSource = this.model.featuredPhotoSource()	
 		this.$el.html this.template(json)
 
 	removeView: ->
+		console.log "removing view"
 		this.$el.remove()
 
 	#galleryClicked: (e) ->

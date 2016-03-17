@@ -1,6 +1,6 @@
 Backbone = require 'backbone'
-templates = require './jst'
 Photo = require './photo'
+templates = require './jst'
 
 module.exports = Backbone.View.extend
 	tagName: 'div'

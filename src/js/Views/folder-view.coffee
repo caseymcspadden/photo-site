@@ -15,7 +15,7 @@ module.exports = Backbone.View.extend
 	events:
 		'submit #fv-editFolder form' : 'editFolder'
 		'submit #fv-addGallery form' : 'addGallery'
-		'click .featured-thumbnail' : 'galleryClicked'
+		'dblclick .featured-thumbnail' : 'selectGallery'
 
 	initialize: (options) ->
 		this.template = templates['folder-view']
@@ -24,7 +24,13 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model.galleries, 'add', this.addAll
 
 	editFolder: (e) ->
-		console.log e
+		e.preventDefault()
+		arr = $(e.target).serializeArray()
+		data = {}
+		for elem in arr
+			data[elem.name]=elem.value	
+		this.currentFolder.save data
+		this.$('#fv-editFolder .close-button').trigger('click')
 
 	addGallery: (e) ->
 		e.preventDefault()
@@ -64,7 +70,7 @@ module.exports = Backbone.View.extend
 		if this.currentFolder
 			this.currentFolder.galleries.each this.addOne, this
 
-	galleryClicked: (e) ->
-		console.log e
+	selectGallery: (e) ->
+		this.model.selectGallery $(e.currentTarget).attr('id').replace(/^gallery-/,'')
 
 

@@ -1,4 +1,4 @@
-dropzone = require('dropzone')
+dropzone = require 'dropzone'
 Backbone = require 'backbone'
 templates = require './jst'
 
@@ -9,7 +9,7 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		console.log "initializing dropzone"
-		this.template = templates['admin-dropzone-view']
+		this.template = templates['dropzone-view']
 
 	render: ->
 		this.$el.html this.template()
@@ -22,7 +22,7 @@ module.exports = Backbone.View.extend
 			maxFileSize: 50
 			init: ->
 				this.on("successmultiple", (a,b) ->
-					self.model.addPhotos $.parseJSON(b)
+					self.model.addPhotos $.parseJSON(b) , true
 				)
 
 	close: ->

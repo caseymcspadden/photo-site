@@ -30,6 +30,9 @@ module.exports = Backbone.Model.extend
 		)
 		this.set {populated: true}
 
+	featuredPhotoSource: ->
+		if this.get('featuredPhoto') != '0' then 'photos/T/' + this.get('featuredPhoto') + '.jpg' else 'images/0_T.jpg'
+
 	addPhoto: (id) ->
 		p = this.master.get(id)
 		this.photos.add p if p
@@ -56,7 +59,6 @@ module.exports = Backbone.Model.extend
 				ids.push photo.id
 		)
 		ids
-
 
 	removeSelectedPhotos: ->
 		ids = this.getSelectedPhotos true

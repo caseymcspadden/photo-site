@@ -58,7 +58,7 @@ module.exports = Backbone.Model.extend
 			return 2 if position <= 1
 		0
 
-	fetchAll: ->
+	fetchAll: ->					
 		self = this
 		this.folders.fetch(
 			reset: true
@@ -93,7 +93,6 @@ module.exports = Backbone.Model.extend
 	createGallery: (data) ->
 		selectedFolder = this.get 'selectedFolder'
 		if selectedFolder
-			console.log 'creating'
 			console.log data
 			data.idfolder = selectedFolder.id
 			g = this.galleries.create data, {wait: true}
@@ -107,6 +106,10 @@ module.exports = Backbone.Model.extend
 		this.galleries.remove gallery
 		this.set {selectedGallery: null}
 		gallery.destroy()
+		position = 1
+		folder.galleries.each (g) ->
+			g.save {position: position++}
+
 
 	selectFolder: (id) ->
 		this.set {selectedFolder: this.folders.get(id)}
@@ -124,28 +127,35 @@ module.exports = Backbone.Model.extend
 
 		this.set {addingPhotos: false}
 
-	moveGallery: (obj) ->
-		fromFolder = this.folders.get(obj.from.id)
-		toFolder = this.folders.get(obj.to.id)
+	#moveGallery: (obj) ->
+	#	fromFolder = this.folders.get(obj.from.id)
+	#	toFolder = this.folders.get(obj.to.id)
 
-		fromFolder.galleries.reset()
-		toFolder.galleries.reset()
+	#	fromFolder.galleries.reset()
+	#	toFolder.galleries.reset()
 
-		position = 1
-		for id in obj.from.galleries
-			g = this.galleries.get id
-			g.save {idfolder: obj.from.id, position: position++}
-			fromFolder.galleries.add g
+	#	position = 1
+	#	for id in obj.from.galleries
+	#		g = this.galleries.get id
+	#		g.save {idfolder: obj.from.id, position: position++}
+	#		fromFolder.galleries.add g
 
-		position = 1
-		for id in obj.to.galleries
-			g = this.galleries.get id
-			g.save {idfolder: obj.to.id, position: position++}
-			toFolder.galleries.add g
+	#	position = 1
+	#	for id in obj.to.galleries
+	#		g = this.galleries.get id
+	#		g.save {idfolder: obj.to.id, position: position++}
+	#		toFolder.galleries.add g
 
-	addPhotos: (photos) ->
+	addPhotos: (photos , addToSelectedGallery) ->
+		gallery = this.get 'selectedGallery'
+		added = []
 		for photo in photos
 			this.photos.add photo
+			if addToSelectedGallery and gallery!=null
+				added.push photo.id
+
+		if added.length>0
+			gallery.addPhotos added
 
 	addSelectedPhotosToGallery: (gallery) ->
 		selectedPhotos = []

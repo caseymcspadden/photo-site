@@ -118,7 +118,13 @@ $app->post('/services/folders/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $vals = $request->getParsedBody();
 
-  $mysqli->query("INSERT INTO folders (name, description) VALUES ('$vals[name]','$vals[description]')");
+  $result = $mysqli->query("SELECT MAX(position) FROM folders WHERE idfolder=0");
+
+  $row = $result->fetch_row();
+
+  $position = 1 + $row[0];
+
+  $mysqli->query("INSERT INTO folders (idfolder, position, name, description) VALUES (0, $position, '$vals[name]','$vals[description]')");
 
   $vals['id'] = $mysqli->insert_id;
 
@@ -174,7 +180,13 @@ $app->post('/services/galleries/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $vals = $request->getParsedBody();
 
-  $mysqli->query("INSERT INTO galleries (idfolder, name, description) VALUES ($vals[idfolder],'$vals[name]','$vals[description]')");
+  $result = $mysqli->query("SELECT MAX(position) FROM galleries WHERE idfolder=$vals[idfolder]");
+
+  $row = $result->fetch_row();
+
+  $position = 1 + $row[0];
+
+  $mysqli->query("INSERT INTO galleries (idfolder, position, name, description) VALUES ($vals[idfolder], $position, '$vals[name]','$vals[description]')");
 
   $vals['id'] = $mysqli->insert_id;
 
@@ -194,7 +206,7 @@ $app->delete('/services/galleries/{id}', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
   $parsedBody = $request->getParsedBody();
  
-  $mysqli->query("DELETE GP.*, G.* FROM galleryphotos GP INNER JOIN galleries G ON G.id=GP.idgallery WHERE G.id=$args[id]");
+  $mysqli->query("DELETE G.*, GP.* FROM galleries G LEFT JOIN galleryphotos GP ON GP.idgallery=G.id WHERE G.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
@@ -310,105 +322,115 @@ $app->post('/services/upload', function($request, $response, $args) {
    
         $allowedTypes = array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF);
         $detectedType = exif_imagetype($tmp);
-        $error = !in_array($detectedType, $allowedTypes);
-        if (!$error) {
-          $size = getimagesize($tmp);
-          $extension = pathinfo($name,PATHINFO_EXTENSION);
- 
-          $mysqli->query("INSERT INTO photos 
-           (fileName, fileSize, width, height, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
-            exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
-            ."'$name',"
-            .filesize($tmp) . ','
-            .$size[0] . ','
-            .$size[1] . ','
-            ."'$extension',"
-            ."'$exif[ImageDescription]',"
-            ."'$exif[Make]',"
-            ."'$exif[Model]',"
-            ."'$exif[Artist]',"
-            ."'$exif[Copyright]',"
-            ."'$exif[ExposureTime]',"
-            ."'$exif[FNumber]',"
-            ."'$exif[ExposureProgram]',"
-            ."'$exif[ISOSpeedRatings]',"
-            ."'$exif[DateTimeOriginal]',"
-            ."'$exif[MeteringMode]',"
-            ."'$exif[Flash]',"
-            ."'$exif[FocalLength]')");
+        if (!in_array($detectedType, $allowedTypes))
+          continue;
 
-            $id = $mysqli->insert_id;
-            array_push($insertIds, $id);
+        $size = getimagesize($tmp);
+        $hash = md5_file($tmp);
+        $fileSize = filesize($tmp);
 
-            $subdirectory = sprintf("%02d",$id%100);         
-            if (!file_exists($photoroot . "/$subdirectory/"))
-              mkdir($photoroot . "/$subdirectory");
-            if (!file_exists($fileroot . "/photos/$subdirectory/"))
-              mkdir($fileroot . "/photos/$subdirectory");
+        $result = $mysqli->query("SELECT id FROM photos WHERE fileSize=$fileSize AND width=$size[0] AND height=$size[1] AND hash='$hash'");
 
-            $im=FALSE;
-            
-            switch($size["mime"]) {
-              case "image/jpeg":
-                $im = imagecreatefromjpeg($tmp); //jpeg file
-                break;
-              case "image/gif":
-                $im = imagecreatefromgif($tmp); //gif file
-                break;
-              case "image/png":
-                $im = imagecreatefrompng($tmp); //png file
-                break;
-              default: 
-                $im=false;
-                break;
-              }
-
-              $aspect = $size[1]/$size[0];  // height/width
-
-              $imlarger=FALSE;
-              $wlarger=0;
-              $hlarger=0;
- 
-              foreach ($fileSizes as $postfix => $h) {
-                //$w = ($aspect<1) ? $sz : $sz/$aspect;
-                //$h = ($aspect<1) ? $sz*$aspect : $sz;
-                $w = $h/$aspect;
-
-                if ($w<=$size[0] && $h<=$size[1]) { // only make the image if smaller than the original
-                  if ($imlarger===FALSE) {
-                    $imlarger = $im;
-                    $wlarger = $size[0];
-                    $hlarger = $size[1];
-                  }
-                  if ($postfix=='T') {   //Make a square thumbnail
-                    $srcx = ($hlarger > $wlarger) ? 0 : ($wlarger-$hlarger)/2;
-                    $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
-                    $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
-                    $im2 = imagecreatetruecolor($h, $h);
-                    imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $h, $h, $srcw, $srcw);
-                  }
-                  else {
-                    $im2 = imagecreatetruecolor($w, $h);
-                    imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
-                  }
-                  imagejpeg($im2, $photoroot . "/$subdirectory/" . $id . "_$postfix" . '.jpg');
-                  $imlarger=$im2;
-                  $wlarger = $w;
-                  $hlarger = $h;
-                }
-              }
-            move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $id . "_$name");
+        if ($result->fetch_row()) {
+          continue;
         }
+ 
+       $extension = pathinfo($name,PATHINFO_EXTENSION);
+ 
+        $mysqli->query("INSERT INTO photos 
+         (fileName, fileSize, width, height, hash, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
+          exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
+          ."'$name',"
+          .$fileSize . ','
+          .$size[0] . ','
+          .$size[1] . ','
+          ."'$hash',"
+          ."'$extension',"
+          ."'$exif[ImageDescription]',"
+          ."'$exif[Make]',"
+          ."'$exif[Model]',"
+          ."'$exif[Artist]',"
+          ."'$exif[Copyright]',"
+          ."'$exif[ExposureTime]',"
+          ."'$exif[FNumber]',"
+          ."'$exif[ExposureProgram]',"
+          ."'$exif[ISOSpeedRatings]',"
+          ."'$exif[DateTimeOriginal]',"
+          ."'$exif[MeteringMode]',"
+          ."'$exif[Flash]',"
+          ."'$exif[FocalLength]')");
+
+          $id = $mysqli->insert_id;
+          array_push($insertIds, $id);
+
+          $subdirectory = sprintf("%02d",$id%100);         
+          if (!file_exists($photoroot . "/$subdirectory/"))
+            mkdir($photoroot . "/$subdirectory");
+          if (!file_exists($fileroot . "/photos/$subdirectory/"))
+            mkdir($fileroot . "/photos/$subdirectory");
+
+          $im=FALSE;
+          
+          switch($size["mime"]) {
+            case "image/jpeg":
+              $im = imagecreatefromjpeg($tmp); //jpeg file
+              break;
+            case "image/gif":
+              $im = imagecreatefromgif($tmp); //gif file
+              break;
+            case "image/png":
+              $im = imagecreatefrompng($tmp); //png file
+              break;
+            default: 
+              $im=false;
+              break;
+            }
+
+            $aspect = $size[1]/$size[0];  // height/width
+
+            $imlarger=FALSE;
+            $wlarger=0;
+            $hlarger=0;
+
+            foreach ($fileSizes as $postfix => $h) {
+              //$w = ($aspect<1) ? $sz : $sz/$aspect;
+              //$h = ($aspect<1) ? $sz*$aspect : $sz;
+              $w = $h/$aspect;
+
+              if ($w<=$size[0] && $h<=$size[1]) { // only make the image if smaller than the original
+                if ($imlarger===FALSE) {
+                  $imlarger = $im;
+                  $wlarger = $size[0];
+                  $hlarger = $size[1];
+                }
+                if ($postfix=='T') {   //Make a square thumbnail
+                  $srcx = ($hlarger > $wlarger) ? 0 : ($wlarger-$hlarger)/2;
+                  $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
+                  $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
+                  $im2 = imagecreatetruecolor($h, $h);
+                  imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $h, $h, $srcw, $srcw);
+                }
+                else {
+                  $im2 = imagecreatetruecolor($w, $h);
+                  imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
+                }
+                imagejpeg($im2, $photoroot . "/$subdirectory/" . $id . "_$postfix" . '.jpg');
+                $imlarger=$im2;
+                $wlarger = $w;
+                $hlarger = $h;
+              }
+            }
+            move_uploaded_file( $tmp , $fileroot . "/photos/$subdirectory/" . $id . "_$name");
     }
   
-    $query = 'SELECT * FROM photos WHERE id IN (' . implode(',', $insertIds) . ')';
-
     $arr = array();
 
-    $result = $mysqli->query($query);
-
-    while ($row = $result->fetch_assoc())
-      array_push($arr,$row);
+    if (count($insertIds)>0) {
+      $query = 'SELECT * FROM photos WHERE id IN (' . implode(',', $insertIds) . ')';
+      $result = $mysqli->query($query);
+      while ($row = $result->fetch_assoc())
+        array_push($arr,$row);
+    }
 
     return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
     //return $response->withHeader('Content-type', 'application/json');

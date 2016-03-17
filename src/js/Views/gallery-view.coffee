@@ -2,19 +2,22 @@
 
 Backbone = require 'backbone'
 Dragula = require 'dragula'
+PhotoView = require './photo-view'
 templates = require './jst'
 Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
-PhotoView = require './photo-view'
 PhotoViewerModel= require './photoviewer'
 PhotoViewer = require './photoviewer-view'
+DropzoneView = require('./dropzone-view')
 
 module.exports = Backbone.View.extend
-	currentGallery: null	
+	currentGallery: null
+
 	photoViews: {}
 
 	events:
+		'submit #gv-editGallery form' : 'editGallery'
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .add-selected' : 'addSelected'	
@@ -25,10 +28,11 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
+		this.currentPhoto = null
 
 	openViewer: (e) ->
 		console.log this.currentGallery.photos
-		this.photoViewer.open this.currentGallery.photos.at(0), this.currentGallery.photos
+		this.photoViewer.open this.currentPhoto, this.currentGallery.photos
 
 	addSelected: ->
 		this.model.addSelectedPhotosToGallery this.model.get('selectedGallery')
@@ -36,6 +40,15 @@ module.exports = Backbone.View.extend
 
 	deleteGallery: ->
 		this.model.deleteGallery this.currentGallery
+
+	editGallery: (e) ->
+		e.preventDefault()
+		arr = $(e.target).serializeArray()
+		data = {}
+		for elem in arr
+			data[elem.name]=elem.value	
+		this.currentGallery.save data
+		this.$('#gv-editGallery .close-button').trigger('click')
 
 	changeGallery: ->
 		if  this.currentGallery
@@ -46,20 +59,25 @@ module.exports = Backbone.View.extend
 		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery
-			this.listenTo this.currentGallery, 'change', this.galleryChanged 
+			this.listenTo this.currentGallery, 'change:selected', this.galleryChanged 
 			#this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
+			this.listenTo this.currentGallery.photos, 'change', this.photosChanged
 			this.addAll()
 			this.masterAddAll()
 			this.galleryChanged()
 			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
 	galleryChanged: (e) ->
+		console.log "galleryChanged"
 		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
+
+	photosChanged: (photo) ->
+		this.currentPhoto = photo
 
 	removePhotos: (e) ->
 		this.model.get('selectedGallery').removeSelectedPhotos()
@@ -76,6 +94,8 @@ module.exports = Backbone.View.extend
 		this.$el.html this.template {name: 'Default'}
 		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer')}
 		this.photoViewer.render()
+		this.dropzoneView = new  DropzoneView {el: '#gv-uploadPhotos', model: this.model}
+		this.dropzoneView.render()
 
 		this.drag = Dragula [this.$('.photo-list')[0]],
 			direction: 'horizontal'

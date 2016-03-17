@@ -16,7 +16,6 @@ module.exports = Backbone.View.extend
 	listAnim: true
 
 	events:
-		'click .add-folder': 'addFolder'
 		'click .add-gallery': 'addGallery'
 		'click .folder > *:first-child' : 'folderClicked'
 		'click .gallery > *:first-child' : 'galleryClicked'
@@ -65,9 +64,6 @@ module.exports = Backbone.View.extend
 
 	photoRemoved: (p) ->
 		console.log "photo removed from gallery"
-
-	addFolder: ->
-		this.app.get('folders').add(new Folder({name: 'New Folder'}))
 
 	addGallery: ->
 		$active = this.$('.folder.mtree-active')

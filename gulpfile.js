@@ -82,9 +82,9 @@ gulp.task('jst', function() {
     .pipe(gulp.dest('require'));
 });
 
-// scripts
-gulp.task('scripts', ['clean:scripts', 'jst'],  function() {
 
+// backbone
+gulp.task('backbone', ['jst'],  function() {
   gulp.src('src/js/Models/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
@@ -96,7 +96,10 @@ gulp.task('scripts', ['clean:scripts', 'jst'],  function() {
   gulp.src('src/js/Views/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
- 
+});
+
+// scripts
+gulp.task('scripts', ['backbone'],  function() { 
   glob('./src/js/*.*', function(err, files) {
     if(err) done(err);
 

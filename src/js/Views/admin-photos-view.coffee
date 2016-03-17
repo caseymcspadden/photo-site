@@ -1,9 +1,9 @@
 #admin-photos-view manages all images in the database
 
 Backbone = require 'backbone'
+PhotoView = require './photo-view'
 templates = require './jst'
 Photos = require './photos'
-PhotoView = require './photo-view'
 
 module.exports = Backbone.View.extend
 	photoViews: {}

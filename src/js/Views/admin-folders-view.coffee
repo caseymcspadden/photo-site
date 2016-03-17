@@ -6,6 +6,8 @@ templates = require './jst'
 Folders = require './folders'
 Folder = require './folder'
 Gallery = require './gallery'
+FolderNodeView = require './folder-node-view'
+GalleryNodeView = require './gallery-node-view'
 Admin = require './admin'
 
 
@@ -17,16 +19,15 @@ module.exports = Backbone.View.extend
 	listAnim: true
 
 	events:
-		'click .add-folder': 'addFolder'
-		#'click .add-gallery': 'addGallery'
-		'click .folder-icon' : 'folderIconClicked'
-		'click .folder-name' : 'folderNameClicked'
-		'click .gallery-name' : 'galleryClicked'
 		'submit #afv-addFolder form' : 'addFolder'
+		'click .folder-icon' : 'folderIconClicked'
+		'click .folder-name' : 'selectFolder'
+		'click .gallery' : 'selectGallery'
+		#'submit #afv-addFolder form' : 'addFolder'
 		'click .delete-folder' : 'deleteFolder'
-		'mousedown' : 'mouseDown'
-		'mouseup' : 'mouseUp'
-		'mouseleave' : 'mouseUp'
+		'mousedown .mtree' : 'mouseDown'
+		'mouseup .mtree' : 'mouseUp'
+		'mouseleave .mtree' : 'mouseUp'
 		'mousemove a' : 'mouseMove'
 		'mouseover a' : 'mouseOver'
 		'mouseout a' : 'mouseOut'
@@ -34,16 +35,16 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['admin-folders-view']
-		this.folder_node_template = templates['folder-node-view']
-		this.gallery_node_template = templates['gallery-node-view']
 		this.dragElement = null
 		this.dragStarted = false
 		this.allowDrop = 0
 
 		this.$el.html(this.template());
 		this.$tree = this.$('.mtree');
-		#this.listenTo(this.model.folders, 'add', this.folderAdded)
-		#this.listenTo(this.model.folders, 'remove', this.folderRemoved)
+		this.listenTo this.model, 'change:selectedFolder', this.selectedFolderChanged
+		this.listenTo this.model, 'change:selectedGallery', this.selectedGalleryChanged
+		this.listenTo(this.model.folders, 'add', this.folderAdded)
+		this.listenTo(this.model.folders, 'remove', this.folderRemoved)
 		this.listenTo(this.model.folders, 'reset', this.resetFolders)
 		this.listenTo(this.model.galleries, 'add', this.galleryAdded)
 		this.listenTo(this.model.galleries, 'remove', this.galleryRemoved)
@@ -162,13 +163,12 @@ module.exports = Backbone.View.extend
 		galleries = this.model.galleries.toArray()
 		for gallery in galleries
 			this.galleryAdded gallery
-			#$li = this.$tree.find '#folder-' + gallery.get("idfolder")
-			#el = this.gallery_node_template {id: gallery.id, name: gallery.get('name')}
-			#$li.find('>ul').append el
 
 	addFolderToParent: (id, idParent) ->
 		f = this.model.folders.get id
-		el = this.folder_node_template {id: id, name: f.get('name')}
+
+		view = new FolderNodeView {model: f}
+		el = view.render().el
 
 		$li = this.$tree.find '#folder-'+idParent
 		if $li.length==0
@@ -177,10 +177,7 @@ module.exports = Backbone.View.extend
 			$li.find('>ul').append el
 
 	folderAdded: (f) ->
-		#this.listenTo(f.galleries, 'add', this.galleryAdded)
-		#this.listenTo(f.galleries, 'remove', this.galleryRemoved)
-		this.$tree.append('<li id="folder-' + f.id + '" class="folder mtree-node mtree-open"><a href="#">' + f.get('name') + '</a><ul id="container-' + f.id + '" class="mtree-level-1"></ul></li>')
-		this.dragula.containers.push this.$tree.find('#container-'+f.id)[0]
+		this.addFolderToParent f.id, 0
 
 	folderRemoved: (f) ->
 		console.log "Folder Removed"
@@ -188,8 +185,9 @@ module.exports = Backbone.View.extend
 
 	galleryAdded: (g) -> 
 		$li = this.$tree.find '#folder-' + g.get("idfolder")
-		el = this.gallery_node_template {id: g.id, name: g.get('name')}
-		$li.find('>ul').append el
+
+		view = new GalleryNodeView {model: g}
+		$li.find('>ul').append view.render().el
 
 	galleryRemoved: (g) ->
 		this.$tree.find('#gallery-' + g.id).remove()
@@ -203,6 +201,7 @@ module.exports = Backbone.View.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
+		console.log data
 		this.model.createFolder data
 		this.$('#afv-addFolder .close-button').trigger('click')
 
@@ -227,29 +226,33 @@ module.exports = Backbone.View.extend
 			$ul.slideToggle(this.duration)
 		e.preventDefault()
 
-	folderNameClicked: (e) ->
+	selectFolder: (e) ->
 		$li = $(e.target).parent().parent()
 		this.model.selectFolder $li.attr('id').replace(/^folder-/,'')
-		this.model.selectGallery null
-		this.$('.folder.mtree-active').not($li).removeClass('mtree-active')
-		this.$('.gallery.mtree-active').removeClass('mtree-active')
-		$li.addClass 'mtree-active'
 		e.preventDefault()
 
-	galleryClicked: (e) ->		
-		$li = $(e.target).parent().parent()
-		$folder = $li.parent().parent()
-
-		this.$('.folder.mtree-active').not($folder).removeClass('mtree-active')
-		$folder.addClass 'mtree-active'
-		this.model.selectFolder $folder.attr('id').replace(/^folder-/,'')
-
-		this.$('.gallery.mtree-active').not($li).removeClass('mtree-active')
-		$li.addClass('mtree-active')
+	selectGallery: (e) ->		
+		$li = this.getContainingElement e.target, 'li'
 		this.model.selectGallery $li.attr('id').replace(/^gallery-/,'')
-
+		$folder = $li.parent().parent()
 		e.preventDefault()
 
+	selectedFolderChanged: (m) ->
+		folder = m.get 'selectedFolder'
+		if folder != null
+			$li = this.$('#folder-' + folder.id)
+			this.$('.folder.mtree-active').not($li).removeClass('mtree-active')
+			this.$('.gallery.mtree-active').removeClass('mtree-active')
+			$li.addClass 'mtree-active'
+
+
+	selectedGalleryChanged: (m) ->
+		console.log "Selected Gallery Changed"
+		gallery = m.get 'selectedGallery'
+		if gallery != null
+			$li = this.$('#gallery-' + gallery.id)
+			this.$('.gallery.mtree-active').not($li).removeClass('mtree-active')
+			$li.addClass 'mtree-active'
 
 
 
