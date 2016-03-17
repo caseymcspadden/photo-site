@@ -15,3 +15,13 @@ module.exports = Backbone.Model.extend
 		
 	initialize: (options) ->
 		this.galleries = new FolderGalleries
+
+	removeGallery: (id) ->
+		this.galleries.remove id
+		position = 1
+		this.galleries.each (g)->
+			g.save {position: position++}
+
+	addGallery: (g) ->
+		this.galleries.add g
+		g.save {idFolder: this.id, position: this.galleries.length-1}

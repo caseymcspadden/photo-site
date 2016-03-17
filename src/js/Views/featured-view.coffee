@@ -16,15 +16,9 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['featured-view']
 		this.listenTo this.model, 'change', this.render
+		this.listenTo this.model, 'remove', this.remove
 
 	render: ->
 		json = this.model.toJSON()
 		json.imageSource = this.model.featuredPhotoSource()	
 		this.$el.html this.template(json)
-
-	removeView: ->
-		console.log "removing view"
-		this.$el.remove()
-
-	#galleryClicked: (e) ->
-	#	e.preventDefault()

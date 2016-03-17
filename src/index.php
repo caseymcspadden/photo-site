@@ -276,6 +276,120 @@ $app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $resp
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
+$app->get('/services/containers/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $arr = array();
+
+  $result = $mysqli->query("SELECT id, type, idparent, position, featuredPhoto, name, description FROM containers ORDER BY idparent, position");
+
+  while ($row = $result->fetch_assoc())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
+});
+
+$app->post('/services/containers/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $result = $mysqli->query("SELECT MAX(position) FROM containers WHERE idparent=$vals[idparent]");
+
+  $row = $result->fetch_row();
+
+  $position = 1 + $row[0];
+
+  $mysqli->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
+
+  $vals['id'] = $mysqli->insert_id;
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
+$app->put('/services/containers/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $vals = $request->getParsedBody();
+
+  $mysqli->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
+$app->delete('/services/containers/{id}', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+ 
+  $mysqli->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+$app->get('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+
+  $arr = array();
+
+  $result = $mysqli->query("SELECT idphoto, position FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+
+  while ($row = $result->fetch_row())
+    array_push($arr,$row[0]);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
+});
+
+$app->post('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+
+  $result = $mysqli->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
+
+  $row = $result->fetch_row();
+
+  $position = $row ? $row[0]+1 : 1;
+
+  foreach($ids as $id) {
+    $mysqli->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
+    $position++;
+  }
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+$app->put('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+
+  $position = 1;
+  foreach($ids as $id) {
+    $mysqli->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+    $position++;
+  }
+});
+
+$app->delete('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+  $mysqli = $this->options['mysqli'];
+  $parsedBody = $request->getParsedBody();
+  $ids = $parsedBody['ids'];
+  $mysqli->query("DELETE FROM containerphotos WHERE idcontainer=$args[id] AND idphoto IN (" . $ids . ')');
+
+  $ids = array();
+  $result = $mysqli->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+
+  while ($row = $result->fetch_row())
+    $ids[] = $row[0];
+
+  $position = 1;
+  foreach($ids as $id) {
+    $mysqli->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+    $position++;
+  }
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+
 $app->post('/services/upload', function($request, $response, $args) {
     $fileSizes = [
       //'X3'=>[1600,1200],
