@@ -20,7 +20,7 @@ module.exports = Backbone.View.extend
 		'submit #afv-addFolder form' : 'addFolder'
 		'click .folder-icon' : 'folderIconClicked'
 		'click .node-name' : 'selectContainer'
-		#'submit #afv-addFolder form' : 'addFolder'
+		'submit #afv-addFolder form' : 'addFolder'
 		'click .delete-folder' : 'deleteFolder'
 		'mousedown .mtree' : 'mouseDown'
 		'mouseup .mtree' : 'mouseUp'
@@ -144,15 +144,16 @@ module.exports = Backbone.View.extend
 	addChildContainers: (idParent) ->
 		children = this.model.containers.where {idparent: idParent}
 		for child in children
-			this.addChildToParent child.id, idParent
+			this.addChildToParent child.id
 			this.addChildContainers child.id
 
 	resetContainers: ->
 		console.log "Reset containers"
-		this.addChildContainers '0'
+		this.addChildContainers 0
 
-	addChildToParent: (id, idParent) ->
+	addChildToParent: (id) ->
 		container = this.model.containers.get id
+		idParent = container.get('idparent')
 
 		view = new NodeView {model: container}
 		el = view.render().el
@@ -164,7 +165,7 @@ module.exports = Backbone.View.extend
 			$li.find('>ul').append el
 
 	containerAdded: (c) ->
-		this.addChildToParent f.id, 0
+		this.addChildToParent c.id
 
 	containerRemoved: (c) ->
 		console.log "Container Removed"

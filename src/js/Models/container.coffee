@@ -8,17 +8,18 @@ module.exports = Backbone.Model.extend
 
 	defaults :
 		type: 'folder'	
-		idparent: '0'
-		position: '0'
+		idparent: 0
+		position: 0
 		name: ""
 		description: ""
 		populated: false
-		featuredPhoto: '0'
+		featuredPhoto: 0
 	
 	initialize: (attributes, options) ->
-		this.containers = new Backbone.Collection
+		#this.containers = new Backbone.Collection
 		this.photos = new ContainerPhotos
 
+	###
 	removeContainer: (id) ->
 		this.containers.remove id
 		position = 1
@@ -28,7 +29,8 @@ module.exports = Backbone.Model.extend
 	addContainer: (c) ->
 		this.containers.add c
 		c.save {idParent: this.id, position: this.containers.length-1}
-
+	###
+	
 	populate: ->
 		self = this
 		console.log 'populate'
@@ -39,7 +41,7 @@ module.exports = Backbone.Model.extend
 		this.set {populated: true}
 
 	featuredPhotoSource: ->
-		if this.get('featuredPhoto') != '0' then 'photos/T/' + this.get('featuredPhoto') + '.jpg' else 'images/0_T.jpg'
+		if this.get('featuredPhoto') != 0 then 'photos/T/' + this.get('featuredPhoto') + '.jpg' else 'images/0_T.jpg'
 
 	addPhoto: (id) ->
 		p = this.master.get(id)

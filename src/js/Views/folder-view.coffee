@@ -19,8 +19,8 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['folder-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
-		this.listenTo this.model.galleries, 'remove', this.addAll
-		this.listenTo this.model.galleries, 'add', this.addAll
+		this.listenTo this.model.containers, 'remove', this.addAll
+		this.listenTo this.model.containers, 'add', this.addAll
 
 	editFolder: (e) ->
 		e.preventDefault()
@@ -42,22 +42,22 @@ module.exports = Backbone.View.extend
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
 	changeContainer: ->
-		if (this.currentContainer)
-			this.stopListening this.currentContainer.containers
+		#if (this.currentContainer)
+		#	this.stopListening this.currentContainer.containers
 
 		this.currentContainer = this.model.get 'selectedContainer'
 		this.$('.title').html(if this.currentContainer then this.currentContainer.get('name') else 'Default')
 		if (this.currentContainer)
 			this.$("#fv-editFolder input[name='name']").val this.currentContainer.get('name')
 			this.$("#fv-editFolder input[name='description']").val this.currentContainer.get('description')
-			this.listenTo this.currentContainer.containers ,'sort' , this.addAll
+			#this.listenTo this.currentContainer.containers ,'sort' , this.addAll
 			this.addAll()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
   		
 	addOne: (container) ->
-		return if container.get('type')=='folder'
+		return if this.currentContainer==null or container.get('type')=='folder' or container.get('idparent') != this.currentContainer.id
 		if !(this.featuredViews.hasOwnProperty container.id)
 			view = this.featuredViews[container.id] = new FeaturedView {model:container, className: 'featured-thumbnail'}
 			view.render()
@@ -68,8 +68,7 @@ module.exports = Backbone.View.extend
 	addAll: ->
 		console.log "Add all"
 		this.$('.gallery-list').html ''
-		if this.currentContainer
-			this.currentContainer.containers.each this.addOne, this
+		this.model.containers.each this.addOne, this
 
 	selectGallery: (e) ->
 		this.model.selectContainer $(e.currentTarget).attr('id').replace('featured-','')

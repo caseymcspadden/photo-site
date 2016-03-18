@@ -286,7 +286,7 @@ $app->get('/services/containers/', function($request, $response, $args) {
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));    
 });
 
 $app->post('/services/containers/', function($request, $response, $args) {

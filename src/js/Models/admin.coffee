@@ -43,6 +43,25 @@ module.exports = Backbone.Model.extend
 			return 2 if position <= 1
 		0
 
+	
+	moveContainerTo: (container, toId, beforeId)->
+		fromParentId = container.get('idparent')
+		toContainer = this.containers.get toId
+
+	adjustPositions: ->
+		children = this.containers.where { idparent: 0}
+		position = 1
+		for child in children 
+			child.save {position: position++}
+
+		self = this
+		this.containers.each (container) ->
+			position = 1
+			children = this.containers.where { idparent: container.id }
+			for child in children 
+				child.save {position: position++}
+		, this
+	
 	fetchAll: ->					
 		self = this
 		this.containers.fetch(
@@ -50,10 +69,11 @@ module.exports = Backbone.Model.extend
 			success: (containercollection) ->
 				containercollection.each (c) ->
 					c.master = self.photos
-					idParent = c.get('idparent')
-					if parseInt(idParent) != 0
-						container = self.containers.get idParent
-						container.containers.add c
+					#idParent = c.get('idparent')
+					#console.log idParent
+					#if idParent != 0
+					#	container = self.containers.get idParent
+					#	container.containers.add c
 				self.photos.fetch()
 		)
 
@@ -62,21 +82,12 @@ module.exports = Backbone.Model.extend
 		data.idparent = if (selectedContainer and selectedContainer.get('type')=='folder') then selectedContainer.id else 0
 		c = this.containers.create data, {wait: true}
 		c.master = this.photos
-		if (data.idparent)
-			selectedContainer.containers.add c
 
 	deleteContainer: (container) ->
-		return if !container
-		toDelete = []
-		container.containers.each (c) ->
-			toDelete.push c
-
-		for c in toDelete
-			this.deleteContainer c
-
 		this.containers.remove container
 		this.set {selectedContainer: null}
 		container.destroy()
+		this.adjustPositions()
 
 	#deleteGallery: (gallery) ->
 	#	return if !gallery
