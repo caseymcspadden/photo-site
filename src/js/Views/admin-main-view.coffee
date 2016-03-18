@@ -2,9 +2,8 @@
 
 Backbone = require 'backbone'
 templates = require './jst'
-Folders = require './folders'
-Folder = require './folder'
-Gallery = require './gallery'
+Containers = require './containers'
+Container = require './container'
 Admin = require './admin'
 FolderView = require './folder-view'
 GalleryView = require './gallery-view'
@@ -14,8 +13,7 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['admin-main-view']
 
-		this.listenTo this.model, 'change:selectedFolder', this.setVisibility
-		this.listenTo this.model, 'change:selectedGallery', this.setVisibility
+		this.listenTo this.model, 'change:selectedContainer', this.setVisibility
 
 		this.folderView = new FolderView {model: this.model}
 		this.galleryView = new GalleryView {model: this.model}
@@ -31,16 +29,15 @@ module.exports = Backbone.View.extend
 		this.setVisibility()
 
 	setVisibility: ->
-		if this.model.get('selectedGallery')
+		if !this.model.get('selectedContainer')
+			this.$('#admin-gallery').hide()
+			this.$('#admin-folder').hide()
+		else if this.model.get('selectedContainer').get('type')=='gallery'
 			this.$('#admin-folder').hide()
 			this.$('#admin-gallery').show()
-		else if this.model.get('selectedFolder')
+		else if this.model.get('selectedContainer').get('type')=='folder'
 			this.$('#admin-gallery').hide()
 			this.$('#admin-folder').show()
-		else
-			this.$('#admin-gallery').hide()
-			this.$('#admin-folder').hide()
-
 
 
 

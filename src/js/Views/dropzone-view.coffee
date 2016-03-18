@@ -1,5 +1,5 @@
-dropzone = require 'dropzone'
 Backbone = require 'backbone'
+dropzone = require 'dropzone'
 templates = require './jst'
 
 module.exports = Backbone.View.extend

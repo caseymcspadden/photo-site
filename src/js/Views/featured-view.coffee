@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend
 	#className: 'featured-thumbnail'
 
 	id: ->
-		'gallery-' + this.model.id
+		'featured-' + this.model.id
 
 	#events:
 	#	'click img' : 'galleryClicked'

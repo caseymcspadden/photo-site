@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend
 		this.model.get('type') + ' mtree-node'
 
 	id: ->
-		'container-' + this.model.id
+		'node-' + this.model.id
 
 	initialize: (options) ->
 		this.folderTemplate = templates['folder-node-view']

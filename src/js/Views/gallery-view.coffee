@@ -27,7 +27,7 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
-		this.listenTo this.model, 'change:selectedGallery', this.changeGallery
+		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
 		this.currentPhoto = null
 
 	openViewer: (e) ->
@@ -35,11 +35,11 @@ module.exports = Backbone.View.extend
 		this.photoViewer.open this.currentPhoto, this.currentGallery.photos
 
 	addSelected: ->
-		this.model.addSelectedPhotosToGallery this.model.get('selectedGallery')
+		this.model.addSelectedPhotosToContainer this.currentGallery
 		this.$('#gv-addPhotos .close-button').trigger('click')
 
 	deleteGallery: ->
-		this.model.deleteGallery this.currentGallery
+		this.model.deleteContainer this.currentGallery
 
 	editGallery: (e) ->
 		e.preventDefault()
@@ -55,13 +55,13 @@ module.exports = Backbone.View.extend
 			this.stopListening this.currentGallery
 			this.stopListening this.currentGallery.photos
 	
-		this.currentGallery = this.model.get('selectedGallery')
+		this.currentGallery = this.model.get('selectedContainer')
 		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
-		if this.currentGallery
+		if this.currentGallery and this.currentGallery.get('type')=='gallery'
 			this.listenTo this.currentGallery, 'change:selected', this.galleryChanged 
-			#this.listenTo this.currentGallery.photos, 'reset', this.addAll 
-			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
+			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
+			this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.listenTo this.currentGallery.photos, 'change', this.photosChanged
@@ -71,7 +71,6 @@ module.exports = Backbone.View.extend
 			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
 	galleryChanged: (e) ->
-		console.log "galleryChanged"
 		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
@@ -80,7 +79,7 @@ module.exports = Backbone.View.extend
 		this.currentPhoto = photo
 
 	removePhotos: (e) ->
-		this.model.get('selectedGallery').removeSelectedPhotos()
+		this.currentGallery.removeSelectedPhotos()
 		e.preventDefault()
 
 	addPhotos: (e) ->
@@ -88,7 +87,7 @@ module.exports = Backbone.View.extend
 		e.preventDefault()
 
 	setFeaturedPhoto: (e) ->
-		this.model.get('selectedGallery').setFeaturedPhoto()
+		this.currentGallery.setFeaturedPhoto()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
@@ -107,8 +106,7 @@ module.exports = Backbone.View.extend
 			for e in elements
 				ids.push $(e).attr('id').replace('gallery-photo-','')
 
-			selectedGallery = self.model.get('selectedGallery')
-			selectedGallery.rearrangePhotos ids
+			self.currentGallery.rearrangePhotos ids
 		)
   		
 	removeOne: (photo) ->

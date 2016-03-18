@@ -1,14 +1,14 @@
 Backbone = require 'backbone'
 Photo = require './photo'
-Containeres = require '/containers'
+#Containers = require './containers'
 ContainerPhotos = require './containerphotos'
 
 module.exports = Backbone.Model.extend
-	urlRoot: 'services/containters/'
+	urlRoot: 'services/containers/'
 
 	defaults :
 		type: 'folder'	
-		idcontainer: '0'
+		idparent: '0'
 		position: '0'
 		name: ""
 		description: ""
@@ -16,7 +16,7 @@ module.exports = Backbone.Model.extend
 		featuredPhoto: '0'
 	
 	initialize: (attributes, options) ->
-		this.containers = new Containers
+		this.containers = new Backbone.Collection
 		this.photos = new ContainerPhotos
 
 	removeContainer: (id) ->

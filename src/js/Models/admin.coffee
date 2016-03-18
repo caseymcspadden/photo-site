@@ -1,7 +1,7 @@
 Backbone = require 'backbone'
-Containres = require './containers'
 PhotoCollection = require './photos'
-Container = require('./container')
+Container = require './container'
+Containers = require './containers'
 
 module.exports = Backbone.Model.extend
 	defaults:
@@ -50,10 +50,11 @@ module.exports = Backbone.Model.extend
 			success: (containercollection) ->
 				containercollection.each (c) ->
 					c.master = self.photos
-					container = self.containers.get(c.get('idparent'))
-					container.containers.add c
+					idParent = c.get('idparent')
+					if parseInt(idParent) != 0
+						container = self.containers.get idParent
+						container.containers.add c
 				self.photos.fetch()
-			)
 		)
 
 	createContainer: (data) ->
@@ -91,6 +92,7 @@ module.exports = Backbone.Model.extend
 
 	selectContainer: (id) ->
 		container = this.containers.get id
+		console.log container
 		this.set {selectedContainer: container}
 		this.set {addingPhotos: false}
 		if container.get('type') == 'gallery'

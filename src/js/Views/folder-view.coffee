@@ -2,14 +2,13 @@
 
 Backbone = require 'backbone'
 templates = require './jst'
-Folders = require './folders'
-Folder = require './folder'
-Gallery = require './gallery'
+Containers = require './containers'
+Container = require './container'
 Admin = require './admin'
 FeaturedView = require './featured-view'
 
 module.exports = Backbone.View.extend
-	currentFolder: null
+	currentContainer: null
 	featuredViews: {}
 
 	events:
@@ -19,7 +18,7 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['folder-view']
-		this.listenTo this.model, 'change:selectedFolder', this.changeFolder
+		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
 		this.listenTo this.model.galleries, 'remove', this.addAll
 		this.listenTo this.model.galleries, 'add', this.addAll
 
@@ -29,7 +28,7 @@ module.exports = Backbone.View.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value	
-		this.currentFolder.save data
+		this.currentContainer.save data
 		this.$('#fv-editFolder .close-button').trigger('click')
 
 	addGallery: (e) ->
@@ -38,39 +37,41 @@ module.exports = Backbone.View.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		this.model.createGallery data
+		data.type = 'gallery'
+		this.model.createContainer data
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
-	changeFolder: ->
-		if (this.currentFolder)
-			this.stopListening this.currentFolder.galleries
+	changeContainer: ->
+		if (this.currentContainer)
+			this.stopListening this.currentContainer.containers
 
-		this.currentFolder = this.model.get 'selectedFolder'
-		this.$('.title').html(if this.currentFolder then this.currentFolder.get('name') else 'Default')
-		if (this.currentFolder)
-			this.$("#fv-editFolder input[name='name']").val this.currentFolder.get('name')
-			this.$("#fv-editFolder input[name='description']").val this.currentFolder.get('description')
-			this.listenTo this.currentFolder.galleries ,'sort' , this.addAll
+		this.currentContainer = this.model.get 'selectedContainer'
+		this.$('.title').html(if this.currentContainer then this.currentContainer.get('name') else 'Default')
+		if (this.currentContainer)
+			this.$("#fv-editFolder input[name='name']").val this.currentContainer.get('name')
+			this.$("#fv-editFolder input[name='description']").val this.currentContainer.get('description')
+			this.listenTo this.currentContainer.containers ,'sort' , this.addAll
 			this.addAll()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
   		
-	addOne: (gallery) ->
-		if !(this.featuredViews.hasOwnProperty gallery.id)
-			view = this.featuredViews[gallery.id] = new FeaturedView {model:gallery, className: 'featured-thumbnail'}
+	addOne: (container) ->
+		return if container.get('type')=='folder'
+		if !(this.featuredViews.hasOwnProperty container.id)
+			view = this.featuredViews[container.id] = new FeaturedView {model:container, className: 'featured-thumbnail'}
 			view.render()
-		view = this.featuredViews[gallery.id]
+		view = this.featuredViews[container.id]
 		view.delegateEvents()
 		this.$('.gallery-list').append view.el
 
 	addAll: ->
 		console.log "Add all"
 		this.$('.gallery-list').html ''
-		if this.currentFolder
-			this.currentFolder.galleries.each this.addOne, this
+		if this.currentContainer
+			this.currentContainer.containers.each this.addOne, this
 
 	selectGallery: (e) ->
-		this.model.selectGallery $(e.currentTarget).attr('id').replace(/^gallery-/,'')
+		this.model.selectContainer $(e.currentTarget).attr('id').replace('featured-','')
 
 

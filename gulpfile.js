@@ -84,22 +84,26 @@ gulp.task('jst', function() {
 
 
 // backbone
-gulp.task('backbone', ['jst'],  function() {
-  gulp.src('src/js/Models/*.coffee')
+gulp.task('backbone:models', ['jst'],  function() {
+  return gulp.src('src/js/Models/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
+});
 
-  gulp.src('src/js/Collections/*.coffee')
+gulp.task('backbone:collections', ['jst'],  function() {
+  return gulp.src('src/js/Collections/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
+});
 
-  gulp.src('src/js/Views/*.coffee')
+gulp.task('backbone:views', ['jst'],  function() {
+  return gulp.src('src/js/Views/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
 });
 
 // scripts
-gulp.task('scripts', ['backbone'],  function() { 
+gulp.task('scripts', ['backbone:models', 'backbone:collections', 'backbone:views'],  function() { 
   glob('./src/js/*.*', function(err, files) {
     if(err) done(err);
 

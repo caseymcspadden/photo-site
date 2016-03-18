@@ -3,8 +3,8 @@
 #Dragula = require 'dragula'
 Backbone = require 'backbone'
 templates = require './jst'
-Containers = require './containers'
 Container = require './container'
+Containers = require './containers'
 NodeView = require './node-view'
 Admin = require './admin'
 
@@ -19,7 +19,7 @@ module.exports = Backbone.View.extend
 	events:
 		'submit #afv-addFolder form' : 'addFolder'
 		'click .folder-icon' : 'folderIconClicked'
-		'click .container' : 'selectContainer'
+		'click .node-name' : 'selectContainer'
 		#'submit #afv-addFolder form' : 'addFolder'
 		'click .delete-folder' : 'deleteFolder'
 		'mousedown .mtree' : 'mouseDown'
@@ -49,6 +49,7 @@ module.exports = Backbone.View.extend
 			return $e if $e.is elementType
 			$e = $e.parent()
 
+	###
 	updateModelsFromTree: ($ul, idContainer) ->
 		console.log $ul
 
@@ -73,13 +74,14 @@ module.exports = Backbone.View.extend
 			model.save {idfolder: idFolder, position: if isFolder then folderPosition else galleryPosition}
 			if isFolder
 				this.updateModelsFromTree $li.find('>ul') , id
+	###
 
 	mouseDown: (e) ->
 		$li = this.getContainingElement e.target, 'li'
 		this.dragStarted = false
 		if $li
 			this.dragElement = $li
-			this.model.setDragModel $li.attr('id').replace('container-','')
+			this.model.setDragModel $li.attr('id').replace('node-','')
 		e.preventDefault()
 
 	mouseUp: (e) ->
@@ -109,7 +111,7 @@ module.exports = Backbone.View.extend
 	mouseOver: (e) ->
 		if this.model.get('dragModel') != null
 			$li = this.getContainingElement e.target, 'li'
-			this.allowDrop = this.model.allowDrop $li.attr('id').replace('container-','')
+			this.allowDrop = this.model.allowDrop $li.attr('id').replace('node-','')
 		e.preventDefault()
 
 	mouseOut: (e) ->
@@ -155,7 +157,7 @@ module.exports = Backbone.View.extend
 		view = new NodeView {model: container}
 		el = view.render().el
 
-		$li = this.$tree.find '#container-'+idParent
+		$li = this.$tree.find '#node-'+idParent
 		if $li.length==0
 			this.$tree.append el
 		else
@@ -166,7 +168,7 @@ module.exports = Backbone.View.extend
 
 	containerRemoved: (c) ->
 		console.log "Container Removed"
-		this.$tree.find('#container-' + c.id).remove()
+		this.$tree.find('#node-' + c.id).remove()
 
 	addFolder: (e) ->
 		e.preventDefault()
@@ -193,7 +195,8 @@ module.exports = Backbone.View.extend
 			$(elem.find('.folder-icon')[0]).html '<i class="fa fa-folder-open"></i>'
 
 	folderIconClicked: (e) ->
-		$li = $(e.target).parent().parent().parent()
+		console.log "folder icon clicked"
+		$li = this.getContainingElement e.target, 'li'
 		$ul = $li.children('ul').first()
 		if $ul.children().length > 0
 			isOpen = $li.hasClass('mtree-open')
@@ -203,14 +206,14 @@ module.exports = Backbone.View.extend
 
 	selectContainer: (e) ->
 		$li = this.getContainingElement e.target, 'li'
-		this.model.selectContainer $li.attr('id').replace('container-','')
+		this.model.selectContainer $li.attr('id').replace('node-','')
 		e.preventDefault()
 
 	selectedContainerChanged: (m) ->
 		container = m.get 'selectedContainer'
 		if container != null
-			$li = this.$('#container-' + container.id)
-			this.$('.container.mtree-active').not($li).removeClass('mtree-active')
+			$li = this.$('#node-' + container.id)
+			this.$('.mtree-node.mtree-active').not($li).removeClass('mtree-active')
 			$li.addClass 'mtree-active'
 
 
