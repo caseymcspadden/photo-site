@@ -24,11 +24,38 @@ module.exports = Backbone.View.extend
 		'click .set-featured' : 'setFeaturedPhoto'
 		'click .delete-gallery' : 'deleteGallery'
 		'dblclick' : 'openViewer'
+		'keydown' : 'keyDown'
+		'keyup' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
 		this.currentPhoto = null
+		this.selectMode = 0
+
+	keyDown: (e) ->
+		if e.keyCode == 91
+			this.selectMode=2
+		else if e.keyCode == 16
+			this.selectMode=3
+
+	keyUp: (e) ->
+		this.selectMode = 0
+
+	selectedPhotoChanged: (photo) ->
+		return if photo.get('selected') == false 
+
+		if this.selectMode==0
+			this.currentGallery.photos.each (p) ->
+				p.set('selected', false) if p.id != photo.id
+		
+		if this.selectMode==3
+			this.selectMode=2
+			index1 = this.currentGallery.photos.indexOf this.currentPhoto
+			index2 = this.currentGallery.photos.indexOf photo
+			this.currentGallery.photos.at(i).set('selected',true) for i in [index1 .. index2]
+	
+		this.currentPhoto = photo		
 
 	openViewer: (e) ->
 		console.log this.currentGallery.photos
@@ -61,12 +88,12 @@ module.exports = Backbone.View.extend
 		if this.currentGallery and this.currentGallery.get('type')=='gallery'
 			this.listenTo this.currentGallery, 'change:selected', this.galleryChanged 
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
-			this.listenTo this.currentGallery.photos, 'sort', this.addAll 
+			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
 			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
-			this.listenTo this.currentGallery.photos, 'change', this.photosChanged
-			this.addAll()
+			this.listenTo this.currentGallery.photos, 'change:selected', this.selectedPhotoChanged
 			this.masterAddAll()
+			this.addAll()
 			this.galleryChanged()
 			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
@@ -74,9 +101,6 @@ module.exports = Backbone.View.extend
 		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
-
-	photosChanged: (photo) ->
-		this.currentPhoto = photo
 
 	removePhotos: (e) ->
 		this.currentGallery.removeSelectedPhotos()
@@ -132,10 +156,9 @@ module.exports = Backbone.View.extend
 			view.render()
 
 		view = this.photoViews[photo.id]
-		view.delegateEvents()
 		this.$('.master-photo-list').append view.el
+		view.delegateEvents()
 
 	masterAddAll: ->
 		this.$('.master-photo-list').html ''
 		this.model.photos.each this.masterAddOne, this
-

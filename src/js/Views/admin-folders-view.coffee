@@ -139,7 +139,6 @@ module.exports = Backbone.View.extend
 		this.addChildToParent c.id
 
 	containerRemoved: (c) ->
-		console.log "Container Removed"
 		this.$tree.find('#node-' + c.id).remove()
 
 	addFolder: (e) ->
@@ -167,7 +166,6 @@ module.exports = Backbone.View.extend
 			$(elem.find('.folder-icon')[0]).html '<i class="fa fa-folder-open"></i>'
 
 	folderIconClicked: (e) ->
-		console.log "folder icon clicked"
 		$li = this.getContainingElement e.target, 'li'
 		$ul = $li.children('ul').first()
 		if $ul.children().length > 0

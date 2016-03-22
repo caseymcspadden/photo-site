@@ -122,7 +122,6 @@ module.exports = Backbone.Model.extend
 
 	selectContainer: (id) ->
 		container = this.containers.get id
-		console.log container
 		this.set {selectedContainer: container}
 		this.set {addingPhotos: false}
 		if container.get('type') == 'gallery'

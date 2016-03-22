@@ -36,11 +36,8 @@ module.exports = Backbone.View.extend
 					#console.log file
 				)
 		)
-		console.log this.dropzone
 
 	selectedContainerChanged: (m) ->
-		console.log "Selected Container Changed"
-		console.log m
 		container = this.model.get('selectedContainer')
 		this.dropzone.options.headers.Watermark = '0'
 		this.dropzone.options.headers.Watermark = '1' if container.get('watermark')==1
