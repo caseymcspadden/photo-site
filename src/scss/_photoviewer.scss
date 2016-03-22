@@ -1,0 +1,21 @@
+#gv-photoViewer {
+  @extend .reveal-dark;
+  .photo-viewer {
+    a {
+      color: $white;
+    }
+    .image-view {
+      float: left;
+      width: 50%;
+      text-align: center;
+    }
+    .text-view {
+      float: left;
+      margin-left: 1rem;
+    }
+    &.full-screen {
+      .image-view {width: 100%;}
+      .text-view {display: none;}
+    }
+  }  
+}

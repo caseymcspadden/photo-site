@@ -100,188 +100,12 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
-
-$app->get('/services/folders/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-
-  $arr = array();
-
-  $result = $mysqli->query("SELECT id, idfolder, position, name, description FROM folders ORDER BY idfolder, position");
-
-  while ($row = $result->fetch_assoc())
-    array_push($arr,$row);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
-});
-
-$app->post('/services/folders/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $vals = $request->getParsedBody();
-
-  $result = $mysqli->query("SELECT MAX(position) FROM folders WHERE idfolder=0");
-
-  $row = $result->fetch_row();
-
-  $position = 1 + $row[0];
-
-  $mysqli->query("INSERT INTO folders (idfolder, position, name, description) VALUES (0, $position, '$vals[name]','$vals[description]')");
-
-  $vals['id'] = $mysqli->insert_id;
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
-});
-
-$app->put('/services/folders/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $vals = $request->getParsedBody();
-
-  $mysqli->query("UPDATE folders SET idfolder=$vals[idfolder], position=$vals[position], name='$vals[name]', description='$vals[description]' WHERE id=$args[id]");
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
-});
-
-$app->delete('/services/folders/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $parsedBody = $request->getParsedBody();
- 
-  $mysqli->query("DELETE F.*, G.*, GP.* FROM FOLDERS F LEFT JOIN galleries G ON G.idfolder=F.id LEFT JOIN galleryphotos GP ON GP.idgallery= G.id WHERE F.id=$args[id]");
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
-});
-
-
-$app->get('/services/folders/{id:[0-9]+}/galleries/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-
-  $arr = array();
-
-  $result = $mysqli->query("SELECT id, idfolder, position, name, description, featuredPhoto FROM galleries WHERE idfolder=$args[id] ORDER BY position");
-
-  while ($row = $result->fetch_assoc())
-    array_push($arr,$row);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
-});
-
-$app->get('/services/galleries/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-
-  $arr = array();
-
-  $result = $mysqli->query("SELECT id, idfolder, position, featuredPhoto, name, description FROM galleries ORDER BY idfolder, position");
-
-  while ($row = $result->fetch_assoc())
-    array_push($arr,$row);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));    
-});
-
-$app->post('/services/galleries/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $vals = $request->getParsedBody();
-
-  $result = $mysqli->query("SELECT MAX(position) FROM galleries WHERE idfolder=$vals[idfolder]");
-
-  $row = $result->fetch_row();
-
-  $position = 1 + $row[0];
-
-  $mysqli->query("INSERT INTO galleries (idfolder, position, name, description) VALUES ($vals[idfolder], $position, '$vals[name]','$vals[description]')");
-
-  $vals['id'] = $mysqli->insert_id;
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
-});
-
-$app->put('/services/galleries/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $vals = $request->getParsedBody();
-
-  $mysqli->query("UPDATE galleries SET idfolder=$vals[idfolder], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
-});
-
-$app->delete('/services/galleries/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $parsedBody = $request->getParsedBody();
- 
-  $mysqli->query("DELETE G.*, GP.* FROM galleries G LEFT JOIN galleryphotos GP ON GP.idgallery=G.id WHERE G.id=$args[id]");
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
-});
-
-$app->get('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-
-  $arr = array();
-
-  $result = $mysqli->query("SELECT idphoto, position FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
-
-  while ($row = $result->fetch_row())
-    array_push($arr,$row[0]);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
-});
-
-$app->post('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $parsedBody = $request->getParsedBody();
-  $ids = explode(',', $parsedBody['ids']);
-
-  $result = $mysqli->query("SELECT MAX(position) FROM galleryphotos WHERE idgallery=$args[id]");
-
-  $row = $result->fetch_row();
-
-  $position = $row ? $row[0]+1 : 1;
-
-  foreach($ids as $id) {
-    $mysqli->query("INSERT INTO galleryphotos (idgallery,idphoto,position) VALUES ($args[id],$id,$position)");
-    $position++;
-  }
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
-});
-
-$app->put('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $parsedBody = $request->getParsedBody();
-  $ids = explode(',', $parsedBody['ids']);
-
-  $position = 1;
-  foreach($ids as $id) {
-    $mysqli->query("UPDATE galleryphotos SET position=$position WHERE idgallery=$args[id] AND idphoto=$id");
-    $position++;
-  }
-});
-
-$app->delete('/services/galleries/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
-  $parsedBody = $request->getParsedBody();
-  $ids = $parsedBody['ids'];
-  $mysqli->query("DELETE FROM galleryphotos WHERE idgallery=$args[id] AND idphoto IN (" . $ids . ')');
-
-  $ids = array();
-  $result = $mysqli->query ("SELECT idphoto FROM galleryphotos WHERE idgallery=$args[id] ORDER BY position");
-
-  while ($row = $result->fetch_row())
-    $ids[] = $row[0];
-
-  $position = 1;
-  foreach($ids as $id) {
-    $mysqli->query("UPDATE galleryphotos SET position=$position WHERE idgallery=$args[id] AND idphoto=$id");
-    $position++;
-  }
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
-});
-
 $app->get('/services/containers/', function($request, $response, $args) {
   $mysqli = $this->options['mysqli'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, type, idparent, position, featuredPhoto, name, description FROM containers ORDER BY idparent, position");
+  $result = $mysqli->query("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers ORDER BY idparent, position");
 
   while ($row = $result->fetch_assoc())
     array_push($arr,$row);
@@ -297,7 +121,7 @@ $app->post('/services/containers/', function($request, $response, $args) {
 
   $row = $result->fetch_row();
 
-  $position = 1 + $row[0];
+  $position = $row ? 1 + $row[0] : 1;
 
   $mysqli->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
 
@@ -391,6 +215,10 @@ $app->delete('/services/containers/{id:[0-9]+}/photos/', function($request, $res
 
 
 $app->post('/services/upload', function($request, $response, $args) {
+    $mysqli = $this->options['mysqli'];
+    $fileroot = $this->options['fileroot'];
+    $photoroot = $this->options['photoroot'];
+
     $fileSizes = [
       //'X3'=>[1600,1200],
       'X'=>960,
@@ -402,6 +230,15 @@ $app->post('/services/upload', function($request, $response, $args) {
       //'TS'=>[100,100],
     ];
 
+    $watermark = NULL;
+    $wmsize = NULL;
+
+    $arr = $request->getHeader('Watermark');
+
+    if (count($arr)>0 && $arr[0]=='1') {
+      $watermark = imagecreatefrompng($fileroot . '/watermark.png');
+      $wmsize = getimagesize($fileroot . '/watermark.png');
+    }
 
     $exifDefaults = [
         'ImageDescription' => '',
@@ -418,10 +255,6 @@ $app->post('/services/upload', function($request, $response, $args) {
         'Flash' => '0',
         'FocalLength' => '' 
     ];
-    $mysqli = $this->options['mysqli'];
-
-    $fileroot = $this->options['fileroot'];
-    $photoroot = $this->options['photoroot'];
 
     //$watermark = imagecreatefrompng($fileroot . '/watermark.png');
     //$wmsize = getimagesize($fileroot . '/watermark.png');
@@ -522,13 +355,21 @@ $app->post('/services/upload', function($request, $response, $args) {
                   $srcy = ($hlarger > $wlarger) ? ($hlarger-$wlarger)/2 : 0;
                   $srcw = ($hlarger > $wlarger) ? $wlarger : $hlarger;
                   $im2 = imagecreatetruecolor($h, $h);
+                  $imsave = $im2;
                   imagecopyresampled ($im2, $imlarger, 0, 0, $srcx, $srcy, $h, $h, $srcw, $srcw);
                 }
                 else {
                   $im2 = imagecreatetruecolor($w, $h);
+                  $imsave = $im2;
                   imagecopyresampled ($im2, $imlarger, 0, 0, 0, 0, $w, $h, $wlarger, $hlarger);
+                  if ($postfix=='X' && $watermark) {
+                    $imsave = imagecreatetruecolor($w, $h);
+                    imagecopy($imsave, $im2, 0, 0, 0, 0, $w, $h);
+                    imagecopyresampled ($imsave , $watermark , 10 , $h-10-$wmsize[1], 0 , 0 , $wmsize[0] , $wmsize[1] , $wmsize[0] , $wmsize[1] );      
+                  }
+
                 }
-                imagejpeg($im2, $photoroot . "/$subdirectory/" . $id . "_$postfix" . '.jpg');
+                imagejpeg($imsave, $photoroot . "/$subdirectory/" . $id . "_$postfix" . '.jpg');
                 $imlarger=$im2;
                 $wlarger = $w;
                 $hlarger = $h;

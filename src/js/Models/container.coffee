@@ -14,6 +14,7 @@ module.exports = Backbone.Model.extend
 		description: ""
 		populated: false
 		featuredPhoto: 0
+		watermark: 1
 	
 	initialize: (attributes, options) ->
 		#this.containers = new Backbone.Collection

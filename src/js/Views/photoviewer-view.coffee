@@ -10,6 +10,7 @@ module.exports = Backbone.View.extend
 		'click .scroll-left' : 'scrollLeft'
 		'click .scroll-right' : 'scrollRight'
 		'click input:radio[name=view-size]' : 'changeImageSize'
+		'keydown' : 'keyDown'
 
 	initialize: (options) ->
 		console.log "Initializing photo viewer"
@@ -19,32 +20,48 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'change:size', this.photoChanged
 		this.listenTo this.model, 'change:photo', this.photoChanged
 		this.listenTo this.model, 'change:collection', this.collectionChanged
-	
-	scrollLeft: ->
+
+	keyDown: (e) ->
+		console.log e
+		if e.keyCode==37
+			this.scrollLeft e
+		else if e.keyCode==39
+			this.scrollRight e
+
+	scrollLeft: (e) ->
 		collection = this.model.get('collection')
 		this.index-- 
 		this.index = collection.length-1 if this.index<0
 		this.model.set {photo: collection.at this.index}
+		e.preventDefault()
 
-	scrollRight: ->
+	scrollRight: (e) ->
 		collection = this.model.get('collection')
 		this.index++
 		this.index = 0 if this.index>=collection.length
 		this.model.set {photo: collection.at this.index}
+		e.preventDefault()
 
-	changeImageSize: (e)->
-		this.model.set {size: $(e.target).attr('id').replace('view-','')}
-		this.$('.view-image').focus()
+	changeImageSize: (e) ->
+		size = $(e.target).attr('id').replace('view-','')
+		this.model.set {size: size}
+		if size=='L' or size=='X'
+			this.$el.addClass('full-screen') 
+		else
+			this.$el.removeClass('full-screen') 
+		this.$('.view-image-wrapper').focus()
 
 	render: ->
 		this.$el.html this.template()
 
-	open: (photo, collection)->
+	open: (photo, collection) ->
 		console.log photo
 		this.model.set {collection: collection}
 		this.model.set {photo: photo}
 		this.index = collection.indexOf photo
-		this.revealElement.foundation 'open' if collection.length>0
+		if collection.length>0	
+			this.revealElement.foundation 'open'
+			this.$('.view-image-wrapper').focus()
 
 	photoChanged: ->
 		this.$('.view-image').attr('src' , 'photos/' + this.model.get('size') + '/' + this.model.get('photo').id + '.jpg')

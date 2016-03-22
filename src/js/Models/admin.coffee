@@ -31,33 +31,52 @@ module.exports = Backbone.Model.extend
 		ret = 0
 		target = this.containers.get id
 		dragmodel = this.get 'dragModel'
-		return 0 if dragmodel == target
-		return 2 if target.get('type') == 'gallery' and dragmodel.get('type') == 'gallery'
-		return 0 if dragmodel.get('type')=='folder' and this.isDescendantContainer target, dragmodel
-		return 3 if target.get('type')=='folder' and dragmodel.get('type') == 'folder'
-		if target.get('type') == 'folder' and dragmodel.get('type') == 'gallery'
-			return 0 if dragmodel.get('idparent') == id
-			return 1
-		if target.get('type') == 'gallery' and dragmodel.get('type') == 'folder'
-			position = target.get 'position'
-			return 2 if position <= 1
-		0
+		targetType = target.get 'type'
+		dragType = dragmodel.get 'type'
 
+		return 0 if dragmodel == target
+		return 2 if targetType == 'gallery' and dragType == 'gallery'
+		return 0 if dragType=='folder' and this.isDescendantContainer target, dragmodel
+		return 3 if targetType=='folder' and dragType == 'folder'
+		if targetType == 'folder' and dragType == 'gallery'
+			return 2 if dragmodel.get('idparent') == id
+			return 3
+		return 2 if targetType == 'gallery' and dragType == 'folder'
+		#if target.get('type') == 'gallery' and dragmodel.get('type') == 'folder'
+		#	position = target.get 'position'
+		#	return 2 if position <= 1
+		0
 	
-	moveContainerTo: (container, toId, beforeId)->
-		fromParentId = container.get('idparent')
+	moveContainerTo: (container, toId, before)->
 		toContainer = this.containers.get toId
 
+		if before
+			children = this.containers.where {idparent: toContainer.get('idparent')}
+			position = 1
+			for child in children 
+				if child.id == toId
+					container.save {position: position++}
+				if child.id != container.id
+					child.save {position: position++}
+			container.save {idparent: toContainer.get('idparent')}
+		else
+			children = this.containers.where {idparent: toId}
+			container.save {idparent: toId, position: children.length+1}
+
+		this.adjustPositions()
+
 	adjustPositions: ->
-		children = this.containers.where { idparent: 0}
+		children = _.sortBy (this.containers.where { idparent: 0}) , (m) ->
+			m.get('position')
+
 		position = 1
 		for child in children 
 			child.save {position: position++}
 
-		self = this
 		this.containers.each (container) ->
 			position = 1
-			children = this.containers.where { idparent: container.id }
+			children = _.sortBy (this.containers.where { idparent: container.id }), (m) ->
+				m.get('position')
 			for child in children 
 				child.save {position: position++}
 		, this

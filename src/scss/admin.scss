@@ -3,6 +3,7 @@
 @import 'settings';
 @import 'dropzone';
 @import 'mtree';
+@import 'photoviewer';
 @import "../../node_modules/foundation-sites/scss/foundation";
 
 @include foundation-global-styles;
@@ -173,15 +174,6 @@
 
 #gv-uploadPhotos {
   @extend .reveal-dark;
-}
-
-#gv-photoViewer {
-  @extend .reveal-dark;
-  .photo-viewer {
-    a {
-      color: $white;
-    }
-  }
 }
 
 #drag-window {

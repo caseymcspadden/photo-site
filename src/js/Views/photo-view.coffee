@@ -12,8 +12,8 @@ module.exports = Backbone.View.extend
 
 	events:
 		'click img' : 'photoClicked'
-		'mouseover' : 'setFocus'
-		'keypress' : 'keyPressed'
+		#'mouseover' : 'setFocus'
+		#'keypress' : 'keyPressed'
 		#'dblclick' : 'keyPressed'
 
 	initialize: (options) ->
@@ -21,6 +21,12 @@ module.exports = Backbone.View.extend
 		this.template = templates['photo-view']
 		this.listenTo this.model, 'change:selected', this.toggleSelected
 		this.listenTo this.model, 'remove', this.removeView
+		this.render()
+		downloadingImage = new Image
+		self = this	
+		downloadingImage.onload = ->
+			self.$('img')[0].src = downloadingImage.src
+		downloadingImage.src = 'photos/T/' + this.model.id + '.jpg'
 
 	setFocus: (e) ->
 		this.$('a').focus()
@@ -31,6 +37,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template(this.model.toJSON())
+
 		if this.model.get('selected')
 			this.$('img').addClass 'selected'
 

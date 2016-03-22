@@ -115,10 +115,9 @@ module.exports = Backbone.View.extend
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
 			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
-			view.render()
 		view = this.photoViews[photo.id]
-		view.delegateEvents()
 		this.$('.photo-list').append view.el
+		view.delegateEvents()
 
 	addAll: ->
 		this.$('.photo-list').html ''

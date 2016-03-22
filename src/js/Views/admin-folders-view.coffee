@@ -49,33 +49,6 @@ module.exports = Backbone.View.extend
 			return $e if $e.is elementType
 			$e = $e.parent()
 
-	###
-	updateModelsFromTree: ($ul, idContainer) ->
-		console.log $ul
-
-		arr = $ul.find('>li').toArray()
-		folderPosition=0
-		galleryPosition=0
-		for li in arr
-			collection = this.model.folders
-			$li = $(li)
-			id = 0
-			isFolder = $li.hasClass 'folder'
-			if isFolder
-				id = $li.attr('id').replace('folder-','')
-				folderPosition++
-				console.log 'updating folder ' + id + ' with parent ' + idFolder + ' and position ' + folderPosition
-			else
-				id = $li.attr('id').replace('gallery-','')
-				collection = this.model.galleries
-				galleryPosition++
-				console.log 'updating gallery ' + id + ' with parent ' + idFolder + ' and position ' + galleryPosition
-			model = collection.get id
-			model.save {idfolder: idFolder, position: if isFolder then folderPosition else galleryPosition}
-			if isFolder
-				this.updateModelsFromTree $li.find('>ul') , id
-	###
-
 	mouseDown: (e) ->
 		$li = this.getContainingElement e.target, 'li'
 		this.dragStarted = false
@@ -87,21 +60,19 @@ module.exports = Backbone.View.extend
 	mouseUp: (e) ->
 		e.preventDefault()
 		this.$('li').removeClass('dropinside').removeClass('dropbefore')
-		model = this.model.get('dragModel')
-		if this.allowDrop!=0 && model
+		dragmodel = this.model.get('dragModel')
+		if this.allowDrop!=0 && dragmodel
 			this.dragElement.remove()
 			$li = this.getContainingElement e.target, 'li'
+			toId = parseInt $li.attr('id').replace('node-','')
 			if e.offsetY < 15 and (this.allowDrop & 2)
 				console.log "drop " + this.dragElement.attr('id') + ' before ' + $li.attr('id')
 				this.dragElement.insertBefore $li
+				this.model.moveContainerTo dragmodel, toId, true
 			else if e.offsetY >= 15 and (this.allowDrop & 1)
 				console.log "drop " + this.dragElement.attr('id') + ' inside ' + $li.attr('id')
-				if this.dragElement.hasClass('gallery') or $li.find('>ul >.gallery').length == 0
-					$li.find('>ul').append this.dragElement
-				else
-					this.dragElement.insertBefore $li.find('>ul .gallery:first-child')
-			this.updateModelsFromTree this.$tree , 0
-
+				$li.find('>ul').append this.dragElement
+				this.model.moveContainerTo dragmodel, toId, false
 
 		this.dragStarted = false
 		this.allowDrop = 0
