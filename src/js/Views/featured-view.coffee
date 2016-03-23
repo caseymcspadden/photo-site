@@ -1,6 +1,5 @@
 Backbone = require 'backbone'
 templates = require './jst'
-Gallery = require './gallery'
 
 module.exports = Backbone.View.extend
 	tagName: 'div'

@@ -4,11 +4,9 @@ Backbone = require 'backbone'
 Dragula = require 'dragula'
 PhotoView = require './photo-view'
 templates = require './jst'
-Folders = require './folders'
-Folder = require './folder'
-Gallery = require './gallery'
 PhotoViewerModel= require './photoviewer'
 PhotoViewer = require './photoviewer-view'
+Photo = require './photo'
 DropzoneView = require('./dropzone-view')
 
 module.exports = Backbone.View.extend
@@ -24,16 +22,22 @@ module.exports = Backbone.View.extend
 		'click .set-featured' : 'setFeaturedPhoto'
 		'click .delete-gallery' : 'deleteGallery'
 		'dblclick' : 'openViewer'
-		'keydown' : 'keyDown'
-		'keyup' : 'keyUp'
+		'keydown .photo-list' : 'keyDown'
+		'keyup .photo-list' : 'keyUp'
+		'keydown .master-photo-list' : 'keyDown'
+		'keyup .master-photo-list' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['gallery-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
+		this.listenTo this.model.photos, 'change:selected', this.masterSelectedPhotoChanged
 		this.currentPhoto = null
+		this.currentMaterPhoto = null
 		this.selectMode = 0
+		this.masterPhotoCollection = new Backbone.Collection {model: Photo}
 
 	keyDown: (e) ->
+		console.log 'key down'
 		if e.keyCode == 91
 			this.selectMode=2
 		else if e.keyCode == 16
@@ -56,6 +60,21 @@ module.exports = Backbone.View.extend
 			this.currentGallery.photos.at(i).set('selected',true) for i in [index1 .. index2]
 	
 		this.currentPhoto = photo		
+
+	masterSelectedPhotoChanged: (photo) ->
+		return if photo.get('selected') == false 
+
+		if this.selectMode==0
+			this.masterPhotoCollection.each (p) ->
+				p.set('selected', false) if p.id != photo.id
+		
+		if this.selectMode==3
+			this.selectMode=2
+			index1 = this.masterPhotoCollection.indexOf this.currentMasterPhoto
+			index2 = this.masterPhotoCollection.indexOf photo
+			this.masterPhotoCollection.at(i).set('selected',true) for i in [index1 .. index2]
+	
+		this.currentMasterPhoto = photo		
 
 	openViewer: (e) ->
 		console.log this.currentGallery.photos
@@ -104,6 +123,7 @@ module.exports = Backbone.View.extend
 
 	removePhotos: (e) ->
 		this.currentGallery.removeSelectedPhotos()
+		this.masterAddAll()
 		e.preventDefault()
 
 	addPhotos: (e) ->
@@ -155,10 +175,12 @@ module.exports = Backbone.View.extend
 			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
 			view.render()
 
+		this.masterPhotoCollection.add photo
 		view = this.photoViews[photo.id]
 		this.$('.master-photo-list').append view.el
 		view.delegateEvents()
 
 	masterAddAll: ->
 		this.$('.master-photo-list').html ''
+		this.masterPhotoCollection.reset()
 		this.model.photos.each this.masterAddOne, this

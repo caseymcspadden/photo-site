@@ -13,8 +13,6 @@ module.exports = Backbone.View.extend
 	events:
 		'click img' : 'photoClicked'
 		'mouseover' : 'setFocus'
-		#'keydown' : 'keyDown'
-		#'dblclick' : 'keyPressed'
 
 	initialize: (options) ->
 		this.photoViewer = options.viewer
@@ -29,10 +27,8 @@ module.exports = Backbone.View.extend
 		downloadingImage.src = 'photos/T/' + this.model.id + '.jpg'
 
 	setFocus: (e) ->
+		console.log "setting focus"
 		this.$('a').focus()
-
-	keyDown: (e) ->
-		console.log 'key down on photo ' + this.model.id
 
 	render: ->
 		this.$el.html this.template(this.model.toJSON())

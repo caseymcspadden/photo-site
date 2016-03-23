@@ -105,6 +105,8 @@ module.exports = Backbone.Model.extend
 	deleteContainer: (container) ->
 		this.containers.remove container
 		this.set {selectedContainer: null}
+		console.log "destroying container"
+		console.log container
 		container.destroy()
 		this.adjustPositions()
 

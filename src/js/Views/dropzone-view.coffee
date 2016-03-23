@@ -39,8 +39,8 @@ module.exports = Backbone.View.extend
 
 	selectedContainerChanged: (m) ->
 		container = this.model.get('selectedContainer')
-		this.dropzone.options.headers.Watermark = '0'
-		this.dropzone.options.headers.Watermark = '1' if container.get('watermark')==1
+		#this.dropzone.options.headers.Watermark = '0'
+		#this.dropzone.options.headers.Watermark = '1' if container.get('watermark')==1
 
 	close: ->
 		this.$('.filedrop').html ''

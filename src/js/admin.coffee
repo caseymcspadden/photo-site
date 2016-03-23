@@ -6,7 +6,6 @@ Backbone = require('backbone')
 Admin = require('../../require/admin')
 AdminFoldersView = require('../../require/admin-folders-view')
 AdminMainView = require('../../require/admin-main-view')
-AdminPhotosView = require('../../require/admin-photos-view')
 
 admin = new Admin()
 

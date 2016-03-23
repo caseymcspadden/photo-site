@@ -33,14 +33,14 @@ module.exports = Backbone.View.extend
 		this.index-- 
 		this.index = collection.length-1 if this.index<0
 		this.model.set {photo: collection.at this.index}
-		e.preventDefault()
+		#e.preventDefault()
 
 	scrollRight: (e) ->
 		collection = this.model.get('collection')
 		this.index++
 		this.index = 0 if this.index>=collection.length
 		this.model.set {photo: collection.at this.index}
-		e.preventDefault()
+		#e.preventDefault()
 
 	changeImageSize: (e) ->
 		size = $(e.target).attr('id').replace('view-','')
