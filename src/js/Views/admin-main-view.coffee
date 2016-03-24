@@ -4,7 +4,7 @@ Backbone = require 'backbone'
 templates = require './jst'
 Containers = require './containers'
 Container = require './container'
-Admin = require './admin'
+#Admin = require './admin'
 FolderView = require './folder-view'
 GalleryView = require './gallery-view'
 

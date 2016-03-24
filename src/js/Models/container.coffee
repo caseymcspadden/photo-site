@@ -41,9 +41,15 @@ module.exports = Backbone.Model.extend
 		)
 		this.set {populated: true}
 
+	###
 	featuredPhotoSource: ->
-		if this.get('featuredPhoto') != 0 then 'photos/T/' + this.get('featuredPhoto') + '.jpg' else 'images/0_T.jpg'
-
+		if this.get('featuredPhoto') != 0 
+			return 'photos/T/' + this.get('featuredPhoto') + '.jpg'
+		else if this.get('type') == 'folder' 
+			return 'images/thumbnail-folder.jpg'
+		return 'images/thumbnail-gallery.jpg'
+	###
+	
 	addPhoto: (id) ->
 		p = this.master.get(id)
 		this.photos.add p if p

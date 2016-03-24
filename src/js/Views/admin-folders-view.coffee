@@ -6,7 +6,7 @@ templates = require './jst'
 Container = require './container'
 Containers = require './containers'
 NodeView = require './node-view'
-Admin = require './admin'
+#ViewModel = require './viewmodel'
 
 
 module.exports = Backbone.View.extend

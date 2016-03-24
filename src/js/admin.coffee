@@ -3,18 +3,18 @@ foundation = require 'foundation'
 _ = require('underscore')
 dropzone = require('dropzone')
 Backbone = require('backbone')
-Admin = require('../../require/admin')
+ViewModel = require('../../require/viewmodel')
 AdminFoldersView = require('../../require/admin-folders-view')
 AdminMainView = require('../../require/admin-main-view')
 
-admin = new Admin()
+viewModel = new ViewModel {allowDragDrop: true}
 
-adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: admin})
-adminMainView = new AdminMainView({el: '#adminMainView', model: admin})
+adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: viewModel})
+adminMainView = new AdminMainView({el: '#adminMainView', model: viewModel})
 
 adminFoldersView.render();
 adminMainView.render();
 
-admin.fetchAll()
+viewModel.fetchAll()
 
 $(document).foundation()

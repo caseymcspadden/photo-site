@@ -3,6 +3,7 @@
 @import 'settings';
 @import 'dropzone';
 @import 'mtree';
+@import 'featured';
 @import 'photoviewer';
 @import "../../node_modules/foundation-sites/scss/foundation";
 
@@ -137,24 +138,6 @@
     &.selected {
       border: 2px solid $white;
     }
-  }
-}
-
-.featured-thumbnail {
-  position: relative;
-  overflow: hidden;
-  float: left;
-  padding: 0;
-  margin: 5px;
-  img {
-    opacity: 0.5;
-  }
-  .gallery-info {
-    position: absolute;
-    top: 70px;
-    left: 5px;
-    color: $white;  
-    width: 100%;
   }
 }
 

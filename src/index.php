@@ -20,12 +20,17 @@ foreach ($contents as $line) {
 }
 
 //$mysqli = mysqli_connect(NULL, 'web', 'taylor0619', 'crossriver');
-$mysqli = mysqli_connect(NULL, $config['mysqluser'], $config['mysqlpwd'] , $config['mysqldb']);
+//$mysqli = mysqli_connect(NULL, $config['mysqluser'], $config['mysqlpwd'] , $config['mysqldb']);
 
-if(!$mysqli) {
+$dbh = new PDO("mysql:host=localhost;dbname=$config[mysqldb]", $config['mysqluser'], $config['mysqlpwd']);
+
+if(!$dbh) {
     echo "Can't connect to database";
     exit();
 }
+
+$cfg = new PHPAuth\Config($dbh);
+$auth = new PHPAuth\Auth($dbh, $config);
 
 $app = new \Slim\App();
 
@@ -51,10 +56,16 @@ $container['options'] = [
     'fileroot'=>$fileroot,
     'webroot'=>$webroot,
     'photoroot'=>$photoroot,
-    'mysqli'=>$mysqli
+    'dbh'=>$dbh
 ];
 
 // Define app routes
+$app->get('/login', function ($request, $response, $args) {
+    return $this->view->render($response, 'login.html' , [
+        'options'=>$this->options
+  ]);
+})->setName('login');
+
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'main.html' , [
         'options'=>$this->options
@@ -80,100 +91,103 @@ $app->get('/contact', function ($request, $response, $args) {
 })->setName('contact');
 
 $app->get('/admin', function ($request, $response, $args) {
+    //if (!$auth->isLogged())
+      //return $response->withHeader('Location', "$webroot/login");
+
     return $this->view->render($response, 'admin.html' , [
         'options'=>$this->options,
     ]);
 })->setName('admin');
 
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
 
   $query = "SELECT * FROM photos WHERE " . ($args['id'] ? "id=$args[id]" : '1');
 
   $arr = array();
 
-  $result = $mysqli->query($query);
+  $result = $dbh->query($query);
 
-  while ($row = $result->fetch_assoc())
+  while ($row = $result->fetchObject())
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
 $app->get('/services/containers/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers ORDER BY idparent, position");
+  $result = $dbh->query("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers ORDER BY idparent, position");
 
-  while ($row = $result->fetch_assoc())
+  while ($row = $result->fetchObject())
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));    
 });
 
 $app->post('/services/containers/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $vals = $request->getParsedBody();
 
-  $result = $mysqli->query("SELECT MAX(position) FROM containers WHERE idparent=$vals[idparent]");
+  $result = $dbh->query("SELECT MAX(position) FROM containers WHERE idparent=$vals[idparent]");
 
-  $row = $result->fetch_row();
+  $row = $result->fetch();
 
   $position = $row ? 1 + $row[0] : 1;
 
-  $mysqli->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
+  $dbh->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
 
-  $vals['id'] = $mysqli->insert_id;
+  $vals['id'] = $dbh->lastInsertId();
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
 $app->put('/services/containers/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $vals = $request->getParsedBody();
 
-  $mysqli->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+  $dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
 $app->delete('/services/containers/{id}', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
  
-  $mysqli->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
+  $dbh->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 $app->get('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
 
   $arr = array();
 
-  $result = $mysqli->query("SELECT idphoto, position FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+  $result = $dbh->query("SELECT idphoto, position FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
-  while ($row = $result->fetch_row())
+  while ($row = $result->fetch())
     array_push($arr,$row[0]);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
 $app->post('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
 
-  $result = $mysqli->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
+  $result = $dbh->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
 
-  $row = $result->fetch_row();
+  $row = $result->fetch();
 
   $position = $row ? $row[0]+1 : 1;
 
   foreach($ids as $id) {
-    $mysqli->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
+    $dbh->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
     $position++;
   }
 
@@ -181,32 +195,32 @@ $app->post('/services/containers/{id:[0-9]+}/photos/', function($request, $respo
 });
 
 $app->put('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
 
   $position = 1;
   foreach($ids as $id) {
-    $mysqli->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+    $dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
     $position++;
   }
 });
 
 $app->delete('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
-  $mysqli = $this->options['mysqli'];
+  $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = $parsedBody['ids'];
-  $mysqli->query("DELETE FROM containerphotos WHERE idcontainer=$args[id] AND idphoto IN (" . $ids . ')');
+  $dbh->query("DELETE FROM containerphotos WHERE idcontainer=$args[id] AND idphoto IN (" . $ids . ')');
 
   $ids = array();
-  $result = $mysqli->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+  $result = $dbh->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
-  while ($row = $result->fetch_row())
+  while ($row = $result->fetch())
     $ids[] = $row[0];
 
   $position = 1;
   foreach($ids as $id) {
-    $mysqli->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+    $dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
     $position++;
   }
 
@@ -215,7 +229,7 @@ $app->delete('/services/containers/{id:[0-9]+}/photos/', function($request, $res
 
 
 $app->post('/services/upload', function($request, $response, $args) {
-    $mysqli = $this->options['mysqli'];
+    $dbh = $this->options['dbh'];
     $fileroot = $this->options['fileroot'];
     $photoroot = $this->options['photoroot'];
 
@@ -276,15 +290,15 @@ $app->post('/services/upload', function($request, $response, $args) {
         $hash = md5_file($tmp);
         $fileSize = filesize($tmp);
 
-        $result = $mysqli->query("SELECT id FROM photos WHERE fileSize=$fileSize AND width=$size[0] AND height=$size[1] AND hash='$hash'");
+        $result = $dbh->query("SELECT id FROM photos WHERE fileSize=$fileSize AND width=$size[0] AND height=$size[1] AND hash='$hash'");
 
-        if ($result->fetch_row()) {
+        if ($result->fetch()) {
           continue;
         }
  
        $extension = pathinfo($name,PATHINFO_EXTENSION);
  
-        $mysqli->query("INSERT INTO photos 
+        $dbh->query("INSERT INTO photos 
          (fileName, fileSize, width, height, hash, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
           exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES ("
           ."'$name',"
@@ -307,7 +321,7 @@ $app->post('/services/upload', function($request, $response, $args) {
           ."'$exif[Flash]',"
           ."'$exif[FocalLength]')");
 
-          $id = $mysqli->insert_id;
+          $id = $dbh->lastInsertId();
           array_push($insertIds, $id);
 
           $subdirectory = sprintf("%02d",$id%100);         
@@ -382,8 +396,8 @@ $app->post('/services/upload', function($request, $response, $args) {
 
     if (count($insertIds)>0) {
       $query = 'SELECT * FROM photos WHERE id IN (' . implode(',', $insertIds) . ')';
-      $result = $mysqli->query($query);
-      while ($row = $result->fetch_assoc())
+      $result = $dbh->query($query);
+      while ($row = $result->fetchObject())
         array_push($arr,$row);
     }
 

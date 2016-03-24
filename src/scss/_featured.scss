@@ -1,0 +1,35 @@
+.featured-thumbnail {
+  position: relative;
+  overflow: hidden;
+  float: left;
+  padding: 0;
+  margin: 5px;
+  cursor: pointer;
+  &:hover { 
+    img {
+      opacity: 1.0;
+    }
+    .container-info, .container-description {
+      display: none;
+    }
+  }
+  img {
+    opacity: 0.6;
+  }
+  .container-info {
+    position: absolute;
+    top: 40%;
+    left: 5px;
+    color: $white;
+    opacity: 1.0;  
+    width: 100%;
+  }
+  .container-description {
+    position: absolute;
+    top: 85%;
+    left: 5px;
+    color: $white;
+    opacity: 1.0;  
+    width: 100%;
+  }
+}

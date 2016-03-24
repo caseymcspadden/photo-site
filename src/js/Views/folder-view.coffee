@@ -4,17 +4,17 @@ Backbone = require 'backbone'
 templates = require './jst'
 Containers = require './containers'
 Container = require './container'
-Admin = require './admin'
-FeaturedView = require './featured-view'
+#Admin = require './admin'
+ContainerView = require './container-view'
 
 module.exports = Backbone.View.extend
 	currentContainer: null
-	featuredViews: {}
+	containerViews: {}
 
 	events:
 		'submit #fv-editFolder form' : 'editFolder'
 		'submit #fv-addGallery form' : 'addGallery'
-		'dblclick .featured-thumbnail' : 'selectGallery'
+		'click .featured-thumbnail' : 'selectContainer'
 
 	initialize: (options) ->
 		this.template = templates['folder-view']
@@ -57,20 +57,19 @@ module.exports = Backbone.View.extend
 		this.$el.html this.template {name: 'Default'}
   		
 	addOne: (container) ->
-		return if this.currentContainer==null or container.get('type')=='folder' or container.get('idparent') != this.currentContainer.id
-		if !(this.featuredViews.hasOwnProperty container.id)
-			view = this.featuredViews[container.id] = new FeaturedView {model:container, className: 'featured-thumbnail'}
+		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id
+		if !(this.containerViews.hasOwnProperty container.id)
+			view = this.containerViews[container.id] = new ContainerView {model:container, className: 'featured-thumbnail'}
 			view.render()
-		view = this.featuredViews[container.id]
+		view = this.containerViews[container.id]
 		view.delegateEvents()
-		this.$('.gallery-list').append view.el
+		this.$('.container-list').append view.el
 
 	addAll: ->
-		console.log "Add all"
-		this.$('.gallery-list').html ''
+		this.$('.container-list').html ''
 		this.model.containers.each this.addOne, this
 
-	selectGallery: (e) ->
+	selectContainer: (e) ->
 		this.model.selectContainer $(e.currentTarget).attr('id').replace('featured-','')
 
 
