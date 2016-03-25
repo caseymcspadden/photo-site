@@ -16,7 +16,7 @@ module.exports = Backbone.View.extend
 		self = this
 		#this.$(".filedrop").dropzone
 		this.dropzone = new Dropzone('.filedrop',
-			url: "services/upload"
+			url: this.model.urlBase + "/services/upload"
 			uploadMultiple: true
 			addRemoveLinks: false
 			acceptedFiles: 'image/*'

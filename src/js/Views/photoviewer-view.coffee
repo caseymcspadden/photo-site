@@ -15,6 +15,7 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		console.log "Initializing photo viewer"
 		this.revealElement = options.revealElement
+		this.urlBase = options.urlBase
 		this.model = new PhotoviewerModel
 		this.template = templates['photoviewer-view']
 		this.listenTo this.model, 'change:size', this.photoChanged
@@ -64,7 +65,7 @@ module.exports = Backbone.View.extend
 			this.$('.view-image-wrapper').focus()
 
 	photoChanged: ->
-		this.$('.view-image').attr('src' , 'photos/' + this.model.get('size') + '/' + this.model.get('photo').id + '.jpg')
+		this.$('.view-image').attr('src' , this.urlBase + '/photos/' + this.model.get('size') + '/' + this.model.get('photo').id + '.jpg')
 		json = this.model.get('photo').toJSON()
 		console.log json
 		text = '';

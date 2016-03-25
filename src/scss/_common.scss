@@ -1,0 +1,27 @@
+.photo-thumbnail {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
+  float: left;
+  margin: 4px;
+  padding: 0;
+  img {
+    border: 2px solid $body-background;
+    padding: 0;
+    margin: 0;
+    &.selected {
+      border: 2px solid $white;
+    }
+  }
+}
+
+.reveal.dark {
+  background-color: $body-background;
+  .close-button:hover {
+    color: $white
+  }
+  label {
+    color: $white
+  }
+}

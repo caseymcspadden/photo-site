@@ -19,9 +19,6 @@ foreach ($contents as $line) {
     $config[trim($kv[0])] = trim($kv[1]);
 }
 
-//$mysqli = mysqli_connect(NULL, 'web', 'taylor0619', 'crossriver');
-//$mysqli = mysqli_connect(NULL, $config['mysqluser'], $config['mysqlpwd'] , $config['mysqldb']);
-
 $dbh = new PDO("mysql:host=localhost;dbname=$config[mysqldb]", $config['mysqluser'], $config['mysqlpwd']);
 
 if(!$dbh) {
@@ -30,10 +27,9 @@ if(!$dbh) {
 }
 
 $cfg = new PHPAuth\Config($dbh);
-$auth = new PHPAuth\Auth($dbh, $config);
+$auth = new PHPAuth\Auth($dbh, $cfg);
 
 $app = new \Slim\App();
-
 
 // Get container
 $container = $app->getContainer();
@@ -56,7 +52,8 @@ $container['options'] = [
     'fileroot'=>$fileroot,
     'webroot'=>$webroot,
     'photoroot'=>$photoroot,
-    'dbh'=>$dbh
+    'dbh'=>$dbh,
+    'auth'=>$auth
 ];
 
 // Define app routes
@@ -91,13 +88,45 @@ $app->get('/contact', function ($request, $response, $args) {
 })->setName('contact');
 
 $app->get('/admin', function ($request, $response, $args) {
-    //if (!$auth->isLogged())
-      //return $response->withHeader('Location', "$webroot/login");
-
-    return $this->view->render($response, 'admin.html' , [
+    return $this->view->render($response, "admin.html" , [
         'options'=>$this->options,
     ]);
 })->setName('admin');
+
+$app->get('/admin/{task}', function ($request, $response, $args) {
+    return $this->view->render($response, "admin-$args[task].html" , [
+        'options'=>$this->options,
+    ]);
+})->setName('admin');
+
+// SERVICES ROUTES
+$app->get('/services/users/{id:[0-9]*}', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $query = "SELECT * FROM users WHERE " . ($args['id'] ? "id=$args[id]" : '1');
+
+  $arr = array();
+
+  $result = $dbh->query($query);
+
+  while ($row = $result->fetchObject())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
+
+$app->post('/services/users/', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $vals = $request->getParsedBody();
+
+  $result = $this->options['auth']->register($vals['email'], $vals['password'], $vals['password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
+
+  $status = $result['error']==true ? 401 : 200;
+
+  $response->getBody()->write(json_encode($result));
+  return $response->withStatus($status)->withHeader('Content-Type','application/json');
+});
 
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   $dbh = $this->options['dbh'];

@@ -1,10 +1,10 @@
 Backbone = require 'backbone'
-Photo = require './photo'
+User = require './user'
 
 module.exports = Backbone.Collection.extend
-	model: Photo
+	model: User
 	url: ->
-		this.urlBase + '/services/photos/'		 
+		this.urlBase + '/services/users/'		 
 
 	initialize: (attributes, options) ->
 		this.urlBase = options.urlBase

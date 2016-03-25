@@ -12,8 +12,10 @@ module.exports = Backbone.Model.extend
 		allowDragDrop: false
 
 	initialize: (attributes, options) ->
-		this.photos = new PhotoCollection
-		this.containers = new Containers
+		this.photos = new PhotoCollection null, options
+		options.masterPhotoCollection = this.photos
+		this.containers = new Containers null , options
+		this.urlBase = options.urlBase
 
 	isDescendantContainer: (testChild, testParent) ->		
 		while testChild
@@ -80,13 +82,13 @@ module.exports = Backbone.Model.extend
 				child.save {position: position++}
 		, this
 	
-	fetchAll: ->					
+	fetchAll: ->
 		self = this
 		this.containers.fetch(
 			reset: true
 			success: (containercollection) ->
-				containercollection.each (c) ->
-					c.master = self.photos
+				#containercollection.each (c) ->
+				#	c.master = self.photos
 				self.photos.fetch()
 		)
 
@@ -94,7 +96,7 @@ module.exports = Backbone.Model.extend
 		selectedContainer = this.get 'selectedContainer'
 		data.idparent = if (selectedContainer and selectedContainer.get('type')=='folder') then selectedContainer.id else 0
 		c = this.containers.create data, {wait: true}
-		c.master = this.photos
+		#c.master = this.photos
 
 	deleteContainer: (container) ->
 		this.containers.remove container

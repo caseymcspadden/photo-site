@@ -1,6 +1,7 @@
 @charset 'utf-8';
 
-@import 'settings';
+@import "settings";
+@import "common";
 @import "../../node_modules/foundation-sites/scss/foundation";
 
 @include foundation-global-styles;
@@ -66,7 +67,7 @@
   .menu-text {
     .title-main { 
       display: inline;
-      font-size: 4rem;
+      font-size: 3rem;
       //font-family: Kameron;
       &:hover {
         color: $secondary-color;
@@ -78,15 +79,15 @@
       font-size: 1.25rem;
     }
   }
-
-  .top-bar-right {
-    margin-top: 5rem;
-    a {
-      border-top: 2px solid $body-background;
-      &:hover {
-        border-top: 2px solid $secondary-color;
-        color: $white;
-      }
+}
+  
+.top-bar-right {
+  a {
+    border-top: 2px solid $body-background;
+    color: $body-font-color;
+    &:hover {
+      border-top: 2px solid $secondary-color;
+      color: $white;
     }
   }
 }

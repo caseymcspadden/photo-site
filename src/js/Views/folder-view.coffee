@@ -59,7 +59,7 @@ module.exports = Backbone.View.extend
 	addOne: (container) ->
 		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id
 		if !(this.containerViews.hasOwnProperty container.id)
-			view = this.containerViews[container.id] = new ContainerView {model:container, className: 'featured-thumbnail'}
+			view = this.containerViews[container.id] = new ContainerView {model:container, className: 'featured-thumbnail', urlBase: this.model.urlBase}
 			view.render()
 		view = this.containerViews[container.id]
 		view.delegateEvents()

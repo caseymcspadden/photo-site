@@ -1,10 +1,10 @@
 Backbone = require 'backbone'
 Photo = require './photo'
-#Containers = require './containers'
 ContainerPhotos = require './containerphotos'
 
 module.exports = Backbone.Model.extend
-	urlRoot: 'services/containers/'
+	urlRoot: -> 
+		this.urlBase + '/services/containers/'
 
 	defaults :
 		type: 'folder'	
@@ -17,7 +17,8 @@ module.exports = Backbone.Model.extend
 		watermark: 1
 	
 	initialize: (attributes, options) ->
-		#this.containers = new Backbone.Collection
+		this.urlBase = if options.collection then options.collection.urlBase else ''
+		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null
 		this.photos = new ContainerPhotos
 
 	###
@@ -35,7 +36,7 @@ module.exports = Backbone.Model.extend
 	populate: ->
 		self = this
 		console.log 'populate'
-		$.getJSON('services/containers/' + this.id + '/photos/', (data) ->
+		$.getJSON(this.urlBase + '/services/containers/' + this.id + '/photos/', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id
 		)
@@ -51,12 +52,12 @@ module.exports = Backbone.Model.extend
 	###
 	
 	addPhoto: (id) ->
-		p = this.master.get(id)
+		p = this.masterPhotoCollection.get(id)
 		this.photos.add p if p
 
 	addPhotos: (arr) ->
 		$.ajax(
-			url: 'services/containers/' + this.id + '/photos/'
+			url: this.urlBase +  '/services/containers/' + this.id + '/photos/'
 			type: 'POST'
 			context: this
 			data: {ids: arr.join(',')}
@@ -80,7 +81,7 @@ module.exports = Backbone.Model.extend
 	removeSelectedPhotos: ->
 		ids = this.getSelectedPhotos true
 		$.ajax(
-			url: 'services/containers/' + this.id + '/photos/'
+			url: this.urlBase + '/services/containers/' + this.id + '/photos/'
 			type: 'DELETE'
 			context: this
 			data: {ids: ids.join(',')}
@@ -98,7 +99,7 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: 'services/containers/' + this.id + '/photos/'
+			url: this.urlBase + '/services/containers/' + this.id + '/photos/'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}

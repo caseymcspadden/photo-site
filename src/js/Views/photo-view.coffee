@@ -16,6 +16,7 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.photoViewer = options.viewer
+		this.urlBase = options.urlBase
 		this.template = templates['photo-view']
 		this.listenTo this.model, 'change:selected', this.setSelected
 		this.listenTo this.model, 'remove', this.removeView
@@ -24,14 +25,16 @@ module.exports = Backbone.View.extend
 		self = this	
 		downloadingImage.onload = ->
 			self.$('img')[0].src = downloadingImage.src
-		downloadingImage.src = 'photos/T/' + this.model.id + '.jpg'
+		downloadingImage.src = this.urlBase + '/photos/T/' + this.model.id + '.jpg'
 
 	setFocus: (e) ->
 		console.log "setting focus"
 		this.$('a').focus()
 
 	render: ->
-		this.$el.html this.template(this.model.toJSON())
+		obj = this.model.toJSON()
+		obj.urlBase = this.urlBase
+		this.$el.html this.template(obj)
 
 		if this.model.get('selected')
 			this.$('img').addClass 'selected'

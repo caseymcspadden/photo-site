@@ -13,16 +13,17 @@ module.exports = Backbone.View.extend
 	#	'click img' : 'galleryClicked'
 
 	initialize: (options) ->
+		this.urlBase = options.urlBase
 		this.template = templates['container-view']
 		this.listenTo this.model, 'change', this.render
 		this.listenTo this.model, 'remove', this.remove
 
 	featuredPhotoSource: ->
 		if this.model.get('featuredPhoto') != 0 
-			return 'photos/T/' + this.model.get('featuredPhoto') + '.jpg'
+			return this.urlBase + '/photos/T/' + this.model.get('featuredPhoto') + '.jpg'
 		else if this.model.get('type') == 'folder' 
-			return 'images/thumbnail-folder.jpg'
-		return 'images/thumbnail-gallery.jpg'		
+			return this.urlBase + '/images/thumbnail-folder.jpg'
+		return this.urlBase + '/images/thumbnail-gallery.jpg'		
 
 	render: ->
 		json = this.model.toJSON()

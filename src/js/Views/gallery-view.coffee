@@ -135,7 +135,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
-		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer')}
+		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer'), urlBase: this.model.urlBase}
 		this.photoViewer.render()
 		this.dropzoneView = new  DropzoneView {el: '#gv-uploadPhotos', model: this.model}
 		this.dropzoneView.render()
@@ -158,7 +158,7 @@ module.exports = Backbone.View.extend
 
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer, urlBase: this.model.urlBase}
 		view = this.photoViews[photo.id]
 		this.$('.photo-list').append view.el
 		view.delegateEvents()
@@ -172,7 +172,7 @@ module.exports = Backbone.View.extend
 			return
 
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer, urlBase: this.model.urlBase}
 			view.render()
 
 		this.masterPhotoCollection.add photo
