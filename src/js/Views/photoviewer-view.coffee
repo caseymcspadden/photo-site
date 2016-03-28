@@ -54,6 +54,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template()
+		this
 
 	open: (photo, collection) ->
 		console.log photo

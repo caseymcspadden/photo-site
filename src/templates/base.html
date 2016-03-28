@@ -26,7 +26,7 @@
         <li><a href="{{options.webroot}}/portfolio">PORTFOLIO</a></li>
         <li><a href="{{options.webroot}}/about">ABOUT</a></li>
         <li><a href="{{options.webroot}}/contact">CONTACT</a></li>
-        <li><a href="#" data-open="revealLogin">LOGIN</a></li>
+        <li class="session-menu"></li>
         </ul>
       </div>
     </div>
@@ -36,15 +36,6 @@
   <div class="row" id="mainContent">
     {% block content %}
     {% endblock %}
-  </div>
-
-  <div class="reveal dark" id="revealLogin" data-reveal>
-    <button type="button" class="close-button" data-close aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    <div id="login">
-      LOGIN FORM PLACEHOLDER
-    </div>
   </div>
  
   {% block bundle %}

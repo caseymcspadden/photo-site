@@ -38,6 +38,7 @@ module.exports = Backbone.View.extend
 
 		if this.model.get('selected')
 			this.$('img').addClass 'selected'
+		this
 
 	removeView: ->
 		this.$el.remove()

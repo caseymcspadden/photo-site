@@ -18,13 +18,26 @@ module.exports = Backbone.View.extend
 
 	addUser: (e) ->
 		e.preventDefault()
+		this.$('.error-message').addClass('hidden')
 		arr = $(e.target).serializeArray()
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		val = this.collection.create data , {wait: true}
-		if (val.id)
-			this.$('#addUser .close-button').trigger('click')
+		
+		$.ajax(
+			url: this.collection.url()
+			type: 'POST'
+			context: this
+			data: data
+			success: (result) ->
+				json = $.parseJSON(result)
+				console.log json
+				if json.hasOwnProperty('error')
+					this.$('.error-message').html(json.message).removeClass('hidden')
+				else
+					this.collection.add json
+					this.$('#addUser .close-button').trigger('click')
+		)
 	
 	render: ->
 		this.$el.html this.template()

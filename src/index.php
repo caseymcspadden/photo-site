@@ -112,7 +112,7 @@ $app->get('/services/users/{id:[0-9]*}', function($request, $response, $args) {
   while ($row = $result->fetchObject())
     array_push($arr,$row);
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
 $app->post('/services/users/', function($request, $response, $args) {
@@ -120,12 +120,42 @@ $app->post('/services/users/', function($request, $response, $args) {
 
   $vals = $request->getParsedBody();
 
-  $result = $this->options['auth']->register($vals['email'], $vals['password'], $vals['password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
+  $result = $this->options['auth']->register($vals['email'], $vals['password'], $vals['repeat-password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
 
-  $status = $result['error']==true ? 401 : 200;
+  if ($result['error']==false) {
+    $rslt = $dbh->query("SELECT * FROM users WHERE email='$vals[email]'");
+    $result = $rslt->fetchObject();
+  }
 
-  $response->getBody()->write(json_encode($result));
-  return $response->withStatus($status)->withHeader('Content-Type','application/json');
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result));
+});
+
+$app->get('/services/session/{hash}', function($request, $response, $args) {
+  $uid = $this->options['auth']->getSessionUID($args['hash']);
+  $result = array();
+  $result['uid'] = $uid===false ? 0 : $uid;
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+});
+
+$app->post('/services/session/{hash}', function($request, $response, $args) {
+  $ret = $this->options['auth']->logout($args['hash']);
+  $result = array();
+  $result['error'] = !$ret;
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+});
+
+$app->post('/services/session', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $vals = $request->getParsedBody();
+
+  $result = $this->options['auth']->login($vals['email'], $vals['password'], $vals['remember']);
+
+  if ($result['error']==false) {
+    $rslt = $dbh->query("SELECT * FROM sessions WHERE hash='$result[hash]'");
+    $result = $rslt->fetchObject();
+  }
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {

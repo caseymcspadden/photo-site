@@ -83,27 +83,33 @@ gulp.task('jst', function() {
 });
 
 
-// backbone
-gulp.task('backbone:models', ['jst'],  function() {
+// require
+gulp.task('require:modules', function() {
+  return gulp.src('src/js/Modules/*.coffee')
+    .pipe(gcoffee())
+    .pipe(gulp.dest('require'));
+});
+
+gulp.task('require:models', function() {
   return gulp.src('src/js/Models/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
 });
 
-gulp.task('backbone:collections', ['jst'],  function() {
+gulp.task('require:collections', function() {
   return gulp.src('src/js/Collections/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
 });
 
-gulp.task('backbone:views', ['jst'],  function() {
+gulp.task('require:views', ['jst'],  function() {
   return gulp.src('src/js/Views/*.coffee')
     .pipe(gcoffee())
     .pipe(gulp.dest('require'));
 });
 
 // scripts
-gulp.task('scripts', ['backbone:models', 'backbone:collections', 'backbone:views'],  function() { 
+gulp.task('scripts', ['require:modules', 'require:models', 'require:collections', 'require:views'],  function() { 
   glob('./src/js/*.*', function(err, files) {
     if(err) done(err);
 
