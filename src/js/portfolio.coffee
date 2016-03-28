@@ -1,5 +1,5 @@
 $ = require 'jquery'
-foundation = require 'foundation'
+require 'foundation'
 _ = require 'underscore'
 Backbone = require 'backbone'
 Session = require('../../require/session')
@@ -13,3 +13,4 @@ sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 $('body').append loginView.render().el
 
 $(document).foundation()
+#new Foundation.DropdownMenu($('.dropdown'))

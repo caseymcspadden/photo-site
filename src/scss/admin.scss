@@ -66,41 +66,6 @@
     }
 }
 
-.top-bar.client {
-  //margin: rem-calc(10) rem-calc(-60) rem-calc(10) rem-calc(-60);
-  margin-top: rem-calc(10);
-  border-top: 3px solid $primary-color;
-  a {
-    color: $body-font-color;
-  }
-
-  .menu-text {
-    .title-main { 
-      display: inline;
-      font-size: 4rem;
-      //font-family: Kameron;
-      &:hover {
-        color: $secondary-color;
-      }
-    }
-    .title-sub {
-      margin-left: 0.5rem;
-      color: $secondary-color;
-      font-size: 1.25rem;
-    }
-  }
-
-  .top-bar-right {
-    margin-top: 5rem;
-    a {
-      border-top: 2px solid $body-background;
-      &:hover {
-        border-top: 2px solid $secondary-color;
-        color: $white;
-      }
-    }
-  }
-}
 
 .admin-panel {
 	float: left;
