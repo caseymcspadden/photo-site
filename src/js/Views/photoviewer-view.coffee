@@ -2,6 +2,7 @@ Backbone = require 'backbone'
 templates = require './jst'
 Photo = require './photo'
 PhotoviewerModel = require './photoviewer'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	tagName: 'div'
@@ -15,7 +16,7 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		console.log "Initializing photo viewer"
 		this.revealElement = options.revealElement
-		this.urlBase = options.urlBase
+		this.urlBase = config.urlBase
 		this.model = new PhotoviewerModel
 		this.template = templates['photoviewer-view']
 		this.listenTo this.model, 'change:size', this.photoChanged

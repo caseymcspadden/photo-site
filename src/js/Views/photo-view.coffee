@@ -1,6 +1,7 @@
 Backbone = require 'backbone'
 Photo = require './photo'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	tagName: 'div'
@@ -16,7 +17,7 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.photoViewer = options.viewer
-		this.urlBase = options.urlBase
+		this.urlBase = config.urlBase
 		this.template = templates['photo-view']
 		this.listenTo this.model, 'change:selected', this.setSelected
 		this.listenTo this.model, 'remove', this.removeView

@@ -100,22 +100,33 @@ $app->get('/admin/{task}', function ($request, $response, $args) {
 })->setName('admin');
 
 // SERVICES ROUTES
-$app->get('/services/users/{id:[0-9]*}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
 
-  $query = "SELECT * FROM users WHERE " . ($args['id'] ? "id=$args[id]" : '1');
+$app->get('/services/users', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
 
   $arr = array();
 
-  $result = $dbh->query($query);
+  $result = $dbh->query("SELECT * FROM users");
 
   while ($row = $result->fetchObject())
     array_push($arr,$row);
 
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
-$app->post('/services/users/', function($request, $response, $args) {
+$app->get('/services/users/{id:[0-9]*}', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $arr = array();
+
+  $result = $dbh->query("SELECT * FROM users WHERE id=$args[id]");
+
+  $row = $result->fetchObject();
+
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($row));
+});
+
+$app->post('/services/users', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
   $vals = $request->getParsedBody();
@@ -158,10 +169,10 @@ $app->post('/services/session', function($request, $response, $args) {
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
-$app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->get('/services/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
-  $query = "SELECT * FROM photos WHERE " . ($args['id'] ? "id=$args[id]" : '1');
+  $query = "SELECT * FROM photos";
 
   $arr = array();
 
@@ -173,7 +184,22 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
-$app->get('/services/containers/', function($request, $response, $args) {
+$app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $query = "SELECT * FROM photos WHERE id=$args[id]";
+
+  $arr = array();
+
+  $result = $dbh->query($query);
+
+  while ($row = $result->fetchObject())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
+
+$app->get('/services/containers', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
   $arr = array();
@@ -186,7 +212,7 @@ $app->get('/services/containers/', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));    
 });
 
-$app->post('/services/containers/', function($request, $response, $args) {
+$app->post('/services/containers', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
   $vals = $request->getParsedBody();
 
@@ -201,6 +227,19 @@ $app->post('/services/containers/', function($request, $response, $args) {
   $vals['id'] = $dbh->lastInsertId();
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
+$app->get('/services/containers/{id}', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $arr = array();
+
+  $result = $dbh->query("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers WHERE id = $args[id] ORDER BY position");
+
+  while ($row = $result->fetchObject())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
 });
 
 $app->put('/services/containers/{id}', function($request, $response, $args) {
@@ -221,7 +260,7 @@ $app->delete('/services/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-$app->get('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+$app->get('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
   $arr = array();
@@ -234,7 +273,7 @@ $app->get('/services/containers/{id:[0-9]+}/photos/', function($request, $respon
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
-$app->post('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+$app->post('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
@@ -253,7 +292,7 @@ $app->post('/services/containers/{id:[0-9]+}/photos/', function($request, $respo
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-$app->put('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+$app->put('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
@@ -265,7 +304,7 @@ $app->put('/services/containers/{id:[0-9]+}/photos/', function($request, $respon
   }
 });
 
-$app->delete('/services/containers/{id:[0-9]+}/photos/', function($request, $response, $args) {
+$app->delete('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
   $ids = $parsedBody['ids'];

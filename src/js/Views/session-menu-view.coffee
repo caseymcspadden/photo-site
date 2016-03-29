@@ -11,16 +11,15 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['session-menu-view']
-		this.listenTo this.model, 'change:uid' , this.uidChanged
+		this.listenTo this.model, 'change:uid' , this.setUser
 		this.render()
+		this.setUser(this.model)
 
-	uidChanged: (m) ->
+	setUser: (m) ->
 		if m.get('uid')==0
-			this.$('.top-menu-item').html('LOGIN').addClass('login-item')
-			this.$('ul.submenu').html ''
+			this.$('ul.submenu').html '<li><a href="#" class="login-item">LOGIN</a></li>'
 		else
-			this.$('.top-menu-item').html('USER').removeClass('login-item')
-			this.$('ul.submenu').html '<li><a href="#">PROFILE</a></li><li><a href="#" class="logout-item">LOGOUT</a></li>'
+			this.$('ul.submenu').html '<li><a href="#">PROFILE</a></li><li><a href="#">GALLERIES</a></li><li><a href="#" class="logout-item">LOGOUT</a></li>'
 
 	login: (e) ->
 		this.model.set 'loggingIn', true
@@ -29,19 +28,5 @@ module.exports = Backbone.View.extend
 		this.model.logout()
 
 	render: ->
-		html = '<a href="#" class="top-menu-item login-item">LOGIN</a>' +
-			'<ul class="menu submenu vertical" data-submenu>' +
-      		'</ul>'
-
-		###
-		if this.model.get('uid')==0
-			html = '<a href="#" class="login-item">LOGIN</a>'
-		else
-			html = '<a href="#" class="login-item">USER</a>' +
-				'<ul class="menu submenu vertical" data-submenu>' +
-            	'<li><a href="#">PROFILE</a></li>' +
-            	'<li><a href="#" class="logout-item">LOGOUT</a></li>' +
-          		'</ul>'
-		###
-		this.$el.html html
+		this.$el.html this.template()
 		this

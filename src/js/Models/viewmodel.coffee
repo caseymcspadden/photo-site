@@ -12,10 +12,10 @@ module.exports = Backbone.Model.extend
 		allowDragDrop: false
 
 	initialize: (attributes, options) ->
-		this.photos = new PhotoCollection null, options
-		options.masterPhotoCollection = this.photos
-		this.containers = new Containers null , options
-		this.urlBase = options.urlBase
+		this.photos = new PhotoCollection null
+		opts = {}
+		opts.masterPhotoCollection = this.photos
+		this.containers = new Containers null, opts
 
 	isDescendantContainer: (testChild, testParent) ->		
 		while testChild

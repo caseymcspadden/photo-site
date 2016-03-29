@@ -53,14 +53,18 @@
       font-size: 1.25rem;
     }
   }
+}
 
-  .top-bar-right {
-    margin-top: 5rem;
-    a {
+.top-bar-right {
+  a {
+    color: $body-font-color;
+    &:visited {color: $body-font-color;}   
+    &:hover {color: $white;}   
+
+    &.top-item {
       border-top: 2px solid $body-background;
       &:hover {
         border-top: 2px solid $secondary-color;
-        color: $white;
       }
     }
   }

@@ -303,7 +303,7 @@ $dropdown-sizes: (
 $dropdownmenu-arrows: false;
 $dropdownmenu-arrow-color: $body-font-color;
 $dropdownmenu-min-width: 200px;
-$dropdownmenu-background: $body-background;
+$dropdownmenu-background: lighten($body-background,10%);
 $dropdownmenu-border: 0px solid $medium-gray;
 
 // 18. Flex Video

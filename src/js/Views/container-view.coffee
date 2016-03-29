@@ -1,5 +1,6 @@
 Backbone = require 'backbone'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	tagName: 'div'
@@ -13,7 +14,7 @@ module.exports = Backbone.View.extend
 	#	'click img' : 'galleryClicked'
 
 	initialize: (options) ->
-		this.urlBase = options.urlBase
+		this.urlBase = config.urlBase
 		this.template = templates['container-view']
 		this.listenTo this.model, 'change', this.render
 		this.listenTo this.model, 'remove', this.remove

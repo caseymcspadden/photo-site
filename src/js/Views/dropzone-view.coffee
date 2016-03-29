@@ -1,6 +1,7 @@
 Backbone = require 'backbone'
 Dropzone = require 'dropzone'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 
@@ -16,7 +17,7 @@ module.exports = Backbone.View.extend
 		self = this
 		#this.$(".filedrop").dropzone
 		this.dropzone = new Dropzone('.filedrop',
-			url: this.model.urlBase + "/services/upload"
+			url: config.urlBase + "/services/upload"
 			uploadMultiple: true
 			addRemoveLinks: false
 			acceptedFiles: 'image/*'
