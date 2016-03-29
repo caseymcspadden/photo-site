@@ -5,7 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Foundation</title>
+  {% block style %}
   <link rel="stylesheet" href="{{options.webroot}}/stylesheets/app.css">
+  {% endblock %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 </head>
 <body>
@@ -38,8 +40,8 @@
     {% endblock %}
   </div>
  
-  {% block bundle %}
-  <script src="{{options.webroot}}/js/home.bundle.js"></script>
+  {% block script %}
+  <script src="{{options.webroot}}/js/app.bundle.js"></script>
   {% endblock %}
 </body>
 </html>

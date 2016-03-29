@@ -1,6 +1,5 @@
 Backbone = require 'backbone'
-Photo = require './photo'
+PhotoSummary = require './photosummary'
 
 module.exports = Backbone.Collection.extend
-	model: Photo
-	comparator: 'position'
+	model: PhotoSummary

@@ -48,6 +48,11 @@ $container['view'] = function ($container) {
     return $view;
 };
 
+$container['cookie'] = function($container){
+    $request = $container->get('request');
+    return new \Slim\Http\Cookies($request->getCookieParams());
+};
+
 $container['options'] = [
     'fileroot'=>$fileroot,
     'webroot'=>$webroot,
@@ -57,17 +62,11 @@ $container['options'] = [
 ];
 
 // Define app routes
-$app->get('/login', function ($request, $response, $args) {
-    return $this->view->render($response, 'login.html' , [
-        'options'=>$this->options
-  ]);
-})->setName('login');
-
 $app->get('/', function ($request, $response, $args) {
-    return $this->view->render($response, 'main.html' , [
+    return $this->view->render($response, 'home.html' , [
         'options'=>$this->options
   ]);
-})->setName('main');
+})->setName('home');
 
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
@@ -80,12 +79,6 @@ $app->get('/about', function ($request, $response, $args) {
         'options'=>$this->options
     ]);
 })->setName('about');
-
-$app->get('/contact', function ($request, $response, $args) {
-    return $this->view->render($response, 'contact.html' , [
-        'options'=>$this->options
-    ]);
-})->setName('contact');
 
 $app->get('/admin', function ($request, $response, $args) {
     return $this->view->render($response, "admin.html" , [
@@ -199,6 +192,19 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
 });
 
+$app->get('/services/featuredphotos', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $arr = array();
+
+  $result = $dbh->query("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN containers C ON C.id=CP.idcontainer WHERE C.isfeatured=1 ORDER BY CP.idcontainer,CP.position");
+
+  while ($row = $result->fetchObject())
+    array_push($arr,$row);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
+});
+
 $app->get('/services/containers', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
@@ -265,12 +271,12 @@ $app->get('/services/containers/{id:[0-9]+}/photos', function($request, $respons
 
   $arr = array();
 
-  $result = $dbh->query("SELECT idphoto, position FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+  $result = $dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
   while ($row = $result->fetch())
     array_push($arr,$row[0]);
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
 });
 
 $app->post('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {

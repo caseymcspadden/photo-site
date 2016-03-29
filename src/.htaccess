@@ -1,5 +1,12 @@
 RewriteEngine On
 
+
+#RewriteCond %{HTTP_REFERER} !^https?://www.crossriver\.com/?.*$ [NC]
+#RewriteCond %{HTTP_REFERER} !^https?://crossriver\.com/?.*$ [NC]
+RewriteCond %{HTTP_REFERER} !^$  
+RewriteCond %{HTTP_REFERER} !^https?://localhost/?.*$ [NC]
+RewriteRule \.(gif|jpe?g|png|bmp)$ - [R=403,NC]
+
 #RewriteCond %{HTTP_REFERER} !^$  
 #RewriteCond %{HTTP_REFERER} !^http://(www.)?crossriver.com/ [NC]  
 #RewriteRule .(gif|jpg|png)$ - [R=403]
