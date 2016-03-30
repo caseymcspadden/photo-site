@@ -25,9 +25,9 @@ module.exports = Backbone.View.extend
 	editFolder: (e) ->
 		e.preventDefault()
 		arr = $(e.target).serializeArray()
-		data = {}
+		data = {isportfolio: 0}
 		for elem in arr
-			data[elem.name]=elem.value	
+			data[elem.name] = if elem.name=='isportfolio' then 1 else elem.value
 		this.currentContainer.save data
 		this.$('#fv-editFolder .close-button').trigger('click')
 
@@ -42,15 +42,16 @@ module.exports = Backbone.View.extend
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
 	changeContainer: ->
-		#if (this.currentContainer)
-		#	this.stopListening this.currentContainer.containers
-
+		console.log "folder container changed"
+		if (this.currentContainer)
+			this.stopListening this.currentContainer
 		this.currentContainer = this.model.get 'selectedContainer'
 		this.$('.title').html(if this.currentContainer then this.currentContainer.get('name') else 'Default')
 		if (this.currentContainer)
 			this.$("#fv-editFolder input[name='name']").val this.currentContainer.get('name')
 			this.$("#fv-editFolder input[name='description']").val this.currentContainer.get('description')
-			#this.listenTo this.currentContainer.containers ,'sort' , this.addAll
+			this.$("#fv-editFolder input[name='isportfolio']").checked = this.currentContainer.get('isportfolio')
+			this.listenTo this.currentContainer, 'change' , this.currentContainerChanged
 			this.addAll()
 
 	render: ->
@@ -68,6 +69,9 @@ module.exports = Backbone.View.extend
 	addAll: ->
 		this.$('.container-list').html ''
 		this.model.containers.each this.addOne, this
+
+	currentContainerChanged: (m) ->
+		this.$('.title').html m.get('name')
 
 	selectContainer: (e) ->
 		this.model.selectContainer $(e.currentTarget).attr('id').replace('featured-','')

@@ -19,7 +19,8 @@ module.exports = Backbone.View.extend
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .add-selected' : 'addSelected'	
-		'click .set-featured' : 'setFeaturedPhoto'
+		'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
+		'click .set-featured-folder' : 'setFeaturedFolderPhoto'
 		'click .delete-gallery' : 'deleteGallery'
 		'dblclick' : 'openViewer'
 		'keydown .photo-list' : 'keyDown'
@@ -105,7 +106,7 @@ module.exports = Backbone.View.extend
 		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery and this.currentGallery.get('type')=='gallery'
-			this.listenTo this.currentGallery, 'change:selected', this.galleryChanged 
+			this.listenTo this.currentGallery, 'change', this.galleryChanged 
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
@@ -117,7 +118,9 @@ module.exports = Backbone.View.extend
 			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
 	galleryChanged: (e) ->
-		this.$("#gv-editGallery input[name='name']").val this.currentGallery.get('name')
+		name = this.currentGallery.get 'name'
+		this.$('.title').html name
+		this.$("#gv-editGallery input[name='name']").val name
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
 
@@ -130,8 +133,15 @@ module.exports = Backbone.View.extend
 		this.model.set {addingPhotos: !this.model.get('addingPhotos')}
 		e.preventDefault()
 
-	setFeaturedPhoto: (e) ->
-		this.currentGallery.setFeaturedPhoto()
+	setFeaturedGalleryPhoto: (e) ->
+		ids = this.currentGallery.getSelectedPhotos true
+		return if ids.length==0
+		this.model.setFeaturedPhoto this.currentGallery.id, ids[0]
+
+	setFeaturedFolderPhoto: (e) ->
+		ids = this.currentGallery.getSelectedPhotos true
+		return if ids.length==0
+		this.model.setFeaturedPhoto this.currentGallery.get('idparent'), ids[0]
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}

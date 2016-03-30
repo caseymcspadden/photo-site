@@ -1,13 +1,26 @@
-<div class="large-4 columns">
-<span class="title">Default</span>
-</div>
-<div class="large-8 columns small button-group">
-	<a href="#" class="button" data-open="gv-editGallery">Edit</a>
-	<a href="#" class="button" data-open="gv-uploadPhotos">Upload Photos</a>
-	<a href="#" class="button" data-open="gv-addPhotos">Add Photos</a>
-	<a href="#" class="button remove-photos">Remove Selected</a>
-	<a href="#" class="button set-featured">Set Featured</a>
-	<a href="#" class="button delete-gallery">Delete</a>
+<div class="large-12 columns">
+	<ul class="dropdown menu" data-dropdown-menu>
+		<li class="menu-text title">Default</li>
+		<li><a href="#">Gallery</a>
+			<ul class="submenu menu vertical" data-submenu>
+				<li><a href="#" data-open="gv-editGallery">Edit</a></li>
+				<li><a href="#" class="delete-gallery">Delete</a></li>
+			</ul>
+		<li>
+		<li><a href="#">Add Photos</a>
+			<ul class="submenu menu vertical" data-submenu>
+				<li><a href="#" data-open="gv-uploadPhotos">Upload Photos</a></li>
+				<li><a href="#" data-open="gv-addPhotos">Add Existing</a></li>
+			</ul>
+		<li>
+		<li><a href="#" class="remove-photos">Remove Selected</a></li>
+		<li><a href="#">Set Featured Photo</a>
+			<ul class="submenu menu vertical" data-submenu>
+				<li><a href="#" class="set-featured-gallery">Gallery</a></li>
+				<li><a href="#" class="set-featured-folder">Folder</a></li>
+			</ul>
+		<li>
+	</ul>
 </div>
 
 <div class="large-12 columns photo-container">
@@ -23,7 +36,7 @@
 </button>
 </div>
 
-<div class="reveal" id="gv-editGallery" data-reveal>
+<div class="reveal form" id="gv-editGallery" data-reveal>
 	<h2>Edit Gallery</h2>
 	<form>
 		<label>Name
@@ -50,7 +63,7 @@
 </div>
 
 
-<div class="reveal large" id="gv-uploadPhotos" data-reveal>
+<div class="reveal dark large" id="gv-uploadPhotos" data-reveal>
 </div>
 
 

@@ -134,3 +134,10 @@ module.exports = Backbone.Model.extend
 		)
 
 		container.addPhotos selectedPhotos
+
+
+	setFeaturedPhoto: (idContainer, idPhoto) ->
+		return if !idContainer or !idPhoto
+		container = this.containers.get idContainer
+		if container
+			container.save {featuredPhoto: idPhoto} , {wait: true}

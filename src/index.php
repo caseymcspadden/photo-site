@@ -252,7 +252,7 @@ $app->put('/services/containers/{id}', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
   $vals = $request->getParsedBody();
 
-  $dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+  $dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });

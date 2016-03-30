@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 templates = require './jst'
 
 module.exports = Backbone.View.extend
-	className: 'reveal'
+	className: 'reveal form'
 
 	attributes:
 		'data-reveal': ''

@@ -16,6 +16,7 @@ module.exports = Backbone.Model.extend
 		populated: false
 		featuredPhoto: 0
 		watermark: 1
+		isportfolio: 0
 	
 	initialize: (attributes, options) ->
 		this.urlBase = config.urlBase
@@ -105,8 +106,3 @@ module.exports = Backbone.Model.extend
 			context: this
 			data: {ids: ids.join(',')}
 		)
-
-	setFeaturedPhoto: ->
-		ids = this.getSelectedPhotos true
-		return if ids.length==0
-		this.save {featuredPhoto: ids[0]} , {wait: true	}

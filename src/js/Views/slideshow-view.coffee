@@ -41,7 +41,6 @@ module.exports = Backbone.View.extend
 
 	addOne: (m) ->
 		json = m.toJSON()
-		console.log json
 		json.position = this.counter++
 		json.urlBase = config.urlBase
 		this.$el.append this.slideTemplate(json) 

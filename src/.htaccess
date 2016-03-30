@@ -4,6 +4,7 @@ RewriteEngine On
 #RewriteCond %{HTTP_REFERER} !^https?://www.crossriver\.com/?.*$ [NC]
 #RewriteCond %{HTTP_REFERER} !^https?://crossriver\.com/?.*$ [NC]
 RewriteCond %{HTTP_REFERER} !^$  
+RewriteCond %{HTTP_REFERER} !^https?://192.168.1.171.*$ [NC]
 RewriteCond %{HTTP_REFERER} !^https?://localhost/?.*$ [NC]
 RewriteRule \.(gif|jpe?g|png|bmp)$ - [R=403,NC]
 

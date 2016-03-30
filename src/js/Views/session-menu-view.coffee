@@ -18,9 +18,12 @@ module.exports = Backbone.View.extend
 
 	setUser: (m) ->
 		if m.get('uid')==0
-			this.$('ul.submenu').html '<li><a href="#" class="login-item">LOGIN</a></li>'
+			#this.$('ul.submenu').html '<li><a href="#" class="login-item">LOGIN</a></li>'
+			this.$('ul.submenu').html ''
+			this.$('.top-item').addClass('login-item')
 		else
 			this.$('ul.submenu').html '<li><a href="#">PROFILE</a></li><li><a href="#">GALLERIES</a></li><li><a href="#" class="logout-item">LOGOUT</a></li>'
+			this.$('.top-item').removeClass('login-item')
 
 	login: (e) ->
 		this.model.set 'loggingIn', true

@@ -13,8 +13,11 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.folderTemplate = templates['folder-node-view']
 		this.galleryTemplate = templates['gallery-node-view']
-		this.listenTo this.model, 'change:name', this.render
+		this.listenTo this.model, 'change:name', this.nameChanged
 		this.listenTo this.model, 'destroy', this.remove
+
+	nameChanged: (m) ->
+		this.$('.node-name').html m.get 'name'
 
 	render: ->
 		template = if this.model.get('type') == 'gallery' then this.galleryTemplate else this.folderTemplate
