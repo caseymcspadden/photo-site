@@ -1,6 +1,7 @@
 require 'foundation'
 Backbone = require 'backbone'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	className: 'reveal'
@@ -26,6 +27,7 @@ module.exports = Backbone.View.extend
 
 	logout: (e) ->
 		this.model.logout()
+		document.location = config.urlBase
 
 	render: ->
 		this.$el.html this.template()

@@ -3,21 +3,41 @@ templates = require './jst'
 config = require './config'
 
 module.exports = Backbone.View.extend
-	#events:
-		#'click .scroll-left' : 'scrollLeft'
-		#'click .scroll-right' : 'scrollRight'
+	events:
+		'mouseover' : 'mouseOver'
+		'mouseout' : 'mouseOut'
+		'click .prev' : 'previous'
+		'click .next' : 'next'
 		#'click input:radio[name=view-size]' : 'changeImageSize'
 		#'keydown' : 'keyDown'
 
 	initialize: (options) ->
 		this.counter = 0
-		this.template = templates['slideshow-view']
+		this.pauseOnHover = true
+		this.speed = 4000
+		this.controlsTemplate = templates['slideshow-view']
 		this.slideTemplate = templates['slide-view']
-		#this.render()
 		this.listenTo this.collection, 'reset', this.addAll
 
-	render: ->
-		this.$el.html this.template()
+	#render: ->
+	#	this.$el.html this.template()
+
+	mouseOver: (e) ->
+		if this.pauseOnHover
+			this.interval = window.clearInterval this.interval
+
+	mouseOut: (e) ->
+		if this.pauseOnHover
+			self = this
+			this.interval = window.setInterval( ->
+				self.showCurrent(1)
+			, this.speed)
+
+	previous: ->
+		this.showCurrent -1
+
+	next: ->
+		this.showCurrent 1
 
 	addOne: (m) ->
 		json = m.toJSON()
@@ -28,11 +48,13 @@ module.exports = Backbone.View.extend
 		#this.$('.controls').before this.slideTemplate(json) 
 
 	addAll: ->
-		this.$el.html ''
+		#this.$el.html ''
 		this.counter = 0
 		this.collection.each this.addOne, this
 		this.counter = 0
 		this.showCurrent 0
+		this.autoCycle this.speed
+		this.$el.append this.controlsTemplate() 
 
 	showCurrent: (i) ->
 		this.counter = this.counter + i
@@ -43,8 +65,12 @@ module.exports = Backbone.View.extend
 
 	#injectControls: ->
 
-	#autoCycle: (speed, pauseOnHover) ->
-
+	autoCycle: (speed) ->
+		self = this
+		this.interval = window.setInterval( ->
+			self.showCurrent(1)
+		, this.speed)
+ 
 	#addFullScreen: ->
 
 	#addSwipe: ->
