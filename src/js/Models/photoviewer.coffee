@@ -1,5 +1,3 @@
-# Gallery model contains a collection of photos
-
 Backbone = require 'backbone'
 
 module.exports = Backbone.Model.extend

@@ -22,18 +22,6 @@ module.exports = Backbone.Model.extend
 		this.urlBase = config.urlBase
 		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null
 		this.photos = new ContainerPhotos
-
-	###
-	removeContainer: (id) ->
-		this.containers.remove id
-		position = 1
-		this.containers.each (c)->
-			c.save {position: position++}
-
-	addContainer: (c) ->
-		this.containers.add c
-		c.save {idParent: this.id, position: this.containers.length-1}
-	###
 	
 	populate: ->
 		self = this
@@ -43,15 +31,6 @@ module.exports = Backbone.Model.extend
 				self.addPhoto id
 		)
 		this.set {populated: true}
-
-	###
-	featuredPhotoSource: ->
-		if this.get('featuredPhoto') != 0 
-			return 'photos/T/' + this.get('featuredPhoto') + '.jpg'
-		else if this.get('type') == 'folder' 
-			return 'images/thumbnail-folder.jpg'
-		return 'images/thumbnail-gallery.jpg'
-	###
 	
 	addPhoto: (id) ->
 		p = this.masterPhotoCollection.get(id)

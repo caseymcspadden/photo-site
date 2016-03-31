@@ -17,7 +17,7 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'destroy', this.remove
 
 	nameChanged: (m) ->
-		this.$('.node-name').html m.get 'name'
+		this.$('> a .node-name').html m.get 'name'
 
 	render: ->
 		template = if this.model.get('type') == 'gallery' then this.galleryTemplate else this.folderTemplate

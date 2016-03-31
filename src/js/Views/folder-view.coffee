@@ -4,7 +4,6 @@ Backbone = require 'backbone'
 templates = require './jst'
 Containers = require './containers'
 Container = require './container'
-#Admin = require './admin'
 ContainerView = require './container-view'
 
 module.exports = Backbone.View.extend
@@ -19,8 +18,7 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['folder-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
-		this.listenTo this.model.containers, 'remove', this.addAll
-		this.listenTo this.model.containers, 'add', this.addAll
+		this.listenTo this.model.containers, 'add remove change', this.addAll
 
 	editFolder: (e) ->
 		e.preventDefault()
@@ -64,16 +62,16 @@ module.exports = Backbone.View.extend
 			view.render()
 		view = this.containerViews[container.id]
 		view.delegateEvents()
-		this.$('.container-list').append view.el
+		this.$('.gallery-list').append view.el
 
 	addAll: ->
-		this.$('.container-list').html ''
+		this.$('gallery-list').html ''
 		this.model.containers.each this.addOne, this
 
 	currentContainerChanged: (m) ->
 		this.$('.title').html m.get('name')
 
 	selectContainer: (e) ->
-		this.model.selectContainer $(e.currentTarget).attr('id').replace('featured-','')
+		this.model.selectContainer $(e.currentTarget).attr('id').replace('container-','')
 
 
