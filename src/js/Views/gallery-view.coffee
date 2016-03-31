@@ -18,6 +18,7 @@ module.exports = Backbone.View.extend
 		'submit #gv-editGallery form' : 'editGallery'
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
+		'click .delete-photos' : 'deletePhotos'
 		'click .add-selected' : 'addSelected'	
 		'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
 		'click .set-featured-folder' : 'setFeaturedFolderPhoto'
@@ -125,7 +126,12 @@ module.exports = Backbone.View.extend
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
 
 	removePhotos: (e) ->
-		this.currentGallery.removeSelectedPhotos()
+		this.currentGallery.removeSelectedPhotos(false)
+		this.masterAddAll()
+		e.preventDefault()
+
+	deletePhotos: (e) ->
+		this.currentGallery.removeSelectedPhotos(true)
 		this.masterAddAll()
 		e.preventDefault()
 

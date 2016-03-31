@@ -5,17 +5,23 @@ module.exports = Backbone.Model.extend
 	urlRoot: config.urlBase + '/services/session'
 
 	defaults :
-		uid: 0
+		id: 0
+		isadmin: 0		
 		errorMessage: ''
 		loggingIn: false
+		email: ''
+		name: ''
+		company: ''
 
 	initialize: (attributes, options) ->
 		hash = this.getSessionHash()
+		console.log hash
 		return if hash==''
 		self = this
 		$.get(this.urlRoot+'/'+hash, (result) ->
 			json = $.parseJSON(result)
-			self.set 'uid', json.uid
+			console.log json
+			self.set json
 		)
 
 	getSessionHash: ->

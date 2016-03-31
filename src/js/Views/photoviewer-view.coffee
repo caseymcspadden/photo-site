@@ -14,7 +14,6 @@ module.exports = Backbone.View.extend
 		'keydown' : 'keyDown'
 
 	initialize: (options) ->
-		console.log "Initializing photo viewer"
 		this.revealElement = options.revealElement
 		this.urlBase = config.urlBase
 		this.model = new PhotoviewerModel
@@ -24,7 +23,6 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'change:collection', this.collectionChanged
 
 	keyDown: (e) ->
-		console.log e
 		if e.keyCode==37
 			this.scrollLeft e
 		else if e.keyCode==39
@@ -58,7 +56,6 @@ module.exports = Backbone.View.extend
 		this
 
 	open: (photo, collection) ->
-		console.log photo
 		this.model.set {collection: collection}
 		this.model.set {photo: photo}
 		this.index = collection.indexOf photo
@@ -69,7 +66,6 @@ module.exports = Backbone.View.extend
 	photoChanged: ->
 		this.$('.view-image').attr('src' , this.urlBase + '/photos/' + this.model.get('size') + '/' + this.model.get('photo').id + '.jpg')
 		json = this.model.get('photo').toJSON()
-		console.log json
 		text = '';
 		for k, v of json
 			text += k + ": " + v + '<br>'

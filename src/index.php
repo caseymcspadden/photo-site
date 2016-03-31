@@ -1,6 +1,10 @@
 <?php
 require './vendor/autoload.php';
 
+use Dflydev\FigCookies\FigResponseCookies;
+use Dflydev\FigCookies\SetCookie;
+use Dflydev\FigCookies\SetCookies;
+
 // Change these three paths when moving to a production environment
 // $fileroot = path used by PHP to write to folder holding original photos. Should be behind the web root
 // $photoroot = path used by PHP to write to thumbnail folder
@@ -29,10 +33,12 @@ if(!$dbh) {
 $cfg = new PHPAuth\Config($dbh);
 $auth = new PHPAuth\Auth($dbh, $cfg);
 
-$app = new \Slim\App();
 
 // Get container
-$container = $app->getContainer();
+//$container = new \Slim\$app->getContainer();
+$container = new \Slim\Container;
+$app = new \Slim\App($container);
+
 
 // Register component on container
 $container['view'] = function ($container) {
@@ -48,10 +54,17 @@ $container['view'] = function ($container) {
     return $view;
 };
 
-$container['cookie'] = function($container){
+/*
+$container['cookies'] = function($container){
     $request = $container->get('request');
-    return new \Slim\Http\Cookies($request->getCookieParams());
+    return Dflydev\FigCookies\Cookies::fromRequest($request);   
 };
+
+$container['setCookies'] = function($container){
+    $response = $container->get('response');
+    return Dflydev\FigCookies\SetCookies::fromResponse($response);   
+};
+*/
 
 $container['options'] = [
     'fileroot'=>$fileroot,
@@ -135,9 +148,15 @@ $app->post('/services/users', function($request, $response, $args) {
 });
 
 $app->get('/services/session/{hash}', function($request, $response, $args) {
-  $uid = $this->options['auth']->getSessionUID($args['hash']);
-  $result = array();
-  $result['uid'] = $uid===false ? 0 : $uid;
+  $dbh = $this->options['dbh'];
+
+  if (!$this->options['auth']->checkSession($args['hash']))
+    $result = array('id'=>0);
+  else
+    $uid = $this->options['auth']->getSessionUID($args['hash']);
+    $rslt = $dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid");
+    $result = $rslt->fetchObject();
+
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
@@ -145,6 +164,8 @@ $app->post('/services/session/{hash}', function($request, $response, $args) {
   $ret = $this->options['auth']->logout($args['hash']);
   $result = array();
   $result['error'] = !$ret;
+  if ($ret)
+    setcookie('session','',time()-1);
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
@@ -156,9 +177,9 @@ $app->post('/services/session', function($request, $response, $args) {
   $result = $this->options['auth']->login($vals['email'], $vals['password'], $vals['remember']);
 
   if ($result['error']==false) {
-    $rslt = $dbh->query("SELECT * FROM sessions WHERE hash='$result[hash]'");
+    $rslt = $dbh->query("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'");
     $result = $rslt->fetchObject();
-  }
+  } 
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
@@ -175,6 +196,18 @@ $app->get('/services/photos', function($request, $response, $args) {
     array_push($arr,$row);
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+});
+
+$app->delete('/services/photos', function($request, $response, $args) {
+  $dbh = $this->options['dbh'];
+
+  $parsedBody = $request->getParsedBody();
+
+  $dbh->query("DELETE P, CP FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE P.id IN (" . $parsedBody['ids'] . ")");
+
+  $arr = array();
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {

@@ -177,7 +177,7 @@ module.exports = Backbone.View.extend
 	selectContainer: (e) ->
 		$li = this.getContainingElement e.target, 'li'
 		this.model.selectContainer $li.attr('id').replace('node-','')
-		e.preventDefault()
+		this.folderIconClicked e
 
 	selectedContainerChanged: (m) ->
 		container = m.get 'selectedContainer'

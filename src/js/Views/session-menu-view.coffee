@@ -12,17 +12,20 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['session-menu-view']
-		this.listenTo this.model, 'change:uid' , this.setUser
+		this.listenTo this.model, 'change:id' , this.setUser
 		this.render()
 		this.setUser(this.model)
 
 	setUser: (m) ->
-		if m.get('uid')==0
+		if m.get('id')==0
 			#this.$('ul.submenu').html '<li><a href="#" class="login-item">LOGIN</a></li>'
 			this.$('ul.submenu').html ''
 			this.$('.top-item').addClass('login-item')
 		else
-			this.$('ul.submenu').html '<li><a href="#">PROFILE</a></li><li><a href="#">GALLERIES</a></li><li><a href="#" class="logout-item">LOGOUT</a></li>'
+			html = 	'<li><a href="#">PROFILE</a></li><li><a href="#">GALLERIES</a></li>'
+			html += '<li><a href="' + config.urlBase + '/admin">ADMIN</a></li>' if this.model.get('isadmin')
+			html += '<li><a href="#" class="logout-item">LOGOUT</a></li>'
+			this.$('ul.submenu').html html
 			this.$('.top-item').removeClass('login-item')
 
 	login: (e) ->

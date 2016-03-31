@@ -16,7 +16,7 @@ module.exports = Backbone.View.extend
 		this.template = templates['login-view']
 		this.listenTo this.model, 'change:loggingIn' , this.openClose
 		this.listenTo this.model, 'change:errorMessage' , this.loginError
-		this.listenTo this.model, 'change:uid' , this.loginSuccess
+		this.listenTo this.model, 'change:id' , this.loginSuccess
 
 	loginError: (m) ->
 		msg = m.get 'errorMessage'

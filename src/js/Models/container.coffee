@@ -4,8 +4,7 @@ ContainerPhotos = require './containerphotos'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	urlRoot: -> 
-		this.urlBase + '/services/containers'
+	urlRoot: config.urlBase + '/services/containers'
 
 	defaults :
 		type: 'folder'	
@@ -19,18 +18,21 @@ module.exports = Backbone.Model.extend
 		isportfolio: 0
 	
 	initialize: (attributes, options) ->
-		this.urlBase = config.urlBase
 		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null
+		this.listenTo this.masterPhotoCollection, 'remove', this.photoRemoved
 		this.photos = new ContainerPhotos
 	
 	populate: ->
 		self = this
 		console.log 'populate'
-		$.getJSON(this.urlBase + '/services/containers/' + this.id + '/photos', (data) ->
+		$.getJSON(config.urlBase + '/services/containers/' + this.id + '/photos', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id
 		)
 		this.set {populated: true}
+
+	photoRemoved: (photo) ->
+		this.photos.remove photo
 	
 	addPhoto: (id) ->
 		p = this.masterPhotoCollection.get(id)
@@ -38,7 +40,7 @@ module.exports = Backbone.Model.extend
 
 	addPhotos: (arr) ->
 		$.ajax(
-			url: this.urlBase +  '/services/containers/' + this.id + '/photos'
+			url: config.urlBase +  '/services/containers/' + this.id + '/photos'
 			type: 'POST'
 			context: this
 			data: {ids: arr.join(',')}
@@ -59,18 +61,24 @@ module.exports = Backbone.Model.extend
 		)
 		ids
 
-	removeSelectedPhotos: ->
+	removeSelectedPhotos: (deletePhotos) ->
 		ids = this.getSelectedPhotos true
+
+		collection = if deletePhotos then this.masterPhotoCollection else this.photos
+
+		for id in ids
+			collection.remove id
+
+		url = if deletePhotos then '/photos' else '/services/containers/' + this.id + '/photos'
+
 		$.ajax(
-			url: this.urlBase + '/services/containers/' + this.id + '/photos'
+			url: config.urlBase + '/services' + url
 			type: 'DELETE'
 			context: this
 			data: {ids: ids.join(',')}
 			success: (result) ->
 				json = $.parseJSON(result)
-				ids = json.ids.split ','
-				for id in ids
-					this.photos.remove id
+				console.log json
 		)
 
 	rearrangePhotos: (ids) ->
@@ -80,7 +88,7 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: this.urlBase + '/services/containers/' + this.id + '/photos'
+			url: config.urlBase + '/services/containers/' + this.id + '/photos'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}

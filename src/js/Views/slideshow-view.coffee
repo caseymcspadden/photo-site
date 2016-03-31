@@ -1,4 +1,5 @@
 Backbone = require 'backbone'
+Hammer = require 'hammerjs'
 templates = require './jst'
 config = require './config'
 
@@ -15,6 +16,7 @@ module.exports = Backbone.View.extend
 		this.counter = 0
 		this.pauseOnHover = true
 		this.speed = 4000
+		this.addSwipe()
 		this.controlsTemplate = templates['slideshow-view']
 		this.slideTemplate = templates['slide-view']
 		this.listenTo this.collection, 'reset', this.addAll
@@ -70,9 +72,17 @@ module.exports = Backbone.View.extend
 			self.showCurrent(1)
 		, this.speed)
  
+	addSwipe: ->
+		this.hammer = new Hammer(this.el)
+		self = this
+		this.hammer.on 'swiperight', (e) ->
+			self.showCurrent(-1)
+
+		this.hammer.on 'swipeleft', (e) ->
+			self.showCurrent(1)
+
 	#addFullScreen: ->
 
-	#addSwipe: ->
 
 	#toggleFullScreen: ->
 

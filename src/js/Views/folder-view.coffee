@@ -57,6 +57,7 @@ module.exports = Backbone.View.extend
   		
 	addOne: (container) ->
 		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id
+
 		if !(this.containerViews.hasOwnProperty container.id)
 			view = this.containerViews[container.id] = new ContainerView {model:container, className: 'featured-thumbnail', urlBase: this.model.urlBase}
 			view.render()
@@ -65,7 +66,7 @@ module.exports = Backbone.View.extend
 		this.$('.gallery-list').append view.el
 
 	addAll: ->
-		this.$('gallery-list').html ''
+		this.$('.gallery-list').html ''
 		this.model.containers.each this.addOne, this
 
 	currentContainerChanged: (m) ->

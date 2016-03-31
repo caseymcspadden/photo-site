@@ -4,7 +4,8 @@
         "slim/slim": "^3.1",
         "slim/php-view": "^2.0",
         "slim/twig-view": "^2.0",
-        "phpauth/phpauth": "^1.1"
+        "phpauth/phpauth": "^1.1",
+        "dflydev/fig-cookies": "^1.0"
     },
     "authors": [
         {
