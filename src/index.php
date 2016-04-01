@@ -201,11 +201,23 @@ $app->get('/services/photos', function($request, $response, $args) {
 $app->delete('/services/photos', function($request, $response, $args) {
   $dbh = $this->options['dbh'];
 
+  $fileroot = $this->options['fileroot'];
+  $photoroot = $this->options['photoroot'];
+
   $parsedBody = $request->getParsedBody();
 
   $dbh->query("DELETE P, CP FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE P.id IN (" . $parsedBody['ids'] . ")");
 
-  $arr = array();
+  $arr = explode(',', $parsedBody['ids']);
+
+  foreach ($arr as $id) {
+    $subdirectory = sprintf("%02d",$id%100);
+    //error_log($fileroot . '/photos/' . $subdirectory .'/' . $id . '_*.jpg');      
+    //error_log($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg');      
+    array_map('unlink', glob($fileroot . '/photos/' . $subdirectory .'/' . $id . '_*.jpg'));      
+    array_map('unlink', glob($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg'));      
+    //array_map('unlink', glob($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg'));
+  }
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
