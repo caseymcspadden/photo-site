@@ -20,19 +20,21 @@
   }
 }
 
-.reveal.dark {
-  background-color: $body-background;
+.reveal.form {
+  color: $white;
+  &:focus {
+    outline: 0;
+  }
   .close-button:hover {
     color: $white
   }
-  label {
-    color: $white
+  a {
+    color: $light-gray;
   }
-}
-
-.reveal.form {
-  background-color: $medium-gray;
-  color: $secondary-color;
+  input[type="submit"] {
+    background-color: lighten($black,10%);
+    width: 100%;
+  }
 }
 
 .menu {

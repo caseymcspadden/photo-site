@@ -7,6 +7,7 @@ module.exports = Backbone.Model.extend
 		fileName: ""
 		title: ""
 		description: ""
+		keywords: ""
 		fileSize: ""
 		width: ""
 		height: ""

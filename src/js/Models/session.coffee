@@ -14,11 +14,8 @@ module.exports = Backbone.Model.extend
 		company: ''
 
 	initialize: (attributes, options) ->
-		hash = this.getSessionHash()
-		console.log hash
-		return if hash==''
 		self = this
-		$.get(this.urlRoot+'/'+hash, (result) ->
+		$.get(this.urlRoot, (result) ->
 			json = $.parseJSON(result)
 			console.log json
 			self.set json
@@ -52,8 +49,8 @@ module.exports = Backbone.Model.extend
 
 	logout: ->
 		$.ajax(
-			url: this.urlRoot + '/' + this.getSessionHash()
-			type: 'POST'
+			url: this.urlRoot
+			type: 'PUT'
 			context: this
 			success: (result) ->
 				json = $.parseJSON(result)

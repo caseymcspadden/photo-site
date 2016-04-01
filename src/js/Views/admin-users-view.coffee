@@ -25,7 +25,7 @@ module.exports = Backbone.View.extend
 			data[elem.name]=elem.value
 		
 		$.ajax(
-			url: this.collection.url()
+			url: this.collection.url
 			type: 'POST'
 			context: this
 			data: data

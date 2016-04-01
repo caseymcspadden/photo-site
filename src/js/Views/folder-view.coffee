@@ -23,9 +23,9 @@ module.exports = Backbone.View.extend
 	editFolder: (e) ->
 		e.preventDefault()
 		arr = $(e.target).serializeArray()
-		data = {isportfolio: 0}
+		data = {}
 		for elem in arr
-			data[elem.name] = if elem.name=='isportfolio' then 1 else elem.value
+			data[elem.name] = elem.value
 		this.currentContainer.save data
 		this.$('#fv-editFolder .close-button').trigger('click')
 

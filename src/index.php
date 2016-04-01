@@ -1,9 +1,6 @@
 <?php
 require './vendor/autoload.php';
-
-use Dflydev\FigCookies\FigResponseCookies;
-use Dflydev\FigCookies\SetCookie;
-use Dflydev\FigCookies\SetCookies;
+require './classes/CrossRiver/Services.php';
 
 // Change these three paths when moving to a production environment
 // $fileroot = path used by PHP to write to folder holding original photos. Should be behind the web root
@@ -52,6 +49,10 @@ $container['view'] = function ($container) {
     ));
 
     return $view;
+};
+
+$container['services'] = function($container) {
+    return new CrossRiver\Services();
 };
 
 /*
@@ -108,94 +109,59 @@ $app->get('/admin/{task}', function ($request, $response, $args) {
 // SERVICES ROUTES
 
 $app->get('/services/users', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else
+    $json = $this->services->fetchJSON("SELECT * FROM users");
 
-  $arr = array();
-
-  $result = $dbh->query("SELECT * FROM users");
-
-  while ($row = $result->fetchObject())
-    array_push($arr,$row);
-
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
-});
-
-$app->get('/services/users/{id:[0-9]*}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
-  $arr = array();
-
-  $result = $dbh->query("SELECT * FROM users WHERE id=$args[id]");
-
-  $row = $result->fetchObject();
-
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($row));
+  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
 $app->post('/services/users', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
   $vals = $request->getParsedBody();
 
-  $result = $this->options['auth']->register($vals['email'], $vals['password'], $vals['repeat-password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
-
-  if ($result['error']==false) {
-    $rslt = $dbh->query("SELECT * FROM users WHERE email='$vals[email]'");
-    $result = $rslt->fetchObject();
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else {
+    $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
+    if ($result['error']==true)
+      $json = json_encode($result);
+    else
+      $json = $this->services->fetchJSON("SELECT * FROM users WHERE email='$vals[email]'",true);
   }
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/session/{hash}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
-  if (!$this->options['auth']->checkSession($args['hash']))
-    $result = array('id'=>0);
-  else
-    $uid = $this->options['auth']->getSessionUID($args['hash']);
-    $rslt = $dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid");
-    $result = $rslt->fetchObject();
-
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+$app->get('/services/session', function($request, $response, $args) {
+  $json = $this->services->getSessionUser();
+  
+  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->post('/services/session/{hash}', function($request, $response, $args) {
-  $ret = $this->options['auth']->logout($args['hash']);
-  $result = array();
+$app->put('/services/session', function($request, $response, $args) {
+  $ret = $this->services->logout($this->services->getSessionHash());
+  $result=array();
   $result['error'] = !$ret;
-  if ($ret)
-    setcookie('session','',time()-1);
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
 });
 
 $app->post('/services/session', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
   $vals = $request->getParsedBody();
-
-  $result = $this->options['auth']->login($vals['email'], $vals['password'], $vals['remember']);
-
-  if ($result['error']==false) {
-    $rslt = $dbh->query("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'");
-    $result = $rslt->fetchObject();
-  } 
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+  $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
+  if ($result['error']==true)
+    $json = json_encode($result);
+  else 
+    $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
+  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
 $app->get('/services/photos', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else
+    $json = $this->services->fetchJSON("SELECT * FROM photos");
 
-  $query = "SELECT * FROM photos";
-
-  $arr = array();
-
-  $result = $dbh->query($query);
-
-  while ($row = $result->fetchObject())
-    array_push($arr,$row);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode(count($arr)==1 && $args['id'] ? $arr[0] : $arr));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
 $app->delete('/services/photos', function($request, $response, $args) {
