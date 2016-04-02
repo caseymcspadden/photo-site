@@ -29,7 +29,6 @@ module.exports = Backbone.View.extend
 		downloadingImage.src = this.urlBase + '/photos/T/' + this.model.id + '.jpg'
 
 	setFocus: (e) ->
-		console.log "setting focus"
 		this.$('a').focus()
 
 	render: ->

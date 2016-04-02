@@ -2,6 +2,7 @@ ul.mtree {
   opacity: 1; // Set to 0 and let mtree display after initialization
   margin-left: 0; // Lets just remove default left margin on root element shall we ...
   padding: 1.2em; // Set a nice padding if your design requires it
+  font-size: 1rem;
 
   ul {
     margin-left: 1em; // Set default indent level (or set 0)

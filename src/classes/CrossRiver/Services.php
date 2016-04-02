@@ -5,19 +5,18 @@ namespace CrossRiver;
 
 class Services
 {
-	private $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
-	private $webroot = '/photo-site/build';
 	private $auth;
 	private $config = array();
 
+	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
+	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
+	public $webroot = '/photo-site/build';
 	public $dbh;
 	public $error = false;
 	public $unauthorizedJSON = '{"error": "unauthorized"}';
 
 	public function __construct()
 	{
-		error_log("Services Constructor");
 		$contents = file($this->fileroot . '/app.cfg');
 
 		foreach ($contents as $line) {

@@ -23,6 +23,8 @@ module.exports = Backbone.View.extend
 		'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
 		'click .set-featured-folder' : 'setFeaturedFolderPhoto'
 		'click .delete-gallery' : 'deleteGallery'
+		'click .select-all' : 'selectAll'
+		'click .deselect-all' : 'deselectAll'
 		'dblclick' : 'openViewer'
 		'keydown .photo-list' : 'keyDown'
 		'keyup .photo-list' : 'keyUp'
@@ -39,7 +41,6 @@ module.exports = Backbone.View.extend
 		this.masterPhotoCollection = new Backbone.Collection {model: Photo}
 
 	keyDown: (e) ->
-		console.log 'key down'
 		if e.keyCode == 91
 			this.selectMode=2
 		else if e.keyCode == 16
@@ -124,6 +125,16 @@ module.exports = Backbone.View.extend
 		this.$("#gv-editGallery input[name='name']").val name
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
+
+	selectAll: ->
+		this.selectMode=2
+		this.currentGallery.photos.each (photo) ->
+			photo.set 'selected', true
+		this.selectMode=0
+
+	deselectAll: ->
+		this.currentGallery.photos.each (photo) ->
+			photo.set 'selected', false
 
 	removePhotos: (e) ->
 		this.currentGallery.removeSelectedPhotos(false)

@@ -69,7 +69,7 @@ module.exports = Backbone.Model.extend
 		for id in ids
 			collection.remove id
 
-		url = if deletePhotos then '/photos' else '/services/containers/' + this.id + '/photos'
+		url = if deletePhotos then '/photos' else '/containers/' + this.id + '/photos'
 
 		$.ajax(
 			url: config.urlBase + '/services' + url
