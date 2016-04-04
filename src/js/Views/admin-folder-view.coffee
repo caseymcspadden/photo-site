@@ -16,7 +16,7 @@ module.exports = Backbone.View.extend
 		'click .featured-thumbnail' : 'selectContainer'
 
 	initialize: (options) ->
-		this.template = templates['folder-view']
+		this.template = templates['admin-folder-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
 		this.listenTo this.model.containers, 'add remove change', this.addAll
 

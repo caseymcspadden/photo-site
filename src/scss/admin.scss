@@ -53,20 +53,6 @@
   background-color: $white;
 }
 
-.slick-slide {
-    padding: 2px;
-    outline: none;
-    background-color: $body-background;
-    text-align:center;
-    img {
-    	opacity: 0.8;
-		  &:hover {
-			 opacity: 1;
-		  }
-    }
-}
-
-
 .admin-panel {
 	float: left;
 	&.left {

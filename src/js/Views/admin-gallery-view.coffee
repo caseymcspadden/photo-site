@@ -32,7 +32,7 @@ module.exports = Backbone.View.extend
 		'keyup .master-photo-list' : 'keyUp'
 
 	initialize: (options) ->
-		this.template = templates['gallery-view']
+		this.template = templates['admin-gallery-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
 		this.listenTo this.model.photos, 'change:selected', this.masterSelectedPhotoChanged
 		this.currentPhoto = null
@@ -80,7 +80,6 @@ module.exports = Backbone.View.extend
 		this.currentMasterPhoto = photo		
 
 	openViewer: (e) ->
-		console.log this.currentGallery.photos
 		this.photoViewer.open this.currentPhoto, this.currentGallery.photos
 
 	addSelected: ->
@@ -112,7 +111,6 @@ module.exports = Backbone.View.extend
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			#this.listenTo this.currentGallery.photos, 'sort', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
-			this.listenTo this.currentGallery.photos, 'remove', this.removeOne
 			this.listenTo this.currentGallery.photos, 'change:selected', this.selectedPhotoChanged
 			this.masterAddAll()
 			this.addAll()
@@ -180,9 +178,6 @@ module.exports = Backbone.View.extend
 			self.currentGallery.rearrangePhotos ids
 		)
   		
-	removeOne: (photo) ->
-		console.log photo
-
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
 			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer, urlBase: this.model.urlBase}

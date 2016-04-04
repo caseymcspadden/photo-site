@@ -12,6 +12,8 @@ module.exports = Backbone.Model.extend
 		email: ''
 		name: ''
 		company: ''
+		portfolioFolder: 0
+		featuredGallery: 0
 
 	initialize: (attributes, options) ->
 		self = this

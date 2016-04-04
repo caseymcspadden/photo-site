@@ -5,8 +5,8 @@ templates = require './jst'
 Containers = require './containers'
 Container = require './container'
 #Admin = require './admin'
-FolderView = require './folder-view'
-GalleryView = require './gallery-view'
+FolderView = require './admin-folder-view'
+GalleryView = require './admin-gallery-view'
 
 module.exports = Backbone.View.extend
 

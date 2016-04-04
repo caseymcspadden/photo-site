@@ -2,6 +2,7 @@ Backbone = require 'backbone'
 templates = require './jst'
 Photo = require './photo'
 PhotoviewerModel = require './photoviewer'
+PhotoTextEditor = require './photo-text-editor-view'
 config = require './config'
 
 module.exports = Backbone.View.extend
@@ -11,7 +12,7 @@ module.exports = Backbone.View.extend
 		'click .scroll-left' : 'scrollLeft'
 		'click .scroll-right' : 'scrollRight'
 		'click input:radio[name=view-size]' : 'changeImageSize'
-		'keydown' : 'keyDown'
+		'keydown .view-image-wrapper' : 'keyDown'
 
 	initialize: (options) ->
 		this.revealElement = options.revealElement
@@ -53,6 +54,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template()
+		this.photoTextEditor = new PhotoTextEditor {model: this.model, el: this.$('.photo-text-editor')}
 		this
 
 	open: (photo, collection) ->
@@ -63,13 +65,8 @@ module.exports = Backbone.View.extend
 			this.revealElement.foundation 'open'
 			this.$('.view-image-wrapper').focus()
 
-	photoChanged: ->
-		this.$('.view-image').attr('src' , this.urlBase + '/photos/' + this.model.get('size') + '/' + this.model.get('photo').id + '.jpg')
-		json = this.model.get('photo').toJSON()
-		text = '';
-		for k, v of json
-			text += k + ": " + v + '<br>'
-		this.$('.text-container').html text
+	photoChanged: (m) ->
+		this.$('.view-image').attr('src' , this.urlBase + '/photos/' + m.get('size') + '/' + m.get('photo').id + '.jpg')
 
 	collectionChanged: (collection) ->
 		console.log "collection changed"

@@ -2,37 +2,7 @@
 require './vendor/autoload.php';
 require './classes/CrossRiver/Services.php';
 
-// Change these three paths when moving to a production environment
-// $fileroot = path used by PHP to write to folder holding original photos. Should be behind the web root
-// $photoroot = path used by PHP to write to thumbnail folder
-// $webroot = root of httpd file structure
-
-$fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-$photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
-$webroot = '/photo-site/build';
-
-$config = array();
-
-$contents = file($fileroot . '/app.cfg');
-
-foreach ($contents as $line) {
-    $kv = explode('=', $line);
-    $config[trim($kv[0])] = trim($kv[1]);
-}
-
-$dbh = new PDO("mysql:host=localhost;dbname=$config[mysqldb]", $config['mysqluser'], $config['mysqlpwd']);
-
-if(!$dbh) {
-    echo "Can't connect to database";
-    exit();
-}
-
-$cfg = new PHPAuth\Config($dbh);
-$auth = new PHPAuth\Auth($dbh, $cfg);
-
-
 // Get container
-//$container = new \Slim\$app->getContainer();
 $container = new \Slim\Container;
 $app = new \Slim\App($container);
 
@@ -55,56 +25,36 @@ $container['services'] = function($container) {
     return new CrossRiver\Services();
 };
 
-/*
-$container['cookies'] = function($container){
-    $request = $container->get('request');
-    return Dflydev\FigCookies\Cookies::fromRequest($request);   
-};
-
-$container['setCookies'] = function($container){
-    $response = $container->get('response');
-    return Dflydev\FigCookies\SetCookies::fromResponse($response);   
-};
-*/
-
-$container['options'] = [
-    'fileroot'=>$fileroot,
-    'webroot'=>$webroot,
-    'photoroot'=>$photoroot,
-    'dbh'=>$dbh,
-    'auth'=>$auth
-];
-
 // Define app routes
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'home.html' , [
         'webroot'=>$this->services->webroot
   ]);
-})->setName('home');
+});
 
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
         'webroot'=>$this->services->webroot
     ]);
-})->setName('portfolio');
+});
 
 $app->get('/about', function ($request, $response, $args) {
     return $this->view->render($response, 'about.html' , [
         'webroot'=>$this->services->webroot
     ]);
-})->setName('about');
+});
 
 $app->get('/admin', function ($request, $response, $args) {
     return $this->view->render($response, "admin.html" , [
         'webroot'=>$this->services->webroot
     ]);
-})->setName('admin');
+});
 
 $app->get('/admin/{task}', function ($request, $response, $args) {
     return $this->view->render($response, "admin-$args[task].html" , [
         'webroot'=>$this->services->webroot
     ]);
-})->setName('admin');
+});
 
 // SERVICES ROUTES
 
@@ -165,24 +115,37 @@ $app->get('/services/photos', function($request, $response, $args) {
 });
 
 $app->delete('/services/photos', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
-  $fileroot = $this->options['fileroot'];
-  $photoroot = $this->options['photoroot'];
-
   $parsedBody = $request->getParsedBody();
 
-  $dbh->query("DELETE P, CP FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE P.id IN (" . $parsedBody['ids'] . ")");
+  if ($this->services->isAdmin()) {
+    $fileroot = $this->services->fileroot;
+    $photoroot = $this->services->photoroot;
 
-  $arr = explode(',', $parsedBody['ids']);
+    $this->services->dbh->query("DELETE P, CP FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE P.id IN (" . $parsedBody['ids'] . ")");
 
-  foreach ($arr as $id) {
-    $subdirectory = sprintf("%02d",$id%100);
-    //error_log($fileroot . '/photos/' . $subdirectory .'/' . $id . '_*.jpg');      
-    //error_log($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg');      
-    array_map('unlink', glob($fileroot . '/photos/' . $subdirectory .'/' . $id . '_*.jpg'));      
-    array_map('unlink', glob($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg'));      
-    //array_map('unlink', glob($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg'));
+    $arr = explode(',', $parsedBody['ids']);
+
+    foreach ($arr as $id) {
+      $subdirectory = sprintf("%02d",$id%100);
+      array_map('unlink', glob($fileroot . '/photos/' . $subdirectory .'/' . $id . '_*.jpg'));      
+      array_map('unlink', glob($photoroot . '/' . $subdirectory .'/' . $id . '_*.jpg'));      
+    }
+  }
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+});
+
+$app->put('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+  $parsedBody = $request->getParsedBody();
+
+  if ($this->services->isAdmin()) {
+    $fields = array('fileName', 'title', 'description', 'keywords');
+    $set = array();
+    foreach ($parsedBody as $k=>$v) {
+      if (in_array($k,$fields))
+        array_push($set,"$k='$v'");
+    }
+    $this->services->dbh->query('UPDATE photos SET ' . implode(',',$set) . ' WHERE id=' . $args['id']); 
   }
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
@@ -212,16 +175,17 @@ $app->get('/services/containers', function($request, $response, $args) {
 $app->post('/services/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
-  $result = $this->services->dbh->query("SELECT MAX(position) FROM containers WHERE idparent=$vals[idparent]");
+  if ($this->services->isAdmin()) {
+    $result = $this->services->dbh->query("SELECT MAX(position) FROM containers WHERE idparent=$vals[idparent]");
 
-  $row = $result->fetch();
+    $row = $result->fetch();
 
-  $position = $row ? 1 + $row[0] : 1;
+    $position = $row ? 1 + $row[0] : 1;
 
-  $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
 
-  $vals['id'] = $this->services->dbh->lastInsertId();
-
+    $vals['id'] = $this->services->dbh->lastInsertId();
+  }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
@@ -241,85 +205,94 @@ $app->get('/services/containers/{id}', function($request, $response, $args) {
 */
 
 $app->put('/services/containers/{id}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
   $vals = $request->getParsedBody();
+  if ($this->services->isAdmin()) {
 
-  $dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
-
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
+  }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
 $app->delete('/services/containers/{id}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
   $parsedBody = $request->getParsedBody();
- 
-  $dbh->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
+
+  if ($this->services->isAdmin())
+    $this->services->dbh->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 $app->get('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
-  $arr = array();
-
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
-  while ($row = $result->fetch())
-    array_push($arr,$row[0]);
+  $arr = array();
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
+  while ($row = $result->fetch())
+    array_push($arr, $row[0]);
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
 });
 
 $app->post('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
-  $ids = explode(',', $parsedBody['ids']);
+  
+  if ($this->services->isAdmin()) {
+    $ids = explode(',', $parsedBody['ids']);
 
-  $result = $this->services->dbh->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
+    $result = $this->services->dbh->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
 
-  $row = $result->fetch();
+    $row = $result->fetch();
 
-  $position = $row ? $row[0]+1 : 1;
+    $position = $row ? $row[0]+1 : 1;
 
-  foreach($ids as $id) {
-    $this->services->dbh->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
-    $position++;
+    foreach($ids as $id) {
+      $this->services->dbh->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
+      $position++;
+    }
   }
-
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 $app->put('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
-  $ids = explode(',', $parsedBody['ids']);
+  if ($this->services->isAdmin()) {
+    $ids = explode(',', $parsedBody['ids']);
 
-  $position = 1;
-  foreach($ids as $id) {
-    $this->services->dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
-    $position++;
+    $position = 1;
+    foreach($ids as $id) {
+      $this->services->dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+      $position++;
+    }
   }
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 $app->delete('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
-  $parsedBody = $request->getParsedBody();
-  $ids = $parsedBody['ids'];
-  $this->services->dbh->query("DELETE FROM containerphotos WHERE idcontainer=$args[id] AND idphoto IN (" . $ids . ')');
+  $parsedBody = $request->getParsedBody(); 
+  if ($this->services->isAdmin()) {
+    $ids = $parsedBody['ids'];
+    $this->services->dbh->query("DELETE FROM containerphotos WHERE idcontainer=$args[id] AND idphoto IN (" . $ids . ')');
 
-  $ids = array();
-  $result = $this->services->dbh->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+    $ids = array();
+    $result = $this->services->dbh->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
-  while ($row = $result->fetch())
-    $ids[] = $row[0];
+    while ($row = $result->fetch())
+      $ids[] = $row[0];
 
-  $position = 1;
-  foreach($ids as $id) {
-    $this->services->dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
-    $position++;
+    $position = 1;
+    foreach($ids as $id) {
+      $this->services->dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+      $position++;
+    }
   }
-
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
 
 $app->post('/services/upload', function($request, $response, $args) {
+    if (!$this->services->isAdmin())
+      return;
+
     $dbh = $this->services->dbh;
     $fileroot = $this->services->fileroot;
     $photoroot = $this->services->photoroot;
