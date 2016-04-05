@@ -1,5 +1,6 @@
 Backbone = require 'backbone'
 Session = require './session'
+Settings = require './settings'
 templates = require './jst'
 
 module.exports = Backbone.View.extend

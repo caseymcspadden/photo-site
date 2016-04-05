@@ -10,6 +10,8 @@ session = new Session
 loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 
+session.fetch()
+
 $('body').append loginView.render().el
 
 $(document).foundation()

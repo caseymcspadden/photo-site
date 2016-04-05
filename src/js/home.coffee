@@ -16,6 +16,8 @@ featuredPhotos = new FeaturedPhotos
 
 slideshowView = new SlideshowView({el: '.slideshow', collection: featuredPhotos})
 
+session.fetch()
+
 $('body').append loginView.render().el
 
 $ ->

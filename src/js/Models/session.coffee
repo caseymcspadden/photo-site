@@ -5,23 +5,24 @@ module.exports = Backbone.Model.extend
 	urlRoot: config.urlBase + '/services/session'
 
 	defaults :
-		id: 0
 		isadmin: 0		
 		errorMessage: ''
 		loggingIn: false
 		email: ''
 		name: ''
 		company: ''
-		portfolioFolder: 0
-		featuredGallery: 0
 
+	initialize: (attributes, options) ->
+		console.log "Initializing session"
+
+	###
 	initialize: (attributes, options) ->
 		self = this
 		$.get(this.urlRoot, (result) ->
 			json = $.parseJSON(result)
-			console.log json
 			self.set json
 		)
+	###
 
 	getSessionHash: ->
 		arr = document.cookie.split ';'

@@ -305,7 +305,7 @@ class Services
     	if (!$hash || !$this->auth->checkSession($hash))
     		return '{"id":0}';
   		$uid = $this->auth->getSessionUID($hash);
-    	return $this->fetchJSON("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company, ST.portfolioFolder, ST.featuredGallery FROM sessions S INNER JOIN users U ON U.id=S.uid LEFT JOIN settings ST ON ST.iduser=U.id WHERE S.uid=$uid",true);
+    	return $this->fetchJSON("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid",true);
     }
 
     /***

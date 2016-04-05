@@ -58,6 +58,15 @@ $app->get('/admin/{task}', function ($request, $response, $args) {
 
 // SERVICES ROUTES
 
+$app->get('/services/settings/{id:[0-9]*}', function($request, $response, $args) {
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else
+    $json = $this->services->fetchJSON("SELECT * FROM settings WHERE iduser=$args[id]");
+
+  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+});
+
 $app->get('/services/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
