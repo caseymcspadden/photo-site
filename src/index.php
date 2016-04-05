@@ -6,7 +6,6 @@ require './classes/CrossRiver/Services.php';
 $container = new \Slim\Container;
 $app = new \Slim\App($container);
 
-
 // Register component on container
 $container['view'] = function ($container) {
     $view = new \Slim\Views\Twig('./templates', [
@@ -30,7 +29,7 @@ $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'home.html' , [
         'webroot'=>$this->services->webroot
   ]);
-});
+})->setName('home');
 
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
@@ -45,12 +44,18 @@ $app->get('/about', function ($request, $response, $args) {
 });
 
 $app->get('/admin', function ($request, $response, $args) {
+    if (!$this->services->isAdmin())
+      return $response->withRedirect($this->get('router')->pathFor('home'));
+
     return $this->view->render($response, "admin.html" , [
         'webroot'=>$this->services->webroot
     ]);
 });
 
 $app->get('/admin/{task}', function ($request, $response, $args) {
+    if (!$this->services->isAdmin())
+     return $response->withRedirect($this->get('router')->pathFor('home'));
+
     return $this->view->render($response, "admin-$args[task].html" , [
         'webroot'=>$this->services->webroot
     ]);
@@ -62,9 +67,18 @@ $app->get('/services/settings/{id:[0-9]*}', function($request, $response, $args)
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
-    $json = $this->services->fetchJSON("SELECT * FROM settings WHERE iduser=$args[id]");
+    $json = $this->services->fetchJSON("SELECT * FROM settings WHERE iduser=$args[id]", true);
 
   $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+});
+
+$app->put('/services/settings/{id:[0-9]*}', function($request, $response, $args) {
+  $parsedBody = $request->getParsedBody();
+
+  if ($this->services->isAdmin()) 
+    $this->services->updateTable('settings', "iduser=$args[id]", $parsedBody, array('portfoliofolder', 'featuredgallery'));
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
 $app->get('/services/users', function($request, $response, $args) {
@@ -147,15 +161,8 @@ $app->delete('/services/photos', function($request, $response, $args) {
 $app->put('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
-  if ($this->services->isAdmin()) {
-    $fields = array('fileName', 'title', 'description', 'keywords');
-    $set = array();
-    foreach ($parsedBody as $k=>$v) {
-      if (in_array($k,$fields))
-        array_push($set,"$k='$v'");
-    }
-    $this->services->dbh->query('UPDATE photos SET ' . implode(',',$set) . ' WHERE id=' . $args['id']); 
-  }
+  if ($this->services->isAdmin()) 
+    $this->services->updateTable('photos', "id=$args[id]", $parsedBody, array('fileName', 'title', 'description', 'keywords'));
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
@@ -170,7 +177,7 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
 });
 
 $app->get('/services/featuredphotos', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN containers C ON C.id=CP.idcontainer WHERE C.isfeatured=1 ORDER BY CP.idcontainer,CP.position");
+  $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN settings S ON S.featuredgallery=CP.idcontainer WHERE S.iduser=1 ORDER BY CP.position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });

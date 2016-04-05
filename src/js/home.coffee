@@ -14,7 +14,7 @@ sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 
 featuredPhotos = new FeaturedPhotos
 
-slideshowView = new SlideshowView({el: '.slideshow', collection: featuredPhotos})
+slideshowView = new SlideshowView({el: '.slideshow', collection: featuredPhotos, speed: 4000, pauseOnHover: true, showControls: false})
 
 session.fetch()
 

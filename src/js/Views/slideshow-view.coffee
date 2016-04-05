@@ -14,8 +14,9 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.counter = 0
-		this.pauseOnHover = true
-		this.speed = 4000
+		this.pauseOnHover = options.pauseOnHover
+		this.speed = options.speed
+		this.showControls = options.showControls
 		this.addSwipe()
 		this.controlsTemplate = templates['slideshow-view']
 		this.slideTemplate = templates['slide-view']
@@ -55,7 +56,7 @@ module.exports = Backbone.View.extend
 		this.counter = 0
 		this.showCurrent 0
 		this.autoCycle this.speed
-		this.$el.append this.controlsTemplate() 
+		this.$el.append this.controlsTemplate() if this.showControls
 
 	showCurrent: (i) ->
 		this.counter = this.counter + i

@@ -314,6 +314,8 @@ class Services
      */
     public function isAdmin()
     {
+    	if (!isset($_COOKIE['session']))
+    		return false;
     	$hash = $this->auth->getSessionHash();
     	if (!$hash || !$this->auth->checkSession($hash))
     		return false;
@@ -339,5 +341,17 @@ class Services
     	if ($returnSingletonAsObject && count($arr)==1)
     		return json_encode($arr[0],JSON_NUMERIC_CHECK);
     	return json_encode($arr,JSON_NUMERIC_CHECK);
+    }
+
+    public function updateTable($table, $where, $data, $allowedFields=NULL)
+    {
+	    $set = array();
+    	foreach ($data as $k=>$v) {
+      		if ($allowedFields==NULL || in_array($k,$allowedFields))
+				array_push($set,"$k='$v'");
+    	}
+    	if (count($set)>0)
+    		$this->dbh->query("UPDATE $table SET " . implode(',',$set) . " WHERE $where");
+
     }
 }

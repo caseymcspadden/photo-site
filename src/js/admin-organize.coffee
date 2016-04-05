@@ -11,13 +11,14 @@ viewModel = new ViewModel {allowDragDrop: true}
 session = new Session()
 settings = new Settings null, {session: session}
 
-adminSettinsView = new AdminSettingsView {model: viewModel, session: session}
+adminSettingsView = new AdminSettingsView {el: '.admin-settings-view', model:settings, viewModel: viewModel}
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: viewModel})
 adminMainView = new AdminMainView({el: '#adminMainView', model: viewModel})
 
 adminFoldersView.render()
 adminMainView.render()
+adminSettingsView.render()
 
 session.fetch()
 viewModel.fetchAll()
