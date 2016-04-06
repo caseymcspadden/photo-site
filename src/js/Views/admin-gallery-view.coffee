@@ -123,6 +123,7 @@ module.exports = Backbone.View.extend
 		this.$("#gv-editGallery input[name='name']").val name
 		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
 		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
+		this.$("#gv-editGallery input[name='url']").val this.currentGallery.get('url')
 
 	selectAll: ->
 		this.selectMode=2

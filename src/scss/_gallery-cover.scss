@@ -1,0 +1,28 @@
+.gallery-cover {
+  position: relative;
+  overflow: hidden;
+  float: left;
+  padding: 0;
+  margin: rem-calc(5);
+  cursor: pointer;
+  &:hover { 
+    img {
+      opacity: 1.0;
+    }
+    .gallery-info {
+      display: none;
+    }
+  }
+  img {
+    opacity: 0.6;
+  }
+  .gallery-info {
+    position: absolute;
+    font-size: 1.25rem;
+    top: 40%;
+    left: rem-calc(10);
+    color: $white;
+    opacity: 1.0;  
+    width: 100%;
+  }
+}

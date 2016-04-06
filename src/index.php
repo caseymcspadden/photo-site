@@ -37,6 +37,13 @@ $app->get('/portfolio', function ($request, $response, $args) {
     ]);
 });
 
+$app->get('/portfolio/{url}', function ($request, $response, $args) {
+    return $this->view->render($response, 'gallery.html' , [
+        'webroot'=>$this->services->webroot,
+        'url'=>$args['url']
+    ]);
+});
+
 $app->get('/about', function ($request, $response, $args) {
     return $this->view->render($response, 'about.html' , [
         'webroot'=>$this->services->webroot
@@ -189,7 +196,7 @@ $app->get('/services/portfolio', function($request, $response, $args) {
 });
 
 $app->get('/services/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers ORDER BY idparent, position");
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, watermark FROM containers ORDER BY idparent, position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);    
 });
@@ -204,7 +211,7 @@ $app->post('/services/containers', function($request, $response, $args) {
 
     $position = $row ? 1 + $row[0] : 1;
 
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]')");
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]')");
 
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
@@ -230,7 +237,7 @@ $app->put('/services/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
   }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });

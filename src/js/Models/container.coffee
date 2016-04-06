@@ -12,6 +12,7 @@ module.exports = Backbone.Model.extend
 		position: 0
 		name: ""
 		description: ""
+		url: ""
 		populated: false
 		featuredPhoto: 0
 		watermark: 1

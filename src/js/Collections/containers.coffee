@@ -4,8 +4,7 @@ config = require './config'
 
 module.exports = Backbone.Collection.extend
 	model: Container
-	url: ->
-		config.urlBase + '/services/containers'		 
+	url: config.urlBase + '/services/containers'		 
 
 	comparator: 'position'
 
