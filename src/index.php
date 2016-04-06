@@ -182,6 +182,12 @@ $app->get('/services/featuredphotos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
+$app->get('/services/portfolio', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT C.* FROM containers C INNER JOIN settings S ON S.portfoliofolder=C.idparent WHERE S.iduser=1 AND C.type='gallery' ORDER BY C.position");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+});
+
 $app->get('/services/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers ORDER BY idparent, position");
 

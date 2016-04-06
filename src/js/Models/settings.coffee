@@ -14,5 +14,4 @@ module.exports = Backbone.Model.extend
 
 	sessionChanged: (session) ->
 		this.set 'id', session.id
-		console.log 'id changed to ' + this.get('id')
 		this.fetch()

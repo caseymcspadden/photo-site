@@ -45,7 +45,6 @@ module.exports = Backbone.Model.extend
 					this.set 'errorMessage' , json.message
 				else
 					expires = new Date(json.expiredate)
-					console.log expires.toString()
 					document.cookie = 'session=' + json.hash + '; expires=' + expires.toString()
 					this.set json
 		)
@@ -57,7 +56,6 @@ module.exports = Backbone.Model.extend
 			context: this
 			success: (result) ->
 				json = $.parseJSON(result)
-				console.log json
 				this.set 'uid', 0
 				document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 		)
