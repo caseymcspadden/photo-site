@@ -25,11 +25,13 @@ $container['services'] = function($container) {
 };
 
 // Define app routes
+/*
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'home.html' , [
         'webroot'=>$this->services->webroot
   ]);
 })->setName('home');
+*/
 
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
@@ -496,6 +498,13 @@ $app->post('/services/upload', function($request, $response, $args) {
 
     return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
     //return $response->withHeader('Content-type', 'application/json');
+});
+
+$app->get('/[{path:.*}]', function($request, $response, $args) {
+    return $this->view->render($response, 'home.html' , [
+        'webroot'=>$this->services->webroot
+  ]);
+   // return $response->getBody()->write($args['path']);
 });
 
 // Run app
