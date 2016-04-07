@@ -1,0 +1,19 @@
+<button type="button" class="close-button" data-close aria-label="Close">
+	<span aria-hidden="true">&times;</span>
+</button>
+<h2><% print(createNew ? 'new' : 'edit'); %> <%= type %></h2>
+<form method="POST">
+	<label>name
+		<input type="text" name="name" value="<%= name %>">
+	</label>
+	<label>description
+		<input type="text" name="description" value="<%= description %>">
+	</label>
+	<label>custom url
+		<input type="text" name="url" value="<%= url %>">
+	</label>
+	<label>url suffix
+		<input type="text" name="urlsuffix" value="<%= urlsuffix %>">
+	</label>
+	<input type="submit" class="button" value="Submit">
+</form>

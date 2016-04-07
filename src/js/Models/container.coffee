@@ -10,13 +10,13 @@ module.exports = Backbone.Model.extend
 		type: 'folder'	
 		idparent: 0
 		position: 0
-		name: ""
-		description: ""
-		url: ""
+		name: ''
+		description: ''
+		url: ''
+		urlsuffix: ''
 		populated: false
 		featuredPhoto: 0
 		watermark: 1
-		isportfolio: 0
 	
 	initialize: (attributes, options) ->
 		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null

@@ -303,9 +303,10 @@ class Services
     {
     	$hash = $this->auth->getSessionHash();
     	if (!$hash || !$this->auth->checkSession($hash))
-    		return '{"id":0}';
+    		return (object) ['id'=>0, 'isadmin'=>0];
   		$uid = $this->auth->getSessionUID($hash);
-    	return $this->fetchJSON("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid",true);
+    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid");
+    	return $result->fetchObject();
     }
 
     /***
@@ -353,5 +354,29 @@ class Services
     	if (count($set)>0)
     		$this->dbh->query("UPDATE $table SET " . implode(',',$set) . " WHERE $where");
 
+    }
+
+    public function getGallery($path)
+    {
+    	$pathArray = explode('/',$path);
+    	$user = $this->getSessionUser();
+
+    	$currentContainer = (object) ['id'=>0, 'iduser'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>''];
+    	for ($i=0;$i<count($pathArray);$i++) {
+    		$result = $this->dbh->query("SELECT id, iduser, type, idparent, url, urlsuffix, loginrequired FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$currentContainer = $result->fetchObject();
+
+    		if (!$currentContainer)
+    			return FALSE;
+    		
+    		$canAccess = $user->isadmin || ($user->id!=0 && $currentContainer->iduser == $user->id);
+
+    		if ($i==count($pathArray)-1)
+    			return ($canAccess || (!$currentContainer->loginrequired && $currentContainer->urlsuffix=='')) ? $currentContainer : FALSE;
+
+    		if ($i==count($pathArray)-2 && $pathArray[$i+1]==$currentContainer->urlsuffix)
+				return ($canAccess || !$currentContainer->loginrequired) ? $currentContainer : FALSE;
+    	}
+    	return FALSE;
     }
 }

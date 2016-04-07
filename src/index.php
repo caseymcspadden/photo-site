@@ -25,13 +25,22 @@ $container['services'] = function($container) {
 };
 
 // Define app routes
-/*
+
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'home.html' , [
         'webroot'=>$this->services->webroot
   ]);
 })->setName('home');
-*/
+
+
+$app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
+    $gallery = $this->services->getGallery($args['path']);
+    if (!$gallery)
+      return $response->withRedirect($this->get('router')->pathFor('home'));
+
+    $response->getBody()->write(json_encode($gallery));
+    return $response->withHeader('X-Gallery', $gallery->id);
+});
 
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
@@ -115,9 +124,9 @@ $app->post('/services/users', function($request, $response, $args) {
 });
 
 $app->get('/services/session', function($request, $response, $args) {
-  $json = $this->services->getSessionUser();
+  $user = $this->services->getSessionUser();
   
-  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($user,JSON_NUMERIC_CHECK));
 });
 
 $app->put('/services/session', function($request, $response, $args) {
@@ -198,7 +207,7 @@ $app->get('/services/portfolio', function($request, $response, $args) {
 });
 
 $app->get('/services/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, watermark FROM containers ORDER BY idparent, position");
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, urlsuffix, watermark FROM containers ORDER BY idparent, position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);    
 });
@@ -239,7 +248,7 @@ $app->put('/services/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', featuredPhoto=$vals[featuredPhoto], isportfolio=$vals[isportfolio] WHERE id=$args[id]");
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
   }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
@@ -498,13 +507,6 @@ $app->post('/services/upload', function($request, $response, $args) {
 
     return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
     //return $response->withHeader('Content-type', 'application/json');
-});
-
-$app->get('/[{path:.*}]', function($request, $response, $args) {
-    return $this->view->render($response, 'home.html' , [
-        'webroot'=>$this->services->webroot
-  ]);
-   // return $response->getBody()->write($args['path']);
 });
 
 // Run app

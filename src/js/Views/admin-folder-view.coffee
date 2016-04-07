@@ -5,13 +5,13 @@ templates = require './jst'
 Containers = require './containers'
 Container = require './container'
 ContainerView = require './container-view'
+EditContainerView = require('./edit-container-view')
 
 module.exports = Backbone.View.extend
 	currentContainer: null
 	containerViews: {}
 
 	events:
-		'submit #fv-editFolder form' : 'editFolder'
 		'submit #fv-addGallery form' : 'addGallery'
 		'click .featured-thumbnail' : 'selectContainer'
 
@@ -46,14 +46,15 @@ module.exports = Backbone.View.extend
 		this.currentContainer = this.model.get 'selectedContainer'
 		this.$('.title').html(if this.currentContainer then this.currentContainer.get('name') else 'Default')
 		if (this.currentContainer)
-			this.$("#fv-editFolder input[name='name']").val this.currentContainer.get('name')
-			this.$("#fv-editFolder input[name='description']").val this.currentContainer.get('description')
-			this.$("#fv-editFolder input[name='isportfolio']").checked = this.currentContainer.get('isportfolio')
 			this.listenTo this.currentContainer, 'change' , this.currentContainerChanged
 			this.addAll()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
+		this.editContainerView = new EditContainerView {el: '#fv-editFolder', model: this.model}
+		this.editContainerView.render()
+		this.addGalleryView = new EditContainerView {el: '#fv-addGallery', model: this.model, containerType: 'gallery'}
+		this.addGalleryView.render()
   		
 	addOne: (container) ->
 		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id

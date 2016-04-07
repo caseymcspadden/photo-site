@@ -5,9 +5,7 @@ templates = require './jst'
 
 module.exports = Backbone.View.extend
 	events:
-		'submit #addUser form' : 'addUser'
-		#'submit #fv-addGallery form' : 'addGallery'
-		#'click .featured-thumbnail' : 'selectContainer'
+		'submit #addUser form' : 'newUser'
 
 	initialize: (options) ->
 		this.template = templates['admin-users-view']
@@ -16,14 +14,17 @@ module.exports = Backbone.View.extend
 		#this.listenTo this.collection, 'error', this.error
 		this.render()
 
-	addUser: (e) ->
+	newUser: (e) ->
+		console.log 'e'
 		e.preventDefault()
 		this.$('.error-message').addClass('hidden')
-		arr = $(e.target).serializeArray()
+		arr = this.$('form').serializeArray()
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		
+
+		console.log data
+		###
 		$.ajax(
 			url: this.collection.url
 			type: 'POST'
@@ -38,6 +39,7 @@ module.exports = Backbone.View.extend
 					this.collection.add json
 					this.$('#addUser .close-button').trigger('click')
 		)
+		###
 	
 	render: ->
 		this.$el.html this.template()
@@ -47,7 +49,6 @@ module.exports = Backbone.View.extend
   		
 	addOne: (user) ->
 		console.log "Adding User"
-		console.log user
 
 	addAll: ->
 		this.collection.each this.addOne, this

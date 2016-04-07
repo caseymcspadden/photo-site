@@ -8,6 +8,7 @@ PhotoViewerModel= require './photoviewer'
 PhotoViewer = require './photoviewer-view'
 Photo = require './photo'
 DropzoneView = require('./dropzone-view')
+EditContainerView = require('./edit-container-view')
 
 module.exports = Backbone.View.extend
 	currentGallery: null
@@ -15,7 +16,6 @@ module.exports = Backbone.View.extend
 	photoViews: {}
 
 	events:
-		'submit #gv-editGallery form' : 'editGallery'
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
@@ -89,15 +89,6 @@ module.exports = Backbone.View.extend
 	deleteGallery: ->
 		this.model.deleteContainer this.currentGallery
 
-	editGallery: (e) ->
-		e.preventDefault()
-		arr = $(e.target).serializeArray()
-		data = {}
-		for elem in arr
-			data[elem.name]=elem.value	
-		this.currentGallery.save data
-		this.$('#gv-editGallery .close-button').trigger('click')
-
 	changeGallery: ->
 		if  this.currentGallery
 			this.stopListening this.currentGallery
@@ -120,10 +111,6 @@ module.exports = Backbone.View.extend
 	galleryChanged: (e) ->
 		name = this.currentGallery.get 'name'
 		this.$('.title').html name
-		this.$("#gv-editGallery input[name='name']").val name
-		this.$("#gv-editGallery input[name='description']").val this.currentGallery.get('description')
-		this.$("#gv-editGallery input[name='featuredPhoto']").val this.currentGallery.get('featuredPhoto')
-		this.$("#gv-editGallery input[name='url']").val this.currentGallery.get('url')
 
 	selectAll: ->
 		this.selectMode=2
@@ -165,6 +152,8 @@ module.exports = Backbone.View.extend
 		this.photoViewer.render()
 		this.dropzoneView = new  DropzoneView {el: '#gv-uploadPhotos', model: this.model}
 		this.dropzoneView.render()
+		this.editContainerView = new EditContainerView {el: '#gv-editGallery', model: this.model}
+		this.editContainerView.render()
 
 		this.drag = Dragula [this.$('.photo-list')[0]],
 			direction: 'horizontal'
