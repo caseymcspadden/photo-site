@@ -7,6 +7,7 @@ module.exports = Backbone.Model.extend
 	defaults:
 		selectedContainer: null
 		addingPhotos: false
+		viewingPhotos: false
 		fetching: false
 		dragModel: null
 		allowDragDrop: false

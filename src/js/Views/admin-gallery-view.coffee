@@ -9,6 +9,7 @@ PhotoViewer = require './photoviewer-view'
 Photo = require './photo'
 DropzoneView = require('./dropzone-view')
 EditContainerView = require('./edit-container-view')
+MasterThumbnailsView = require('./master-thumbnails-view')
 
 module.exports = Backbone.View.extend
 	currentGallery: null
@@ -19,7 +20,7 @@ module.exports = Backbone.View.extend
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
-		'click .add-selected' : 'addSelected'	
+		#'click .add-selected' : 'addSelected'	
 		'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
 		'click .set-featured-folder' : 'setFeaturedFolderPhoto'
 		'click .delete-gallery' : 'deleteGallery'
@@ -28,17 +29,33 @@ module.exports = Backbone.View.extend
 		'dblclick' : 'openViewer'
 		'keydown .photo-list' : 'keyDown'
 		'keyup .photo-list' : 'keyUp'
-		'keydown .master-photo-list' : 'keyDown'
-		'keyup .master-photo-list' : 'keyUp'
+		#'keydown .master-photo-list' : 'keyDown'
+		#'keyup .master-photo-list' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['admin-gallery-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
-		this.listenTo this.model.photos, 'change:selected', this.masterSelectedPhotoChanged
+		#this.listenTo this.model.photos, 'change:selected', this.masterSelectedPhotoChanged
 		this.currentPhoto = null
 		this.currentMaterPhoto = null
 		this.selectMode = 0
 		this.masterPhotoCollection = new Backbone.Collection {model: Photo}
+
+		#this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer'), urlBase: this.model.urlBase}
+		#this.photoViewer.render()
+		this.dropzoneView = new  DropzoneView {model: this.model}
+		this.editContainerView = new EditContainerView {model: this.model}
+
+		this.drag = Dragula({direction: 'horizontal'})
+
+		self = this
+		this.drag.on('drop', (el, target, source, sibling) ->
+			elements = $(source).find('div').toArray()
+			ids = []
+			for e in elements
+				ids.push $(e).attr('id').replace('gallery-photo-','')
+			self.currentGallery.rearrangePhotos ids
+		)
 
 	keyDown: (e) ->
 		if e.keyCode == 91
@@ -79,8 +96,10 @@ module.exports = Backbone.View.extend
 	
 		this.currentMasterPhoto = photo		
 
+	###
 	openViewer: (e) ->
 		this.photoViewer.open this.currentPhoto, this.currentGallery.photos
+	###
 
 	addSelected: ->
 		this.model.addSelectedPhotosToContainer this.currentGallery
@@ -106,7 +125,7 @@ module.exports = Backbone.View.extend
 			this.masterAddAll()
 			this.addAll()
 			this.galleryChanged()
-			this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
+			#this.photoViewer.model.set {gallery: this.currentGallery, index: 0}
 
 	galleryChanged: (e) ->
 		name = this.currentGallery.get 'name'
@@ -146,15 +165,29 @@ module.exports = Backbone.View.extend
 		return if ids.length==0
 		this.model.setFeaturedPhoto this.currentGallery.get('idparent'), ids[0]
 
+	assign : (view, selector) ->
+		view.setElement(this.$(selector)).render()
+
 	render: ->
 		this.$el.html this.template {name: 'Default'}
-		this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer'), urlBase: this.model.urlBase}
-		this.photoViewer.render()
-		this.dropzoneView = new  DropzoneView {el: '#gv-uploadPhotos', model: this.model}
-		this.dropzoneView.render()
-		this.editContainerView = new EditContainerView {el: '#gv-editGallery', model: this.model}
-		this.editContainerView.render()
+		
+		#this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer'), urlBase: this.model.urlBase}
+		#this.photoViewer.render()
+		#this.assign this.photoViewer, '#gv-photoViewer'
+		#this.dropzoneView = new  DropzoneView {el: '#gv-uploadPhotos', model: this.model}
+		#this.dropzoneView.render()
+		this.assign this.dropzoneView, '#gv-uploadPhotos'
+		#this.editContainerView = new EditContainerView {el: '#gv-editGallery', model: this.model}
+		#this.editContainerView.render()
+		this.assign this.editContainerView, '#gv-editGallery'
 
+		this.drag.containers.pop()
+		this.drag.containers.push this.$('.photo-list')[0]
+
+		#this.masterThumbnailsView = new MasterThumbnailsView {el: '#gv-addPhotos', collection: this.masterPhotoCollection}
+		#this.masterThumbnailsView.render()
+
+		###
 		this.drag = Dragula [this.$('.photo-list')[0]],
 			direction: 'horizontal'
 
@@ -167,10 +200,11 @@ module.exports = Backbone.View.extend
 
 			self.currentGallery.rearrangePhotos ids
 		)
-  		
+  		###
+
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer, urlBase: this.model.urlBase}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo}
 		view = this.photoViews[photo.id]
 		this.$('.photo-list').append view.el
 		view.delegateEvents()
@@ -184,7 +218,7 @@ module.exports = Backbone.View.extend
 			return
 
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, viewer: this.photoViewer, urlBase: this.model.urlBase}
+			view = this.photoViews[photo.id] = new PhotoView {model:photo, urlBase: this.model.urlBase}
 			view.render()
 
 		this.masterPhotoCollection.add photo
