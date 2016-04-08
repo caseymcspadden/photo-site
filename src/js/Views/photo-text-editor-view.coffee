@@ -9,8 +9,8 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['photo-text-editor-view']
+		this.listenTo this.model, 'change:viewPhoto', this.photoChanged
 		this.render()
-		this.listenTo this.model, 'change:photo', this.photoChanged
 
 	render: ->
 		this.$el.html this.template()
@@ -22,11 +22,11 @@ module.exports = Backbone.View.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value	
-		this.model.get('photo').save data
+		this.model.get('viewPhoto').save data
 		this.$('input[type="submit"]').blur()
 
 	photoChanged: (m) ->
-		photo = m.get('photo')	
+		photo = m.get('viewPhoto')	
 		json =photo.toJSON()
 		text = '';
 		for k, v of json

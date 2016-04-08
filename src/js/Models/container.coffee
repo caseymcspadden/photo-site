@@ -40,11 +40,17 @@ module.exports = Backbone.Model.extend
 		this.photos.add p if p
 
 	addPhotos: (arr) ->
+		addArray = []
+		for id in arr
+			addArray.push id if this.photos.indexOf(id)<0
+
+		console.log addArray
+
 		$.ajax(
 			url: config.urlBase +  '/services/containers/' + this.id + '/photos'
 			type: 'POST'
 			context: this
-			data: {ids: arr.join(',')}
+			data: {ids: addArray.join(',')}
 			success: (result) ->
 				json = $.parseJSON(result)
 				ids = json.ids.split ','

@@ -6,8 +6,11 @@ Containers = require './containers'
 module.exports = Backbone.Model.extend
 	defaults:
 		selectedContainer: null
-		addingPhotos: false
-		viewingPhotos: false
+		selectedPhoto: null
+		addingPhotosToggle: false
+		viewingPhotosToggle: false
+		viewPhotoSize: 'M'
+		viewPhoto: 0
 		fetching: false
 		dragModel: null
 		allowDragDrop: false

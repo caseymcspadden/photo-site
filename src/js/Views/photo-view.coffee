@@ -8,9 +8,6 @@ module.exports = Backbone.View.extend
 
 	className: 'photo-thumbnail'
 
-	id: ->
-		'gallery-photo-' + this.model.id
-
 	events:
 		'click img' : 'photoClicked'
 		'mouseover' : 'setFocus'

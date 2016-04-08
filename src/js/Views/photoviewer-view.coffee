@@ -16,12 +16,19 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.revealElement = options.revealElement
-		this.urlBase = config.urlBase
-		this.model = new PhotoviewerModel
 		this.template = templates['photoviewer-view']
-		this.listenTo this.model, 'change:size', this.photoChanged
-		this.listenTo this.model, 'change:photo', this.photoChanged
-		this.listenTo this.model, 'change:collection', this.collectionChanged
+		this.listenTo this.model, 'change:viewPhotoSize', this.photoChanged
+		this.listenTo this.model, 'change:viewPhoto', this.photoChanged
+		this.listenTo this.model, 'change:viewingPhotosToggle' , this.open
+		this.photoTextEditor = new PhotoTextEditor {model: this.model}
+
+	open: ->
+		this.$el.foundation 'open'
+		this.selectedContainer = this.model.get 'selectedContainer'
+		this.photos = this.selectedContainer.photos
+		this.model.set 'viewPhoto' , this.model.get('selectedPhoto')
+		this.index = this.photos.indexOf(this.model.get 'viewPhoto')
+		this.$('.view-image-wrapper').focus()
 
 	keyDown: (e) ->
 		if e.keyCode==37
@@ -30,43 +37,30 @@ module.exports = Backbone.View.extend
 			this.scrollRight e
 
 	scrollLeft: (e) ->
-		collection = this.model.get('collection')
 		this.index-- 
-		this.index = collection.length-1 if this.index<0
-		this.model.set {photo: collection.at this.index}
-		#e.preventDefault()
+		this.index = this.photos.length-1 if this.index<0
+		this.model.set {viewPhoto: this.photos.at this.index}
 
 	scrollRight: (e) ->
-		collection = this.model.get('collection')
 		this.index++
-		this.index = 0 if this.index>=collection.length
-		this.model.set {photo: collection.at this.index}
-		#e.preventDefault()
+		this.index = 0 if this.index>=this.photos.length
+		this.model.set {viewPhoto: this.photos.at this.index}
 
 	changeImageSize: (e) ->
 		size = $(e.target).attr('id').replace('view-','')
-		this.model.set {size: size}
+		this.model.set {viewPhotoSize: size}
 		if size=='L' or size=='X'
-			this.$el.addClass('full-screen') 
+			this.$('.photo-viewer').addClass('full-screen') 
 		else
-			this.$el.removeClass('full-screen') 
+			this.$('.photo-viewer').removeClass('full-screen') 
 		this.$('.view-image-wrapper').focus()
+
+	assign : (view, selector) ->
+		view.setElement(this.$(selector)).render()
 
 	render: ->
 		this.$el.html this.template()
-		this.photoTextEditor = new PhotoTextEditor {model: this.model, el: this.$('.photo-text-editor')}
-		this
-
-	open: (photo, collection) ->
-		this.model.set {collection: collection}
-		this.model.set {photo: photo}
-		this.index = collection.indexOf photo
-		if collection.length>0	
-			this.revealElement.foundation 'open'
-			this.$('.view-image-wrapper').focus()
+		this.assign this.photoTextEditor , '.photo-text-editor'
 
 	photoChanged: (m) ->
-		this.$('.view-image').attr('src' , this.urlBase + '/photos/' + m.get('size') + '/' + m.get('photo').id + '.jpg')
-
-	collectionChanged: (collection) ->
-		console.log "collection changed"
+		this.$('.view-image').attr('src' , config.urlBase + '/photos/' + m.get('viewPhotoSize') + '/' + m.get('viewPhoto').id + '.jpg')
