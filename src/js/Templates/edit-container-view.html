@@ -12,8 +12,12 @@
 	<label>custom url
 		<input type="text" name="url" value="<%= url %>">
 	</label>
-	<label>url suffix
-		<input type="text" name="urlsuffix" value="<%= urlsuffix %>">
+	<label>access
+		<select name="access">
+			<option value="0"<% if (access==0) print(" selected") %>>public</option>
+			<option value="1"<% if (access==1) print(" selected") %>>public with link</option>
+			<option value="2"<% if (access==2) print(" selected") %>>login required</option>
+		</select>
 	</label>
 	<input type="submit" class="button" value="Submit">
 </form>

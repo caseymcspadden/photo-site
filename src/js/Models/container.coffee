@@ -14,19 +14,20 @@ module.exports = Backbone.Model.extend
 		description: ''
 		url: ''
 		urlsuffix: ''
+		access: 0
 		populated: false
 		featuredPhoto: 0
 		watermark: 1
 	
 	initialize: (attributes, options) ->
 		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null
-		this.listenTo this.masterPhotoCollection, 'remove', this.photoRemoved
+		this.listenTo(this.masterPhotoCollection, 'remove', this.photoRemoved) if this.masterPhotoCollection
 		this.photos = new ContainerPhotos
 	
 	populate: ->
 		self = this
 		console.log 'populate'
-		$.getJSON(config.urlBase + '/services/containers/' + this.id + '/photos', (data) ->
+		$.getJSON(config.urlBase + '/services/containers/' + this.id + '/containerphotos', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id
 		)
@@ -47,7 +48,7 @@ module.exports = Backbone.Model.extend
 		console.log addArray
 
 		$.ajax(
-			url: config.urlBase +  '/services/containers/' + this.id + '/photos'
+			url: config.urlBase +  '/services/containers/' + this.id + '/containerphotos'
 			type: 'POST'
 			context: this
 			data: {ids: addArray.join(',')}
@@ -76,7 +77,7 @@ module.exports = Backbone.Model.extend
 		for id in ids
 			collection.remove id
 
-		url = if deletePhotos then '/photos' else '/containers/' + this.id + '/photos'
+		url = if deletePhotos then '/photos' else '/containers/' + this.id + '/containerphotos'
 
 		$.ajax(
 			url: config.urlBase + '/services' + url
@@ -95,7 +96,7 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: config.urlBase + '/services/containers/' + this.id + '/photos'
+			url: config.urlBase + '/services/containers/' + this.id + '/containerphotos'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}

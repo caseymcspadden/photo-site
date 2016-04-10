@@ -34,12 +34,21 @@ $app->get('/', function ($request, $response, $args) {
 
 
 $app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
-    $gallery = $this->services->getGallery($args['path']);
-    if (!$gallery)
+    $container = $this->services->getContainer($args['path']);
+    if (!$container)
       return $response->withRedirect($this->get('router')->pathFor('home'));
 
-    $response->getBody()->write(json_encode($gallery));
-    return $response->withHeader('X-Gallery', $gallery->id);
+    if ($container->type=='folder') {
+      return $this->view->render($response, 'folder.html' , [
+          'webroot'=>$this->services->webroot,
+          'container'=>$container
+      ]);
+    } else {
+      return $this->view->render($response, 'gallery.html' , [
+          'webroot'=>$this->services->webroot,
+          'container'=>$container
+      ]);
+    }
 });
 
 $app->get('/portfolio', function ($request, $response, $args) {
@@ -206,10 +215,22 @@ $app->get('/services/portfolio', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, urlsuffix, watermark FROM containers ORDER BY idparent, position");
+$app->get('/services/containerfrompath/[{path:.*}]', function($request, $response, $args) {
+    $gallery = $this->services->getContainer($args['path']);
+    if (!$gallery)
+      $gallery = array('error'=>'gallery not found');
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);    
+    $response->getBody()->write(json_encode($gallery,JSON_NUMERIC_CHECK));
+
+    return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/services/containers', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, urlsuffix, access, watermark FROM containers ORDER BY idparent, position");
+
+  $response->getBody()->write($json);
+
+  return $response->withHeader('Content-Type','application/json');    
 });
 
 $app->post('/services/containers', function($request, $response, $args) {
@@ -222,33 +243,20 @@ $app->post('/services/containers', function($request, $response, $args) {
 
     $position = $row ? 1 + $row[0] : 1;
 
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]')");
+    $urlsuffix = $this->services->getRandomKey(6);
+
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$urlsuffix', $vals[access])");
 
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
-/*
-$app->get('/services/containers/{id}', function($request, $response, $args) {
-  $dbh = $this->options['dbh'];
-
-  $arr = array();
-
-  $result = $dbh->query("SELECT id, type, idparent, position, featuredPhoto, name, description, watermark FROM containers WHERE id = $args[id] ORDER BY position");
-
-  while ($row = $result->fetchObject())
-    array_push($arr,$row);
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
-});
-*/
-
 $app->put('/services/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
   }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
@@ -263,6 +271,13 @@ $app->delete('/services/containers/{id}', function($request, $response, $args) {
 });
 
 $app->get('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
+
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
   $arr = array();
@@ -270,10 +285,12 @@ $app->get('/services/containers/{id:[0-9]+}/photos', function($request, $respons
   while ($row = $result->fetch())
     array_push($arr, $row[0]);
 
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($arr));
+  $response->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
+
+  return $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+$app->post('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   
   if ($this->services->isAdmin()) {
@@ -290,10 +307,10 @@ $app->post('/services/containers/{id:[0-9]+}/photos', function($request, $respon
       $position++;
     }
   }
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
-$app->put('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+$app->put('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
     $ids = explode(',', $parsedBody['ids']);
@@ -304,10 +321,10 @@ $app->put('/services/containers/{id:[0-9]+}/photos', function($request, $respons
       $position++;
     }
   }
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
-$app->delete('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+$app->delete('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody(); 
   if ($this->services->isAdmin()) {
     $ids = $parsedBody['ids'];
@@ -325,7 +342,7 @@ $app->delete('/services/containers/{id:[0-9]+}/photos', function($request, $resp
       $position++;
     }
   }
-  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
 

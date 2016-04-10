@@ -356,14 +356,15 @@ class Services
 
     }
 
-    public function getGallery($path)
+    public function getContainer($path)
     {
+    	error_log($path);
     	$pathArray = explode('/',$path);
     	$user = $this->getSessionUser();
 
-    	$currentContainer = (object) ['id'=>0, 'iduser'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>''];
+    	$currentContainer = (object) ['id'=>0, 'iduser'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, iduser, type, idparent, url, urlsuffix, loginrequired FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$result = $this->dbh->query("SELECT id, iduser, type, idparent, name, url, urlsuffix, access FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
     		$currentContainer = $result->fetchObject();
 
     		if (!$currentContainer)
@@ -372,10 +373,10 @@ class Services
     		$canAccess = $user->isadmin || ($user->id!=0 && $currentContainer->iduser == $user->id);
 
     		if ($i==count($pathArray)-1)
-    			return ($canAccess || (!$currentContainer->loginrequired && $currentContainer->urlsuffix=='')) ? $currentContainer : FALSE;
+    			return ($canAccess || $currentContainer->access==0) ? $currentContainer : FALSE;
 
     		if ($i==count($pathArray)-2 && $pathArray[$i+1]==$currentContainer->urlsuffix)
-				return ($canAccess || !$currentContainer->loginrequired) ? $currentContainer : FALSE;
+				return ($canAccess || $currentContainer->access<=1) ? $currentContainer : FALSE;
     	}
     	return FALSE;
     }

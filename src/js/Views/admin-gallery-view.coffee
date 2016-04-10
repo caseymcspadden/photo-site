@@ -33,6 +33,7 @@ module.exports = Backbone.View.extend
 		this.template = templates['admin-gallery-view']
 		this.listenTo this.model, 'change:selectedContainer', this.changeGallery
 		this.selectMode = 0
+		this.currentPhoto = null
 
 		this.dropzoneView = new  DropzoneView {model: this.model}
 		this.editContainerView = new EditContainerView {model: this.model}
@@ -66,12 +67,12 @@ module.exports = Backbone.View.extend
 		
 		if this.selectMode==3
 			this.selectMode=2
-			index1 = this.currentGallery.photos.indexOf this.model.get('selectedPhoto')
+			index1 = this.currentGallery.photos.indexOf this.currentPhoto
 			index2 = this.currentGallery.photos.indexOf photo
 			this.currentGallery.photos.at(i).set('selected',true) for i in [index1 .. index2]
-	
-		this.model.set 'selectedPhoto', photo		
 
+		this.model.set 'selectedPhoto', photo			
+		this.currentPhoto = photo		
 
 	openViewer: (e) ->
 		this.model.set 'viewingPhotosToggle' , !this.model.get('viewingPhotosToggle')
