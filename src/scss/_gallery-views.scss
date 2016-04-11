@@ -1,0 +1,60 @@
+.gallery-grid-view {
+	float: left;
+	width: rem-calc(350);
+		
+	.next, .prev {
+		position: absolute;
+		z-index: 1;
+		top: 45%;
+		background-color: lighten($body-background,20%);
+		opacity: 0.5;
+		font-size: 50px;
+		font-weight: bold;
+		user-select: none;
+		
+		&:hover {
+			cursor: pointer;
+			opacity: 1;
+		}
+	}
+
+	@include breakpoint(medium down) {
+		.prev, .next {
+			display: none;
+		}
+	}
+
+	.prev {
+		padding: 10px 10px 15px 5px;
+		left: 0;
+	}
+
+	.next {
+		padding: 10px 5px 15px 10px;
+		right: 0;
+	}
+
+	.content {
+	 	min-height: rem-calc(450);
+	}
+
+	.pager {
+		text-align: center;
+		width: 100%;
+		select {
+			width: 33%;
+			border: 0;
+			outline: none;
+		}
+	}
+}
+
+.gallery-photo-view {
+  float: left;
+  .content {
+  	min-height: rem-calc(450);
+  }
+  img {
+  	max-height: rem-calc(360);
+  }
+}

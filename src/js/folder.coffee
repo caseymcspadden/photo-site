@@ -5,23 +5,22 @@ Backbone = require 'backbone'
 Session = require('../../require/session')
 LoginView = require('../../require/login-view')
 SessionMenuView = require('../../require/session-menu-view')
+Galleries = require('../../require/galleries')
 FolderView = require('../../require/folder-view')
-#Galleries = require('../../require/galleries')
-#PortfolioView = require('../../require/portfolio-view')
 
 session = new Session
 loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 
-#galleries = new Galleries
-#portfolioView = new PortfolioView {collection: galleries, el: '.portfolio-view'}
-
 $('body').append loginView.render().el
 
-console.log "FOLDER " + document.location.pathname.replace(/^.*\/galleries\//,'')
+galleries = new Galleries
+folderView = new FolderView {collection: galleries, el: '.folder-view'}
+
+folderView.render()
 
 session.fetch()
-#galleries.fetch {reset: true}
+galleries.fetch {reset: true}
 
 $(document).foundation()
 #new Foundation.DropdownMenu($('.dropdown'))

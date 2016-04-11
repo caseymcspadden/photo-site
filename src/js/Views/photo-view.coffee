@@ -16,12 +16,14 @@ module.exports = Backbone.View.extend
 		this.template = templates['photo-view']
 		this.listenTo this.model, 'change:selected', this.setSelected
 		this.listenTo this.model, 'remove', this.removeView
+		###
 		this.render()
 		downloadingImage = new Image
 		self = this	
 		downloadingImage.onload = ->
 			self.$('img')[0].src = downloadingImage.src
 		downloadingImage.src = config.urlBase + '/photos/T/' + this.model.id + '.jpg'
+		###
 
 	setFocus: (e) ->
 		this.$('a').focus()
@@ -45,5 +47,6 @@ module.exports = Backbone.View.extend
 			this.$('img').removeClass('selected')
 
 	photoClicked: (e) ->
+		console.log this.model
 		this.model.set 'selected', !this.model.get('selected')
 		e.preventDefault()

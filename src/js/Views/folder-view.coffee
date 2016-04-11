@@ -12,6 +12,8 @@ module.exports = Backbone.View.extend
 	addOne: (gallery) ->
 		data = gallery.toJSON()
 		data.urlBase = config.urlBase
+		data.galleryUrl = config.urlBase + '/galleries/' + document.location.pathname.replace(/^.*\/galleries\//,'') + '/' + data.url
+		console.log data
 		html = this.galleryTemplate data
 		this.$el.append html
 
