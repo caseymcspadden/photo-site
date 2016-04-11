@@ -1,17 +1,18 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
-PhotoView = require './photo-view'
+GalleryGridView = require './gallery-grid-view'
+GalleryPhotoView = require './gallery-photo-view'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 
 	initialize: (options) ->
-		this.listenTo this.model.photos, 'reset', this.addAll
+		this.template = templates['gallery-main-view']
+		this.galleryGridView = new GalleryGridView {model: this.model}
+		this.galleryPhotoView = new GalleryPhotoView {model: this.model}
 
-	addOne: (photo) ->
-		photoView = new PhotoView {model: photo}
-		this.$el.append photoView.render().el
-
-	addAll: (collection) ->
-		this.$el.html ''
-		collection.each this.addOne, this		
+	render: ->
+		this.$el.html this.template()
+		this.assign this.galleryGridView, '.gallery-grid-view'
+		this.assign this.galleryPhotoView, '.gallery-photo-view'
+		this

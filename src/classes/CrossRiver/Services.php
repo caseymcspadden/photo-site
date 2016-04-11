@@ -358,7 +358,6 @@ class Services
 
     public function getContainer($path)
     {
-    	error_log($path);
     	$pathArray = explode('/',$path);
     	$user = $this->getSessionUser();
 

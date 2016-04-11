@@ -20,6 +20,7 @@ sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 $('body').append loginView.render().el
 
 galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view'}
+galleryMainView.render()
 
 session.fetch()
 #galleries.fetch {reset: true}
