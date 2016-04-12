@@ -5,10 +5,13 @@ PageView = require './gallery-grid-page'
 module.exports = BaseView.extend
 	events:
 		'change .pager select' : 'changePage'
+		'click .prev' : 'scrollLeft'
+		'click .next' : 'scrollRight'
 
 	initialize: (options) ->
 		this.template = templates['gallery-grid-view']
 		this.gridPages = []
+		this.currentPage = -1
 		this.listenTo this.model.photos, 'reset', this.addAll
 
 	render: ->
@@ -26,10 +29,25 @@ module.exports = BaseView.extend
 			this.$('.pager select').append $("<option></option>").attr("value",i).text('' + (i+1) + ' of ' + this.gridPages.length)
 
 		this.showPage 0
+
+	scrollLeft: ->
+		val = parseInt this.$('.pager select').val()
+		if val > 0
+			this.$('.pager select').val(val-1)
+			this.showPage(val-1)
 		
+	scrollRight: ->
+		val = parseInt this.$('.pager select').val()
+		if val < this.gridPages.length-1
+			this.$('.pager select').val(val+1)
+			this.showPage(val+1)
+
 	changePage: (e) ->
 		this.showPage e.target.value
 
-	showPage: (n)->
+	showPage: (n) ->
 		this.$('.content').html ''
+		this.gridPages[this.currentPage].undelegateEvents() if this.currentPage>=0
+		this.currentPage=n
 		this.assign this.gridPages[n] , '.content'
+		this.model.photos.at(n*12).set 'selected' , true

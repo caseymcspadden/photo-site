@@ -4,14 +4,16 @@ PhotoView = require './photo-view'
 
 module.exports = BaseView.extend
 
-	className: 'grid'
+	className: 'grid-page'
 
 	initialize: (options) ->
 		this.photoViews = []
 		this.listenTo this.model.photos, 'change:selected', this.selectPhoto
 
 	render: ->
-		this.$el.append this.photoViews[i].render().el for i in [0...this.photoViews.length]
+		for i in [0...this.photoViews.length]
+			this.$el.append this.photoViews[i].render().el
+			this.photoViews[i].delegateEvents()
 		this
 
 	selectPhoto: (m) ->
@@ -22,5 +24,6 @@ module.exports = BaseView.extend
 			this.model.set 'currentPhoto' , m
 
 	addPhoto: (photo) ->
-		this.photoViews.push new PhotoView {model: photo}
+		photoView = new PhotoView {model: photo}
+		this.photoViews.push photoView
 
