@@ -1,11 +1,11 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 Photo = require './photo'
 PhotoviewerModel = require './photoviewer'
 PhotoTextEditor = require './photo-text-editor-view'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	tagName: 'div'
 
 	events:
@@ -54,9 +54,6 @@ module.exports = Backbone.View.extend
 		else
 			this.$('.photo-viewer').removeClass('full-screen') 
 		this.$('.view-image-wrapper').focus()
-
-	assign : (view, selector) ->
-		view.setElement(this.$(selector)).render()
 
 	render: ->
 		this.$el.html this.template()

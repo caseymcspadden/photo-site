@@ -1,6 +1,6 @@
 #Folders View manages a collection of folders
 
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 Containers = require './containers'
 Container = require './container'
@@ -10,7 +10,7 @@ GalleryView = require './admin-gallery-view'
 MasterThumbnailsView = require './master-thumbnails-view'
 PhotoViewer = require './photoviewer-view'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 
 	initialize: (options) ->
 		this.template = templates['admin-main-view']
@@ -21,9 +21,6 @@ module.exports = Backbone.View.extend
 		this.galleryView = new GalleryView {model: this.model}
 		this.masterThumbnailsView = new MasterThumbnailsView {model: this.model}
 		this.photoViewer = new PhotoViewer {model: this.model}
-
-	assign: (view, selector) ->
-		view.setElement(this.$(selector)).render();
 
 	render: ->
 		this.$el.html this.template()

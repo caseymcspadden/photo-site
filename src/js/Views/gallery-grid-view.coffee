@@ -7,16 +7,37 @@ module.exports = BaseView.extend
 		'change .pager select' : 'changePage'
 		'click .prev' : 'scrollLeft'
 		'click .next' : 'scrollRight'
+		'keyup' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['gallery-grid-view']
 		this.gridPages = []
 		this.currentPage = -1
 		this.listenTo this.model.photos, 'reset', this.addAll
+		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
 
 	render: ->
 		this.$el.html this.template()
 		this
+
+	keyUp: (e) ->
+		console.log "keyup in grid view"		
+		offset = switch e.keyCode
+			when 37 then -1
+			when 38 then -3
+			when 39 then 1
+			when 40 then 3
+			else 0
+		this.model.offsetCurrentPhoto offset
+
+	currentPhotoChanged: (model) ->
+		photo = model.get "currentPhoto"
+		photo.set 'selected', true
+		return if !photo
+		index = model.photos.indexOf photo
+		page = Math.floor(index/12)
+		this.$('.pager select').val page
+		this.showPage page
 
 	addAll: (collection) ->
 		for i in [0...collection.length]
@@ -29,25 +50,24 @@ module.exports = BaseView.extend
 			this.$('.pager select').append $("<option></option>").attr("value",i).text('' + (i+1) + ' of ' + this.gridPages.length)
 
 		this.showPage 0
+		this.model.set 'currentPhoto', this.model.photos.at 0
 
 	scrollLeft: ->
-		val = parseInt this.$('.pager select').val()
-		if val > 0
-			this.$('.pager select').val(val-1)
-			this.showPage(val-1)
-		
+		this.model.offsetCurrentPhoto -12
+
 	scrollRight: ->
-		val = parseInt this.$('.pager select').val()
-		if val < this.gridPages.length-1
-			this.$('.pager select').val(val+1)
-			this.showPage(val+1)
+		index = this.model.photos.indexOf this.model.get('currentPhoto')
+		this.model.offsetCurrentPhoto Math.min(12, this.model.photos.length-index-1)
 
 	changePage: (e) ->
+		page = e.target.value
 		this.showPage e.target.value
+		this.model.photos.at(page*12).set 'selected' , true
 
-	showPage: (n) ->
+	showPage: (page) ->
+		return if page==this.currentPage
 		this.$('.content').html ''
 		this.gridPages[this.currentPage].undelegateEvents() if this.currentPage>=0
-		this.currentPage=n
-		this.assign this.gridPages[n] , '.content'
-		this.model.photos.at(n*12).set 'selected' , true
+		this.currentPage = page
+		this.assign this.gridPages[page] , '.content'
+		this.$('a').focus()

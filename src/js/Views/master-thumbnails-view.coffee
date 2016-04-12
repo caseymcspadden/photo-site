@@ -64,10 +64,10 @@ module.exports = Backbone.View.extend
 			view = this.photoViews[photo.id] = new PhotoView {model:photo, id: 'master-photo-' + photo.id}
 		
 		view = this.photoViews[photo.id]
-		this.$('.thumbnails').append view.el
-		view.delegateEvents()
+		this.$('.thumbnails').append view.render().el
+		#view.delegateEvents()
 
-	filterPhoto: (photo) ->
+	filterPhoto: (photo) ->		
 		if this.selectedContainer.photos.indexOf(photo)<0
 			this.photos.add photo
 

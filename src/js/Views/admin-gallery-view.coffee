@@ -1,6 +1,6 @@
 #Gallery View manages a gallery or folder
 
-Backbone = require 'backbone'
+BaseView = require './base-view'
 Dragula = require 'dragula'
 PhotoView = require './photo-view'
 templates = require './jst'
@@ -11,7 +11,7 @@ DropzoneView = require('./dropzone-view')
 EditContainerView = require('./edit-container-view')
 #MasterThumbnailsView = require('./master-thumbnails-view')
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	currentGallery: null
 
 	photoViews: {}
@@ -131,9 +131,6 @@ module.exports = Backbone.View.extend
 		ids = this.currentGallery.getSelectedPhotos true
 		return if ids.length==0
 		this.model.setFeaturedPhoto this.currentGallery.get('idparent'), ids[0]
-
-	assign : (view, selector) ->
-		view.setElement(this.$(selector)).render()
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
