@@ -26,7 +26,6 @@ module.exports = Backbone.Model.extend
 	
 	populate: ->
 		self = this
-		console.log 'populate'
 		$.getJSON(config.urlBase + '/services/containers/' + this.id + '/containerphotos', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id
@@ -43,9 +42,7 @@ module.exports = Backbone.Model.extend
 	addPhotos: (arr) ->
 		addArray = []
 		for id in arr
-			addArray.push id if this.photos.indexOf(id)<0
-
-		console.log addArray
+			addArray.push id if this.photos.get(id)
 
 		$.ajax(
 			url: config.urlBase +  '/services/containers/' + this.id + '/containerphotos'
@@ -86,7 +83,6 @@ module.exports = Backbone.Model.extend
 			data: {ids: ids.join(',')}
 			success: (result) ->
 				json = $.parseJSON(result)
-				console.log json
 		)
 
 	rearrangePhotos: (ids) ->

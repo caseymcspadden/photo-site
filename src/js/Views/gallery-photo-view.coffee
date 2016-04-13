@@ -19,7 +19,6 @@ module.exports = BaseView.extend
 		this
 
 	keyUp: (e) ->
-		console.log "keyup in photo view"
 		offset = switch e.keyCode
 			when 37 then -1
 			when 38 then -3

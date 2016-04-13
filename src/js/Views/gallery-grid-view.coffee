@@ -1,6 +1,7 @@
 BaseView = require './base-view'
 templates = require './jst'
 PageView = require './gallery-grid-page'
+config = require './config'
 
 module.exports = BaseView.extend
 	events:
@@ -17,11 +18,12 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
 
 	render: ->
-		this.$el.html this.template()
+		breadcrumbs =  document.location.pathname.replace(/^.*\/galleries\//,'').split '/'
+		console.log breadcrumbs
+		this.$el.html this.template {urlBase: config.urlBase, breadcrumbs: breadcrumbs}
 		this
 
 	keyUp: (e) ->
-		console.log "keyup in grid view"		
 		offset = switch e.keyCode
 			when 37 then -1
 			when 38 then -3

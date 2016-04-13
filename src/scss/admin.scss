@@ -5,7 +5,8 @@
 @import 'dropzone';
 @import 'mtree';
 @import 'featured';
-@import 'photoviewer';
+@import 'admin-photoviewer';
+@import 'admin-breadcrumbs';
 @import "../../node_modules/foundation-sites/scss/foundation";
 
 @include foundation-global-styles;
@@ -44,8 +45,6 @@
 @include foundation-tooltip;
 @include foundation-top-bar;
 
-@import "../../node_modules/slick-carousel/slick/slick.scss";
-@import "../../node_modules/slick-carousel/slick/slick-theme.scss";
 @import "../../node_modules/font-awesome/scss/font-awesome.scss";
 
 #uploadModal {
@@ -85,7 +84,7 @@
   @extend .reveal-dark;
 }
 
-#gv-uploadPhotos {
+.dropzone-view {
   @extend .reveal-dark;
 }
 

@@ -56,7 +56,6 @@ module.exports = Backbone.View.extend
 		this.$el.foundation 'close'
 
 	render: ->
-		console.log "rendering master thumbnails view"
 		this.$el.html this.template()
 
 	addOneThumbnail: (photo) ->

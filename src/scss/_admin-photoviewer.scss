@@ -1,0 +1,27 @@
+.admin-photoviewer-view {
+  @extend .reveal-dark;
+  .photo-viewer {
+    a {
+      color: $white;
+    }
+    .image-view {
+      float: left;
+      width: 50%;
+      text-align: center;
+      a {
+        outline: none;
+      }
+    }
+    .text-view {
+      float: left;
+      margin-left: 1rem;
+    }
+    &.full-screen {
+      .image-view {width: 100%;}
+      .text-view {display: none;}
+    }
+  }  
+  .photo-text-editor {
+    width: 380px;
+  }
+}

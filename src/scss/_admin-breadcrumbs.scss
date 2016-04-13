@@ -1,0 +1,17 @@
+.breadcrumbs-view {
+  line-height: 2rem;
+
+  a {
+    color: $body-font-color;
+    &:visited {color: $body-font-color;}   
+    &:hover {color: $white;}
+  }
+
+  img {
+    border: 0;
+    padding: 0;
+    margin: 0px 3px 0px 3px;
+    width: 2rem;
+    height: 2rem;
+  }
+}

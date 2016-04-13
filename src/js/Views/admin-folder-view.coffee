@@ -40,7 +40,6 @@ module.exports = Backbone.View.extend
 		this.$('#fv-addGallery .close-button').trigger('click')
 	
 	changeContainer: ->
-		console.log "folder container changed"
 		if (this.currentContainer)
 			this.stopListening this.currentContainer
 		this.currentContainer = this.model.get 'selectedContainer'

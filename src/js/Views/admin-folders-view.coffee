@@ -66,11 +66,11 @@ module.exports = Backbone.View.extend
 			$li = this.getContainingElement e.target, 'li'
 			toId = parseInt $li.attr('id').replace('node-','')
 			if e.offsetY < 15 and (this.allowDrop & 2)
-				console.log "drop " + this.dragElement.attr('id') + ' before ' + $li.attr('id')
+				#console.log "drop " + this.dragElement.attr('id') + ' before ' + $li.attr('id')
 				this.dragElement.insertBefore $li
 				this.model.moveContainerTo dragmodel, toId, true
 			else if e.offsetY >= 15 and (this.allowDrop & 1)
-				console.log "drop " + this.dragElement.attr('id') + ' inside ' + $li.attr('id')
+				#console.log "drop " + this.dragElement.attr('id') + ' inside ' + $li.attr('id')
 				$li.find('>ul').append this.dragElement
 				this.model.moveContainerTo dragmodel, toId, false
 
@@ -94,7 +94,6 @@ module.exports = Backbone.View.extend
 		e.preventDefault() 
 		return if !this.model.get('dragModel')
 		if !this.dragStarted
-			console.log "starting drag"
 			this.dragStarted = true
 
 		return if this.allowDrop==0
@@ -119,7 +118,6 @@ module.exports = Backbone.View.extend
 			this.addChildContainers child.id
 
 	resetContainers: ->
-		console.log "Reset containers"
 		this.addChildContainers 0
 
 	addChildToParent: (id) ->
@@ -147,7 +145,6 @@ module.exports = Backbone.View.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		console.log data
 		data.type = 'folder'
 		this.model.createContainer data
 		this.$('#afv-addFolder .close-button').trigger('click')

@@ -12,9 +12,6 @@ module.exports = Backbone.Model.extend
 		name: ''
 		company: ''
 
-	initialize: (attributes, options) ->
-		console.log "Initializing session"
-
 	###
 	initialize: (attributes, options) ->
 		self = this
@@ -45,7 +42,7 @@ module.exports = Backbone.Model.extend
 					this.set 'errorMessage' , json.message
 				else
 					expires = new Date(json.expiredate)
-					document.cookie = 'session=' + json.hash + '; expires=' + expires.toString()
+					document.cookie = 'session=' + json.hash + ';path=/; expires=' + expires.toString()
 					this.set json
 		)
 

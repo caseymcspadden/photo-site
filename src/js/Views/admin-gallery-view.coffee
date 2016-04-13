@@ -5,11 +5,10 @@ Dragula = require 'dragula'
 PhotoView = require './photo-view'
 templates = require './jst'
 PhotoViewerModel= require './photoviewer'
-#PhotoViewer = require './photoviewer-view'
 Photo = require './photo'
 DropzoneView = require('./dropzone-view')
 EditContainerView = require('./edit-container-view')
-#MasterThumbnailsView = require('./master-thumbnails-view')
+BreadcrumbsView = require ('./admin-breadcrumbs-view')
 
 module.exports = BaseView.extend
 	currentGallery: null
@@ -20,8 +19,8 @@ module.exports = BaseView.extend
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
-		'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
-		'click .set-featured-folder' : 'setFeaturedFolderPhoto'
+		#'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
+		#'click .set-featured-folder' : 'setFeaturedFolderPhoto'
 		'click .delete-gallery' : 'deleteGallery'
 		'click .select-all' : 'selectAll'
 		'click .deselect-all' : 'deselectAll'
@@ -37,6 +36,7 @@ module.exports = BaseView.extend
 
 		this.dropzoneView = new  DropzoneView {model: this.model}
 		this.editContainerView = new EditContainerView {model: this.model}
+		this.breadcrumbsView = new BreadcrumbsView {model: this.model} 
 
 		this.drag = Dragula({direction: 'horizontal'})
 
@@ -72,7 +72,7 @@ module.exports = BaseView.extend
 			this.currentGallery.photos.at(i).set('selected',true) for i in [index1 .. index2]
 
 		this.model.set 'selectedPhoto', photo			
-		this.currentPhoto = photo		
+		this.currentPhoto = photo
 
 	openViewer: (e) ->
 		this.model.set 'viewingPhotosToggle' , !this.model.get('viewingPhotosToggle')
@@ -89,6 +89,7 @@ module.exports = BaseView.extend
 		#this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery and this.currentGallery.get('type')=='gallery'
+			this.breadcrumbsView.render()
 			this.listenTo this.currentGallery, 'change', this.galleryChanged 
 			this.listenTo this.currentGallery.photos, 'reset', this.addAll 
 			this.listenTo this.currentGallery.photos, 'add', this.addOne
@@ -135,11 +136,9 @@ module.exports = BaseView.extend
 	render: ->
 		this.$el.html this.template {name: 'Default'}
 		
-		#this.photoViewer = new PhotoViewer {el:this.$('.photo-viewer'), revealElement: this.$('#gv-photoViewer'), urlBase: this.model.urlBase}
-		#this.photoViewer.render()
-		#this.assign this.photoViewer, '#gv-photoViewer'
-		this.assign this.dropzoneView, '#gv-uploadPhotos'
-		this.assign this.editContainerView, '#gv-editGallery'
+		this.assign this.dropzoneView, '.dropzone-view'
+		this.assign this.editContainerView, '.edit-gallery-view'
+		this.assign this.breadcrumbsView, '.breadcrumbs-view'
 
 		this.drag.containers.pop()
 		this.drag.containers.push this.$('.photo-list')[0]

@@ -105,8 +105,6 @@ module.exports = Backbone.Model.extend
 	deleteContainer: (container) ->
 		this.containers.remove container
 		this.set {selectedContainer: null}
-		console.log "destroying container"
-		console.log container
 		container.destroy()
 		this.adjustPositions()
 
@@ -139,9 +137,18 @@ module.exports = Backbone.Model.extend
 
 		container.addPhotos selectedPhotos
 
+	getContainerTree: (container) ->
+		current = container
+		ret = []
+		while current
+			ret.push current
+			idParent = current.get 'idparent'
+			return ret if idParent == 0
+			current = this.containers.get idParent
+		ret
 
 	setFeaturedPhoto: (idContainer, idPhoto) ->
-		return if !idContainer or !idPhoto
+		return if !idContainer 
 		container = this.containers.get idContainer
 		if container
 			container.save {featuredPhoto: idPhoto} , {wait: true}

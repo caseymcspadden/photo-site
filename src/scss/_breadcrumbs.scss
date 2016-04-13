@@ -1,0 +1,13 @@
+.gallery-breadcrumbs {
+  line-height: 24px;
+  margin: 0;
+  text-align: center;
+  a {
+    color: $body-font-color;
+    &:visited {color: $body-font-color;}   
+    &:hover {
+      color: $white;
+      text-decoration: underline;
+    }
+  }
+}

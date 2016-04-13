@@ -16,8 +16,6 @@ module.exports = Backbone.View.extend
 		this.listenTo this.viewModel.containers, 'change', this.populateForm
 
 	settingsChanged: (settings) ->
-		console.log "Settings Changed"
-		console.log this.model
 		this.populateForm()
 
 	populateForm: ->

@@ -47,6 +47,5 @@ module.exports = Backbone.View.extend
 			this.$('img').removeClass('selected')
 
 	photoClicked: (e) ->
-		console.log this.model
 		this.model.set 'selected', !this.model.get('selected')
 		e.preventDefault()

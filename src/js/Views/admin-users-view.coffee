@@ -15,7 +15,6 @@ module.exports = Backbone.View.extend
 		this.render()
 
 	newUser: (e) ->
-		console.log 'e'
 		e.preventDefault()
 		this.$('.error-message').addClass('hidden')
 		arr = this.$('form').serializeArray()
@@ -23,7 +22,6 @@ module.exports = Backbone.View.extend
 		for elem in arr
 			data[elem.name]=elem.value
 
-		console.log data
 		###
 		$.ajax(
 			url: this.collection.url
