@@ -7,8 +7,8 @@ Container = require './container'
 #Admin = require './admin'
 FolderView = require './admin-folder-view'
 GalleryView = require './admin-gallery-view'
-MasterThumbnailsView = require './master-thumbnails-view'
-PhotoViewer = require './photoviewer-view'
+AdminThumbnailsView = require './admin-thumbnails-view'
+PhotoViewer = require './admin-photoviewer-view'
 
 module.exports = BaseView.extend
 
@@ -19,15 +19,15 @@ module.exports = BaseView.extend
 
 		this.folderView = new FolderView {model: this.model}
 		this.galleryView = new GalleryView {model: this.model}
-		this.masterThumbnailsView = new MasterThumbnailsView {model: this.model}
+		this.adminThumbnailsView = new AdminThumbnailsView {model: this.model}
 		this.photoViewer = new PhotoViewer {model: this.model}
 
 	render: ->
 		this.$el.html this.template()
 		this.assign this.folderView, '#admin-folder'
 		this.assign this.galleryView, '#admin-gallery'
-		this.assign this.masterThumbnailsView, '#admin-thumbnails'
-		this.assign this.photoViewer, '#admin-photoviewer'
+		this.assign this.adminThumbnailsView, '.admin-thumbnails-view'
+		this.assign this.photoViewer, '.admin-photoviewer-view'
 		this.setVisibility()
 
 	setVisibility: ->

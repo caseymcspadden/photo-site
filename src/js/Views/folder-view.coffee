@@ -5,18 +5,16 @@ config = require './config'
 module.exports = Backbone.View.extend
 
 	initialize: (options) ->
-		this.galleryTemplate = templates['gallery-cover-view']
-		this.listenTo this.collection, 'add', this.addOne
-		this.listenTo this.collection, 'reset', this.addAll
+		this.containerTemplate = templates['container-cover-view']
+		this.listenTo this.model.containers, 'reset', this.addAll
 
-	addOne: (gallery) ->
-		data = gallery.toJSON()
+	addOne: (container) ->
+		data = container.toJSON()
 		data.urlBase = config.urlBase
-		data.galleryUrl = config.urlBase + '/galleries/' + document.location.pathname.replace(/^.*\/galleries\//,'') + '/' + data.url
-		console.log data
-		html = this.galleryTemplate data
+		data.containerUrl = this.model.urlBase + '/' + data.url
+		html = this.containerTemplate data
 		this.$el.append html
 
 	addAll: (collection) ->
 		this.$el.html ''
-		collection.each this.addOne, this		
+		this.model.containers.each this.addOne, this		

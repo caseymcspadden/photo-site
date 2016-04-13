@@ -86,7 +86,7 @@ module.exports = BaseView.extend
 			this.stopListening this.currentGallery.photos
 	
 		this.currentGallery = this.model.get('selectedContainer')
-		this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
+		#this.$('.title').html(if this.currentGallery then this.currentGallery.get('name') else 'Default')
 
 		if this.currentGallery and this.currentGallery.get('type')=='gallery'
 			this.listenTo this.currentGallery, 'change', this.galleryChanged 
@@ -148,7 +148,7 @@ module.exports = BaseView.extend
 		if !(this.photoViews.hasOwnProperty photo.id)
 			view = this.photoViews[photo.id] = new PhotoView {model:photo, id: 'gallery-photo-' + photo.id}
 		view = this.photoViews[photo.id]
-		this.$('.photo-list').append view.el
+		this.$('.photo-list').append view.render().el
 		view.delegateEvents()
 
 	addAll: ->

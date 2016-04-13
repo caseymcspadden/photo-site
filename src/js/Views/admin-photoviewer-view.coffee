@@ -16,7 +16,7 @@ module.exports = BaseView.extend
 
 	initialize: (options) ->
 		this.revealElement = options.revealElement
-		this.template = templates['photoviewer-view']
+		this.template = templates['admin-photoviewer-view']
 		this.listenTo this.model, 'change:viewPhotoSize', this.photoChanged
 		this.listenTo this.model, 'change:viewPhoto', this.photoChanged
 		this.listenTo this.model, 'change:viewingPhotosToggle' , this.open

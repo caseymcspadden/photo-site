@@ -270,6 +270,12 @@ $app->delete('/services/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
+$app->get('/services/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
+
+  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+});
+
 $app->get('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
 

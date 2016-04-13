@@ -1,10 +1,9 @@
 Backbone = require 'backbone'
-Gallery = require './gallery'
+FolderContainer = require './foldercontainer'
 config = require './config'
 
 module.exports = Backbone.Collection.extend
-	model: Gallery
-	url: config.urlBase + '/services/portfolio'		 
+	model: FolderContainer
 
 	comparator: 'position'
 

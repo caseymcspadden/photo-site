@@ -1,4 +1,4 @@
-.gallery-cover {
+.container-cover {
   position: relative;
   overflow: hidden;
   float: left;
@@ -9,14 +9,14 @@
     img {
       opacity: 1.0;
     }
-    .gallery-info {
+    .container-info {
       display: none;
     }
   }
   img {
     opacity: 0.6;
   }
-  .gallery-info {
+  .container-info {
     position: absolute;
     font-size: 1.25rem;
     top: 40%;

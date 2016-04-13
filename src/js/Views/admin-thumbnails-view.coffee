@@ -14,7 +14,7 @@ module.exports = Backbone.View.extend
 		this.photos = new Backbone.Collection {model: Photo}
 		this.selectMode = 0
 		this.currentPhoto = null
-		this.template = templates['master-thumbnails-view']
+		this.template = templates['admin-thumbnails-view']
 
 		this.listenTo this.photos, 'change:selected', this.selectedPhotoChanged
 		this.listenTo this.photos, 'add', this.addOneThumbnail
