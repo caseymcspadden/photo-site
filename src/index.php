@@ -28,7 +28,8 @@ $container['services'] = function($container) {
 
 $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'home.html' , [
-        'webroot'=>$this->services->webroot
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
   ]);
 })->setName('home');
 
@@ -41,12 +42,14 @@ $app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
     if ($container->type=='folder') {
       return $this->view->render($response, 'folder.html' , [
           'webroot'=>$this->services->webroot,
-          'container'=>$container
+          'container'=>$container,
+          'islogged'=>$this->services->isLogged()
       ]);
     } else {
       return $this->view->render($response, 'gallery.html' , [
           'webroot'=>$this->services->webroot,
-          'container'=>$container
+          'container'=>$container,
+          'islogged'=>$this->services->isLogged()
       ]);
     }
 });
@@ -60,13 +63,15 @@ $app->get('/portfolio', function ($request, $response, $args) {
 $app->get('/portfolio/{url}', function ($request, $response, $args) {
     return $this->view->render($response, 'gallery.html' , [
         'webroot'=>$this->services->webroot,
-        'url'=>$args['url']
+        'url'=>$args['url'],
+        'islogged'=>$this->services->isLogged()
     ]);
 });
 
 $app->get('/about', function ($request, $response, $args) {
     return $this->view->render($response, 'about.html' , [
-        'webroot'=>$this->services->webroot
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
     ]);
 });
 
@@ -75,7 +80,8 @@ $app->get('/admin', function ($request, $response, $args) {
       return $response->withRedirect($this->get('router')->pathFor('home'));
 
     return $this->view->render($response, "admin.html" , [
-        'webroot'=>$this->services->webroot
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
     ]);
 });
 
@@ -140,9 +146,12 @@ $app->get('/services/session', function($request, $response, $args) {
 
 $app->put('/services/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
+  if ($ret)
+    setcookie("auth", '', time()-3600, '/photo-site/build/', 'localhost', FALSE, TRUE );
   $result=array();
   $result['error'] = !$ret;
-  $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+  $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+  $response->withHeader('Content-Type','application/json');
 });
 
 $app->post('/services/session', function($request, $response, $args) {
@@ -150,9 +159,14 @@ $app->post('/services/session', function($request, $response, $args) {
   $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
   if ($result['error']==true)
     $json = json_encode($result);
-  else 
+  else {
+    setcookie("auth", $result['hash'], time()+3600, '/photo-site/build/', 'localhost', FALSE, TRUE );
     $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
-  $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+  }
+  
+  $response->getBody()->write($json);
+
+  $response->withHeader('Content-Type','application/json');
 });
 
 $app->get('/services/photos', function($request, $response, $args) {

@@ -25,7 +25,15 @@
         <li><a class="top-item" href="{{webroot}}/galleries/portfolio">PORTFOLIO</a></li>
         <li><a class="top-item" href="{{webroot}}/about">ABOUT</a></li>
         <li><a class="top-item" href="#">CONTACT</a></li>
-        <li class="session-menu"><a class="top-item" href="#">CLIENT</a></li>
+        <li class="session-menu"><a class="top-item" href="#">
+          {% if islogged %}
+            CLIENT
+          {% else %}
+            LOGIN
+          {% endif %}        
+        </a>
+          <ul class="submenu menu vertical" data-submenu></ul>
+        </li>
         </ul>
       </div>
     </div>

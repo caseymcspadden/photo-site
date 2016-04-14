@@ -315,7 +315,7 @@ class Services
      */
     public function isAdmin()
     {
-    	if (!isset($_COOKIE['session']))
+    	if (!isset($_COOKIE['auth']))
     		return false;
     	$hash = $this->auth->getSessionHash();
     	if (!$hash || !$this->auth->checkSession($hash))
