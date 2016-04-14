@@ -1,0 +1,23 @@
+<button type="button" class="close-button" data-close aria-label="Close">
+	<span aria-hidden="true">&times;</span>
+</button>
+<h2>Add a User</h2>
+<form method="POST">
+	<label>Name
+		<input type="text" name="name" value="<%= name %>">
+	</label>
+	<label>Company
+		<input type="text" name="company" value="<%= company %>">
+	</label>
+	<label>Email
+		<input type="text" name="email" value="<%= email %>">
+	</label>
+	<label>Password
+		<input type="password" name="password">
+	</label>
+	<label>Repeat Password
+		<input type="password" name="repeat-password">
+	</label>
+	<input type="submit" class="button" value="Submit">
+</form>
+<div class="error-message hidden"></div>

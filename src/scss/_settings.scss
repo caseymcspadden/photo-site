@@ -40,7 +40,6 @@
 //  35. Top Bar
 
 @import '../../node_modules/foundation-sites/scss/util/util';
-@import url(http://fonts.googleapis.com/css?family=Kameron);
 
 // 1. Global
 // ---------
@@ -475,7 +474,7 @@ $switch-paddle-transition: all 0.25s ease-out;
 // 30. Table
 // ---------
 
-$table-background: $white;
+$table-background: $body-background;
 $table-color-scale: 5%;
 $table-border: 1px solid smart-scale($table-background, $table-color-scale);
 $table-padding: rem-calc(8 10 10);

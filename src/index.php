@@ -118,9 +118,27 @@ $app->get('/services/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
-    $json = $this->services->fetchJSON("SELECT * FROM users");
+    $json = $this->services->fetchJSON("SELECT id, email, isactive, dt, isadmin, name, company, idcontainer FROM users");
 
   $response->withHeader('Content-Type','application/json')->getBody()->write($json);
+});
+
+$app->put('/services/users/{id:[0-9]*}', function($request, $response, $args) {
+  $vals = $request->getParsedBody();
+
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else {
+    $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], 
+      ['name'=>$vals['name'], 
+       'company'=>$vals['company']
+      ]);
+    if ($result['error']==true)
+      $json = json_encode($result);
+    else
+      $json = $this->services->fetchJSON("SELECT * FROM users WHERE email='$vals[email]'",true);
+  }
+  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
 $app->post('/services/users', function($request, $response, $args) {
@@ -129,7 +147,10 @@ $app->post('/services/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else {
-    $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], ['name'=>$vals['name'], 'company'=>$vals['company']]);
+    $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], 
+      ['name'=>$vals['name'], 
+       'company'=>$vals['company']
+      ]);
     if ($result['error']==true)
       $json = json_encode($result);
     else
@@ -160,7 +181,7 @@ $app->post('/services/session', function($request, $response, $args) {
   if ($result['error']==true)
     $json = json_encode($result);
   else {
-    setcookie("auth", $result['hash'], time()+3600, '/photo-site/build/', 'localhost', FALSE, TRUE );
+    setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, FALSE, $this->services->cookie_http);
     $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
   }
   
@@ -223,11 +244,13 @@ $app->get('/services/featuredphotos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
+/*
 $app->get('/services/portfolio', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT C.* FROM containers C INNER JOIN settings S ON S.portfoliofolder=C.idparent WHERE S.iduser=1 AND C.type='gallery' ORDER BY C.position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
+*/
 
 $app->get('/services/containerfrompath/[{path:.*}]', function($request, $response, $args) {
     $gallery = $this->services->getContainer($args['path']);
@@ -235,6 +258,14 @@ $app->get('/services/containerfrompath/[{path:.*}]', function($request, $respons
       $gallery = array('error'=>'gallery not found');
 
     $response->getBody()->write(json_encode($gallery,JSON_NUMERIC_CHECK));
+
+    return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/services/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
+    $path = $this->services->getContainerPath($args['id']);
+
+    $response->getBody()->write(json_encode(array('path'=>$path)));
 
     return $response->withHeader('Content-Type','application/json');
 });

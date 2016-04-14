@@ -6,7 +6,7 @@ namespace CrossRiver;
 class Services
 {
 	private $auth;
-	private $config = array();
+	private $config;
 
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
@@ -18,22 +18,28 @@ class Services
 	public function __construct()
 	{
 		$contents = file($this->fileroot . '/app.cfg');
+		$config = array();
 
 		foreach ($contents as $line) {
 			$kv = explode('=', $line);
-			$this->config[trim($kv[0])] = trim($kv[1]);
+			$config[trim($kv[0])] = trim($kv[1]);
 		}
 
-		$this->dbh = new \PDO("mysql:host=localhost;dbname=" . $this->config['mysqldb'],  $this->config['mysqluser'] , $this->config['mysqlpwd']);
+		$this->dbh = new \PDO("mysql:host=localhost;dbname=" . $config['mysqldb'],  $config['mysqluser'] , $config['mysqlpwd']);
 
 		if(!$this->dbh) {
     		$this->error = true;
     		return;
     	}
 
-		$cfg = new \PHPAuth\Config($this->dbh);
-		$this->auth = new \PHPAuth\Auth($this->dbh, $cfg);
+		$this->config = new \PHPAuth\Config($this->dbh);
+		$this->auth = new \PHPAuth\Auth($this->dbh, $this->config);
 	}
+
+	public function __get($setting)
+    {
+        return $this->config->__get($setting);
+    }
 
 	/***
 	* Logs a user in
@@ -301,11 +307,10 @@ class Services
      */
     public function getSessionUser()
     {
-    	$hash = $this->auth->getSessionHash();
-    	if (!$hash || !$this->auth->checkSession($hash))
+    	if (!$this->auth->isLogged())
     		return (object) ['id'=>0, 'isadmin'=>0];
-  		$uid = $this->auth->getSessionUID($hash);
-    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.uid=$uid");
+    	$hash = $this->auth->getSessionHash();
+    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$hash'");
     	return $result->fetchObject();
     }
 
@@ -354,6 +359,23 @@ class Services
     	if (count($set)>0)
     		$this->dbh->query("UPDATE $table SET " . implode(',',$set) . " WHERE $where");
 
+    }
+
+    public function getContainerPath($idcontainer)
+    {
+    	$pathArray = array();
+
+    	while (1) {
+    		$result = $this->dbh->query("SELECT idparent, url FROM containers WHERE id=$idcontainer");
+    		$container = $result->fetchObject();
+    		if (!$container)
+    			break;
+    		$pathArray[] = $container->url;
+    		if ($container->idparent==0)
+    			break;
+    		$idcontainer = $container->idparent;
+    	}
+    	return implode('/',array_reverse($pathArray));
     }
 
     public function getContainer($path)

@@ -1,11 +1,13 @@
 $ = require 'jquery'
 foundation = require 'foundation'
 UsersCollection = require('../../require/users')
-UsersView = require('../../require/admin-users-view')
+AdminUsersView = require('../../require/admin-users-view')
 
-usersCollection = new UsersCollection null
+usersCollection = new UsersCollection
 
-usersView = new UsersView({el: '#adminUsersView', collection: usersCollection})
+adminUsersView = new AdminUsersView({el: '.admin-users-view', collection: usersCollection})
+
+adminUsersView.render()
 
 usersCollection.fetch {reset: true}
 
