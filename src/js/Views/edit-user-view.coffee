@@ -1,5 +1,6 @@
 Backbone = require 'backbone'
 templates = require './jst'
+User = require './user'
 
 module.exports = Backbone.View.extend
 	events:
@@ -13,7 +14,9 @@ module.exports = Backbone.View.extend
 			idcontainer: 0
 			isadmin: 0
 
-		this.template = templates['edit-user-view']
+		this.newTemplate = templates['new-user-view']
+		this.editTemplate = templates['new-user-view']
+		console.log User
 
 	open: ->
 		this.render()
@@ -32,6 +35,7 @@ module.exports = Backbone.View.extend
 		this.$('.close-button').trigger('click')
 
 	render: ->
-		data = if this.model then this.model.toJSON() else this.defaultData
-		this.$el.html this.template(data)
-		this
+		if this.model 
+			this.$el.html this.editTemplate(this.model.toJSON())
+		else
+			this.$el.html this.newTemplate(this.defaultData)

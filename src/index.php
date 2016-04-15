@@ -297,6 +297,14 @@ $app->post('/services/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
+$app->put('/services/containers', function($request, $response, $args) {
+  $vals = $request->getParsedBody();
+  if ($this->services->isAdmin()) {
+    error_log("adjusting container ownership");
+  }
+  return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
+});
+
 $app->put('/services/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {

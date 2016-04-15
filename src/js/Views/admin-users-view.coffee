@@ -5,6 +5,7 @@ EditUserView = require './edit-user-view'
 module.exports = BaseView.extend
 	events:
 		'click .add-user' : 'addUser'
+		'click .edit-user' : 'editUser'
 
 	initialize: (options) ->
 		this.template = templates['admin-users-view']
@@ -17,6 +18,12 @@ module.exports = BaseView.extend
 		this.editUserView.model = null
 		this.editUserView.open()
 	
+	editUser: (e) ->
+		id = e.target.id.replace('user-', '')
+		model = this.collection.get id
+		console.log model
+		e.preventDefault()
+
 	render: ->
 		this.$el.html this.template()
 		this.assign this.editUserView, '.edit-user-view'
