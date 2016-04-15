@@ -11,7 +11,7 @@ config = require('../../require/config')
 
 session = new Session
 loginView = new LoginView {model: session}
-sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
+sessionMenuView = new SessionMenuView {el: '.session-menu', model: session}
 
 $('body').append loginView.render().el
 

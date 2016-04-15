@@ -310,7 +310,7 @@ class Services
     	if (!$this->auth->isLogged())
     		return (object) ['id'=>0, 'isadmin'=>0];
     	$hash = $this->auth->getSessionHash();
-    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$hash'");
+    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company, U.idcontainer FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$hash'");
     	return $result->fetchObject();
     }
 
@@ -382,6 +382,7 @@ class Services
     {
     	$pathArray = explode('/',$path);
     	$user = $this->getSessionUser();
+    	$onUserBranch = FALSE;
 
     	$currentContainer = (object) ['id'=>0, 'iduser'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
@@ -390,8 +391,13 @@ class Services
 
     		if (!$currentContainer)
     			return FALSE;
+
+    		//error_log("current container id =" . $currentContainer->id . " user container =" . $user->idcontainer . " on user branch = " . $onUserBranch);
+
+    		if (!$onUserBranch && $user->id!=0 && $user->idcontainer!=0) 
+    			$onUserBranch = $currentContainer->id == $user->idcontainer;
     		
-    		$canAccess = $user->isadmin || ($user->id!=0 && $currentContainer->iduser == $user->id);
+    		$canAccess = $user->isadmin || $onUserBranch;
 
     		if ($i==count($pathArray)-1)
     			return ($canAccess || $currentContainer->access==0) ? $currentContainer : FALSE;

@@ -11,14 +11,16 @@ module.exports = Backbone.Model.extend
 		email: ''
 		name: ''
 		company: ''
+		idcontainer: 0
 
 	initialize: (attributes, options) ->
 		self = this
+		###
 		$.get(this.urlRoot, (result) ->
 			json = $.parseJSON(result)
 			self.set json
 		)
-
+		###
 		
 	login: (data) ->
 		$.ajax(

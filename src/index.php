@@ -168,7 +168,7 @@ $app->get('/services/session', function($request, $response, $args) {
 $app->put('/services/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
   if ($ret)
-    setcookie("auth", '', time()-3600, '/photo-site/build/', 'localhost', FALSE, TRUE );
+    setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, FALSE, $this->services->cookie_http);
   $result=array();
   $result['error'] = !$ret;
   $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));

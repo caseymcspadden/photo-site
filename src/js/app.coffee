@@ -8,8 +8,10 @@ SessionMenuView = require('../../require/session-menu-view')
 
 session = new Session
 loginView = new LoginView {model: session}
-sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
+sessionMenuView = new SessionMenuView {el: '.session-menu', model: session}
 
 $('body').append loginView.render().el
+
+session.fetch()
 
 $(document).foundation()
