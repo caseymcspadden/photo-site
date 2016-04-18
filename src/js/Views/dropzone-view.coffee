@@ -15,9 +15,8 @@ module.exports = Backbone.View.extend
 	render: ->
 		this.$el.html this.template()
 		self = this
-		#this.$(".filedrop").dropzone
 		this.dropzone = new Dropzone('.filedrop',
-			url: config.urlBase + "/services/upload"
+			url: config.servicesBase + "/upload"
 			uploadMultiple: true
 			addRemoveLinks: false
 			acceptedFiles: 'image/*'
@@ -40,8 +39,6 @@ module.exports = Backbone.View.extend
 
 	selectedContainerChanged: (m) ->
 		container = this.model.get('selectedContainer')
-		#this.dropzone.options.headers.Watermark = '0'
-		#this.dropzone.options.headers.Watermark = '1' if container.get('watermark')==1
 
 	close: ->
 		this.$('.filedrop').html ''

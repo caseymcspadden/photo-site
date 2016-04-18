@@ -4,4 +4,4 @@ config = require './config'
 
 module.exports = Backbone.Collection.extend
 	model: User
-	url: config.urlBase + '/services/users'		 
+	url: config.servicesBase + '/users'		 

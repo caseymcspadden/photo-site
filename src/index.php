@@ -2,6 +2,18 @@
 require './vendor/autoload.php';
 require './classes/CrossRiver/Services.php';
 
+// Get admin and services paths
+
+$contents = file('/Users/caseymcspadden/sites/photo-site/fileroot/paths.cfg');
+$paths = array();
+
+foreach ($contents as $line) {
+  $kv = explode('=', $line);
+  $paths[trim($kv[0])] = trim($kv[1]);
+}
+
+$paths = (object)$paths;
+
 // Get container
 $container = new \Slim\Container;
 $app = new \Slim\App($container);
@@ -54,6 +66,7 @@ $app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
     }
 });
 
+/*
 $app->get('/portfolio', function ($request, $response, $args) {
     return $this->view->render($response, 'portfolio.html' , [
         'webroot'=>$this->services->webroot
@@ -67,6 +80,7 @@ $app->get('/portfolio/{url}', function ($request, $response, $args) {
         'islogged'=>$this->services->isLogged()
     ]);
 });
+*/
 
 $app->get('/about', function ($request, $response, $args) {
     return $this->view->render($response, 'about.html' , [
@@ -75,28 +89,30 @@ $app->get('/about', function ($request, $response, $args) {
     ]);
 });
 
-$app->get('/admin', function ($request, $response, $args) {
+$app->get($paths->adminpath, function ($request, $response, $args) {
     if (!$this->services->isAdmin())
       return $response->withRedirect($this->get('router')->pathFor('home'));
 
     return $this->view->render($response, "admin.html" , [
         'webroot'=>$this->services->webroot,
+        'adminroot'=>$this->services->adminroot,
         'islogged'=>$this->services->isLogged()
     ]);
 });
 
-$app->get('/admin/{task}', function ($request, $response, $args) {
+$app->get($paths->adminpath . '/{task}', function ($request, $response, $args) {
     if (!$this->services->isAdmin())
      return $response->withRedirect($this->get('router')->pathFor('home'));
 
     return $this->view->render($response, "admin-$args[task].html" , [
-        'webroot'=>$this->services->webroot
+        'webroot'=>$this->services->webroot,
+        'adminroot'=>$this->services->adminroot
     ]);
 });
 
 // SERVICES ROUTES
 
-$app->get('/services/settings/{id:[0-9]*}', function($request, $response, $args) {
+$app->get($paths->servicespath . '/settings/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -105,7 +121,7 @@ $app->get('/services/settings/{id:[0-9]*}', function($request, $response, $args)
   $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->put('/services/settings/{id:[0-9]*}', function($request, $response, $args) {
+$app->put($paths->servicespath . '/settings/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) 
@@ -114,7 +130,7 @@ $app->put('/services/settings/{id:[0-9]*}', function($request, $response, $args)
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
-$app->get('/services/users', function($request, $response, $args) {
+$app->get($paths->servicespath . '/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -123,7 +139,7 @@ $app->get('/services/users', function($request, $response, $args) {
   $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->put('/services/users/{id:[0-9]*}', function($request, $response, $args) {
+$app->put($paths->servicespath . '/users/{id:[0-9]*}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if (!$this->services->isAdmin())
@@ -141,7 +157,7 @@ $app->put('/services/users/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->post('/services/users', function($request, $response, $args) {
+$app->post($paths->servicespath . '/users', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if (!$this->services->isAdmin())
@@ -159,29 +175,29 @@ $app->post('/services/users', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/session', function($request, $response, $args) {
+$app->get($paths->servicespath . '/session', function($request, $response, $args) {
   $user = $this->services->getSessionUser();
   
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($user,JSON_NUMERIC_CHECK));
 });
 
-$app->put('/services/session', function($request, $response, $args) {
+$app->put($paths->servicespath . '/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
   if ($ret)
-    setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, TRUE, $this->services->cookie_http);
+    setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
   $result=array();
   $result['error'] = !$ret;
   $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
   $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/services/session', function($request, $response, $args) {
+$app->post($paths->servicespath . '/session', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
   if ($result['error']==true)
     $json = json_encode($result);
   else {
-    setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, TRUE, $this->services->cookie_http);
+    setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
     $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
   }
   
@@ -190,7 +206,7 @@ $app->post('/services/session', function($request, $response, $args) {
   $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/services/photos', function($request, $response, $args) {
+$app->get($paths->servicespath . '/photos', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -199,7 +215,7 @@ $app->get('/services/photos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->delete('/services/photos', function($request, $response, $args) {
+$app->delete($paths->servicespath . '/photos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) {
@@ -220,7 +236,7 @@ $app->delete('/services/photos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-$app->put('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->put($paths->servicespath . '/photos/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) 
@@ -229,7 +245,7 @@ $app->put('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-$app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->get($paths->servicespath . '/photos/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -238,13 +254,13 @@ $app->get('/services/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/featuredphotos', function($request, $response, $args) {
+$app->get($paths->servicespath . '/featuredphotos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN settings S ON S.featuredgallery=CP.idcontainer WHERE S.iduser=1 ORDER BY CP.position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/containerfrompath/[{path:.*}]', function($request, $response, $args) {
+$app->get($paths->servicespath . '/containerfrompath/[{path:.*}]', function($request, $response, $args) {
     $container = $this->services->getContainer($args['path']);
     if (!$container)
       $container = array('error'=>'gallery not found');
@@ -254,7 +270,7 @@ $app->get('/services/containerfrompath/[{path:.*}]', function($request, $respons
     return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/services/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
+$app->get($paths->servicespath . '/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
     $path = $this->services->getContainerPath($args['id']);
 
     $response->getBody()->write(json_encode(array('path'=>$path)));
@@ -262,7 +278,7 @@ $app->get('/services/pathfromcontainer/{id:[0-9]+}', function($request, $respons
     return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/services/containers', function($request, $response, $args) {
+$app->get($paths->servicespath . '/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark FROM containers ORDER BY idparent, position");
 
   $response->getBody()->write($json);
@@ -270,7 +286,7 @@ $app->get('/services/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');    
 });
 
-$app->post('/services/containers', function($request, $response, $args) {
+$app->post($paths->servicespath . '/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if ($this->services->isAdmin()) {
@@ -289,7 +305,7 @@ $app->post('/services/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
-$app->put('/services/containers', function($request, $response, $args) {
+$app->put($paths->servicespath . '/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
     error_log("adjusting container ownership");
@@ -297,7 +313,7 @@ $app->put('/services/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
-$app->put('/services/containers/{id}', function($request, $response, $args) {
+$app->put($paths->servicespath . '/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
@@ -306,7 +322,7 @@ $app->put('/services/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });
 
-$app->delete('/services/containers/{id}', function($request, $response, $args) {
+$app->delete($paths->servicespath . '/containers/{id}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin())
@@ -315,20 +331,20 @@ $app->delete('/services/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody));
 });
 
-$app->get('/services/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
+$app->get($paths->servicespath . '/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
 
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-$app->get('/services/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+$app->get($paths->servicespath . '/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->get($paths->servicespath . '/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
   $arr = array();
@@ -341,7 +357,7 @@ $app->get('/services/containers/{id:[0-9]+}/containerphotos', function($request,
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->post($paths->servicespath . '/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   
   if ($this->services->isAdmin()) {
@@ -361,7 +377,7 @@ $app->post('/services/containers/{id:[0-9]+}/containerphotos', function($request
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
-$app->put('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->put($paths->servicespath . '/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
     $ids = explode(',', $parsedBody['ids']);
@@ -375,7 +391,7 @@ $app->put('/services/containers/{id:[0-9]+}/containerphotos', function($request,
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
-$app->delete('/services/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->delete($paths->servicespath . '/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody(); 
   if ($this->services->isAdmin()) {
     $ids = $parsedBody['ids'];
@@ -397,7 +413,7 @@ $app->delete('/services/containers/{id:[0-9]+}/containerphotos', function($reque
 });
 
 
-$app->post('/services/upload', function($request, $response, $args) {
+$app->post($paths->servicespath . '/upload', function($request, $response, $args) {
     if (!$this->services->isAdmin())
       return;
 

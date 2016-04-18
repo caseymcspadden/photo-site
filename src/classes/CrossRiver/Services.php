@@ -10,6 +10,7 @@ class Services
 
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
+	public $adminroot = '/mamfe';
 	public $webroot = '';
 	public $dbh;
 	public $error = false;

@@ -11,9 +11,9 @@ module.exports = Backbone.Model.extend
 		this.photos = new Backbone.Collection null, {model: Photo}
 		#this.listenTo this.photos, 'reset', this.photosLoaded
 		self = this
-		$.get(config.urlBase + '/services/containerfrompath/' + document.location.pathname.replace(/^.*\/galleries\//,''), (data) ->
+		$.get(config.servicesBase + '/containerfrompath/' + document.location.pathname.replace(/^.*\/galleries\//,''), (data) ->
 			self.set data
-			self.photos.url = config.urlBase + '/services/containers/' + data.id + '/photos'
+			self.photos.url = config.servicesBase + '/containers/' + data.id + '/photos'
 			self.photos.fetch {reset: true}
 		)
 

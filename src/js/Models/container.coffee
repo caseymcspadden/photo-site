@@ -4,7 +4,7 @@ ContainerPhotos = require './containerphotos'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	urlRoot: config.urlBase + '/services/containers'
+	urlRoot: config.servicesBase + '/containers'
 
 	defaults :
 		type: 'folder'	
@@ -26,7 +26,7 @@ module.exports = Backbone.Model.extend
 	
 	populate: ->
 		self = this
-		$.getJSON(config.urlBase + '/services/containers/' + this.id + '/containerphotos', (data) ->
+		$.getJSON(config.servicesBase + '/containers/' + this.id + '/containerphotos', (data) ->
 			_.each data, (id) ->
 				self.addPhoto id
 		)
@@ -45,7 +45,7 @@ module.exports = Backbone.Model.extend
 			addArray.push id if not this.photos.get(id)
 
 		$.ajax(
-			url: config.urlBase +  '/services/containers/' + this.id + '/containerphotos'
+			url: config.serviceslBase +  '/containers/' + this.id + '/containerphotos'
 			type: 'POST'
 			context: this
 			data: {ids: addArray.join(',')}
@@ -74,10 +74,10 @@ module.exports = Backbone.Model.extend
 		for id in ids
 			collection.remove id
 
-		url = if deletePhotos then '/photos' else '/containers/' + this.id + '/containerphotos'
+		url = if deletePhotos then 'photos' else 'containers/' + this.id + 'containerphotos'
 
 		$.ajax(
-			url: config.urlBase + '/services' + url
+			url: config.servicesBase + '/' + url
 			type: 'DELETE'
 			context: this
 			data: {ids: ids.join(',')}
@@ -92,7 +92,7 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: config.urlBase + '/services/containers/' + this.id + '/containerphotos'
+			url: config.servicesBase + '/containers/' + this.id + '/containerphotos'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}

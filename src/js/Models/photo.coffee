@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	urlBase: config.urlBase + '/services/photos'
+	urlBase: config.servicesBase + '/photos'
 	defaults :
 		selected: false
 		fileName: ""

@@ -22,9 +22,9 @@ module.exports = Backbone.View.extend
 			this.$('.top-item').html 'CLIENT'
 			this.$('.top-item').removeClass('login-item')
 			self = this
-			$.get(config.urlBase + '/services/pathfromcontainer/' + m.get('idcontainer'), (json) ->
+			$.get(config.servicesBase + '/pathfromcontainer/' + m.get('idcontainer'), (json) ->
 				html = 	'<li><a href="#">PROFILE</a></li><li><a href="' + config.urlBase + '/galleries/' + json.path + '">MY GALLERIES</a></li>'
-				html += '<li><a href="' + config.urlBase + '/admin">ADMIN</a></li>' if m.get('isadmin')
+				html += '<li><a href="' + config.adminBase + '">ADMIN</a></li>' if m.get('isadmin')
 				html += '<li><a href="#" class="logout-item">LOGOUT</a></li>'
 				self.$('ul.submenu').html html
 			)

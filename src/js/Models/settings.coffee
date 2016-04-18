@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	urlRoot: -> config.urlBase + '/services/settings/'
+	urlRoot: -> config.servicesBase + '/settings'
 
 	defaults :
 		featuredgallery: 0

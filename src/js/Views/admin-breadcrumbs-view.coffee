@@ -15,8 +15,8 @@ module.exports = BaseView.extend
 		container = this.model.get 'selectedContainer'
 		return if !container or container.get('type') != 'gallery'
 		breadcrumbs = this.model.getContainerTree(container)
-		console.log breadcrumbs
 		html = ''
+		
 		for i in [breadcrumbs.length-1..0]
 			fid = breadcrumbs[i].get 'featuredphoto'
 			name = breadcrumbs[i].get 'name'
@@ -30,7 +30,7 @@ module.exports = BaseView.extend
 			html += '<a id="breadcrumb-' + breadcrumbs[i].id + '" href="#"><img src="' + src + '" alt="' + name + '">' + name + '</a>'
 			if i!=0
 				html += ' &gt; '
-
+		
 		this.$el.html html
 		this
 

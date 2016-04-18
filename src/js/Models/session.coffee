@@ -2,7 +2,7 @@ Backbone = require 'backbone'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	urlRoot: config.urlBase + '/services/session'
+	urlRoot: config.servicesBase + '/session'
 
 	defaults :
 		isadmin: 0		
@@ -33,8 +33,6 @@ module.exports = Backbone.Model.extend
 				if json.hasOwnProperty 'error'
 					this.set 'errorMessage' , json.message
 				else
-					expires = new Date(json.expiredate)
-					#document.cookie = 'session=' + json.hash + ';path=/; expires=' + expires.toString()
 					this.set json
 		)
 
@@ -46,7 +44,6 @@ module.exports = Backbone.Model.extend
 			success: (result) ->
 				json = $.parseJSON(result)
 				this.set 'uid', 0
-				#document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 		)
 
 
