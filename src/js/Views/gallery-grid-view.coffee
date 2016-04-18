@@ -15,11 +15,23 @@ module.exports = BaseView.extend
 		this.gridPages = []
 		this.currentPage = -1
 		this.listenTo this.model.photos, 'reset', this.addAll
+		this.listenTo this.model, 'change:urlsuffix', this.render
 		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
 
 	render: ->
+		if this.model.get('access')==1
+			this.$('.gallery-breadcrumbs').addClass('hidden')
+			return
+
+		this.$('.gallery-breadcrumbs').removeClass('hidden')
+
 		breadcrumbs =  document.location.pathname.replace(/^.*\/galleries\//,'').split '/'
-		console.log breadcrumbs
+		
+		count = breadcrumbs.length
+
+		if count>1 and breadcrumbs[count-1] == this.model.get('urlsuffix')
+			breadcrumbs.pop()
+
 		this.$el.html this.template {urlBase: config.urlBase, breadcrumbs: breadcrumbs}
 		this
 

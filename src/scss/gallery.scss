@@ -3,6 +3,7 @@
 @import "settings";
 @import "common";
 @import "gallery-views";
+@import "photo-view";
 @import "breadcrumbs";
 @import "../../node_modules/foundation-sites/scss/foundation";
 
@@ -41,3 +42,6 @@
 @include foundation-title-bar;
 @include foundation-tooltip;
 @include foundation-top-bar;
+
+@import "../../node_modules/font-awesome/scss/font-awesome.scss";
+

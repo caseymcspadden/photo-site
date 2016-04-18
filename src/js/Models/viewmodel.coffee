@@ -151,4 +151,4 @@ module.exports = Backbone.Model.extend
 		return if !idContainer 
 		container = this.containers.get idContainer
 		if container
-			container.save {featuredPhoto: idPhoto} , {wait: true}
+			container.save {featuredphoto: idPhoto} , {wait: true}

@@ -1,22 +1,24 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 
 	events:
+		'click a img' : 'breadcrumbImageClicked'
 		'click a' : 'breadcrumbClicked'
 
 	initialize: (options) ->
 		this.listenTo this.model, 'change:selectedContainer', this.render
-		this.listenTo this.model.containers, 'change:featuredPhoto', this.render
+		this.listenTo this.model.containers, 'change:featuredphoto', this.render
 
 	render: ->
 		container = this.model.get 'selectedContainer'
 		return if !container or container.get('type') != 'gallery'
 		breadcrumbs = this.model.getContainerTree(container)
+		console.log breadcrumbs
 		html = ''
 		for i in [breadcrumbs.length-1..0]
-			fid = breadcrumbs[i].get 'featuredPhoto'
+			fid = breadcrumbs[i].get 'featuredphoto'
 			name = breadcrumbs[i].get 'name'
 			if fid!=0
 				src = config.urlBase + '/photos/T/' + fid + '.jpg'
@@ -32,11 +34,22 @@ module.exports = Backbone.View.extend
 		this.$el.html html
 		this
 
-	breadcrumbClicked: (e) ->
+	breadcrumbImageClicked: (e) ->
+		e.stopPropagation()
 		container = this.model.get 'selectedContainer'
 		photoids = container.getSelectedPhotos true
 
 		pid = if photoids.length==0 then 0 else photoids[0]
 
-		targetid = e.target.id.replace('breadcrumb-','')
+		$a = this.getContainingElement e.target, 'a'
+		targetid = $a.attr('id').replace('breadcrumb-','')
+
 		this.model.setFeaturedPhoto targetid, pid
+
+	breadcrumbClicked: (e) ->
+		targetid = e.target.id.replace('breadcrumb-','')
+		this.model.selectContainer targetid
+
+
+
+

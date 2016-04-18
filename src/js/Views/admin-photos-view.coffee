@@ -1,7 +1,7 @@
 #admin-photos-view manages all images in the database
 
 Backbone = require 'backbone'
-PhotoView = require './photo-view'
+ThumbnailView = require './thumbnail-view'
 templates = require './jst'
 Photos = require './photos'
 
@@ -39,7 +39,7 @@ module.exports = Backbone.View.extend
 			return
 
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo}
+			view = this.photoViews[photo.id] = new ThumbnailView {model:photo}
 			view.render()
 
 		view = this.photoViews[photo.id]

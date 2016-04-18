@@ -1,7 +1,7 @@
 Backbone = require 'backbone'
 templates = require './jst'
 Photo = require './photo'
-PhotoView = require './photo-view'
+ThumbnailView = require './thumbnail-view'
 
 module.exports = Backbone.View.extend
 	events:
@@ -60,11 +60,11 @@ module.exports = Backbone.View.extend
 
 	addOneThumbnail: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, id: 'master-photo-' + photo.id}
+			view = this.photoViews[photo.id] = new ThumbnailView {model:photo, id: 'master-photo-' + photo.id}
 		
 		view = this.photoViews[photo.id]
 		this.$('.thumbnails').append view.render().el
-		#view.delegateEvents()
+		view.delegateEvents()
 
 	filterPhoto: (photo) ->		
 		if this.selectedContainer.photos.indexOf(photo)<0

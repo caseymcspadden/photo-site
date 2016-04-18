@@ -1,44 +1,27 @@
 #Gallery View manages a gallery or folder
 
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 Containers = require './containers'
 Container = require './container'
 ContainerView = require './container-view'
 EditContainerView = require('./edit-container-view')
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	currentContainer: null
 	containerViews: {}
 
 	events:
-		'submit #fv-addGallery form' : 'addGallery'
 		'click .featured-thumbnail' : 'selectContainer'
 
 	initialize: (options) ->
 		this.template = templates['admin-folder-view']
+		this.editContainerView = new EditContainerView {model: this.model}
+		this.addGalleryView = new EditContainerView {model: this.model, containerType: 'gallery'}
+
 		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
 		this.listenTo this.model.containers, 'add remove change', this.addAll
 
-	editFolder: (e) ->
-		e.preventDefault()
-		arr = $(e.target).serializeArray()
-		data = {}
-		for elem in arr
-			data[elem.name] = elem.value
-		this.currentContainer.save data
-		this.$('#fv-editFolder .close-button').trigger('click')
-
-	addGallery: (e) ->
-		e.preventDefault()
-		arr = $(e.target).serializeArray()
-		data = {}
-		for elem in arr
-			data[elem.name]=elem.value
-		data.type = 'gallery'
-		this.model.createContainer data
-		this.$('#fv-addGallery .close-button').trigger('click')
-	
 	changeContainer: ->
 		if (this.currentContainer)
 			this.stopListening this.currentContainer
@@ -50,10 +33,8 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
-		this.editContainerView = new EditContainerView {el: '#fv-editFolder', model: this.model}
-		this.editContainerView.render()
-		this.addGalleryView = new EditContainerView {el: '#fv-addGallery', model: this.model, containerType: 'gallery'}
-		this.addGalleryView.render()
+		this.assign this.editContainerView, '#fv-editFolder'
+		this.assign this.addGalleryView, '#fv-addGallery'
   		
 	addOne: (container) ->
 		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id

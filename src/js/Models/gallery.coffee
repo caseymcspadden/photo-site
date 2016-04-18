@@ -5,6 +5,7 @@ Photo = require './photo'
 module.exports = Backbone.Model.extend
 	defaults:
 		currentPhoto: null
+		urlsuffix: ''
 
 	initialize: ->
 		this.photos = new Backbone.Collection null, {model: Photo}

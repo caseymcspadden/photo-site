@@ -10,7 +10,7 @@ class Services
 
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
-	public $webroot = '/photo-site/build';
+	public $webroot = '';
 	public $dbh;
 	public $error = false;
 	public $unauthorizedJSON = '{"error": "unauthorized"}';
@@ -384,9 +384,9 @@ class Services
     	$user = $this->getSessionUser();
     	$onUserBranch = FALSE;
 
-    	$currentContainer = (object) ['id'=>0, 'iduser'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0];
+    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, iduser, type, idparent, name, url, urlsuffix, access FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$result = $this->dbh->query("SELECT id, type, idparent, name, url, urlsuffix, access FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
     		$currentContainer = $result->fetchObject();
 
     		if (!$currentContainer)

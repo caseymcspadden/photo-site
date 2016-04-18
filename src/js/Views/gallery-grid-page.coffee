@@ -1,6 +1,6 @@
 BaseView = require './base-view'
 templates = require './jst'
-PhotoView = require './photo-view'
+ThumbnailView = require './thumbnail-view'
 
 module.exports = BaseView.extend
 
@@ -24,6 +24,6 @@ module.exports = BaseView.extend
 			this.model.set 'currentPhoto' , m
 
 	addPhoto: (photo) ->
-		photoView = new PhotoView {model: photo}
+		photoView = new ThumbnailView {model: photo}
 		this.photoViews.push photoView
 

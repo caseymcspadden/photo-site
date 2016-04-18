@@ -1,15 +1,14 @@
 #Folders View manages a collection of folders
 
 #Dragula = require 'dragula'
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 Container = require './container'
 Containers = require './containers'
 NodeView = require './node-view'
-#ViewModel = require './viewmodel'
+EditContainerView = require('./edit-container-view')
 
-
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	$tree: null
 	collapsed: true
 	close_same_level: false
@@ -17,7 +16,6 @@ module.exports = Backbone.View.extend
 	listAnim: true
 
 	events:
-		'submit #afv-addFolder form' : 'addFolder'
 		'click .folder-icon' : 'folderIconClicked'
 		'click .node-name' : 'selectContainer'
 		'submit #afv-addFolder form' : 'addFolder'
@@ -37,17 +35,12 @@ module.exports = Backbone.View.extend
 		this.allowDrop = 0
 
 		this.$el.html(this.template());
+		this.editContainerView = new EditContainerView {model: this.model, containerType: 'folder'}
 		this.$tree = this.$('.mtree');
 		this.listenTo this.model, 'change:selectedContainer', this.selectedContainerChanged
 		this.listenTo(this.model.containers, 'add', this.containerAdded)
 		this.listenTo(this.model.containers, 'remove', this.containerRemoved)
 		this.listenTo(this.model.containers, 'reset', this.resetContainers)
-
-	getContainingElement: (e, elementType) ->
-		$e = $(e)
-		while $e
-			return $e if $e.is elementType
-			$e = $e.parent()
 
 	mouseDown: (e) ->
 		$li = this.getContainingElement e.target, 'li'
@@ -105,6 +98,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		this.$tree.html('')
+		this.assign this.editContainerView, '#afv-addFolder'
 
 		#this.$tree.find('ul').css
 		#	'overflow':'hidden'
@@ -138,16 +132,6 @@ module.exports = Backbone.View.extend
 
 	containerRemoved: (c) ->
 		this.$tree.find('#node-' + c.id).remove()
-
-	addFolder: (e) ->
-		e.preventDefault()
-		arr = $(e.target).serializeArray()
-		data = {}
-		for elem in arr
-			data[elem.name]=elem.value
-		data.type = 'folder'
-		this.model.createContainer data
-		this.$('#afv-addFolder .close-button').trigger('click')
 
 	deleteFolder: (e) ->
 		selectedContainer = this.model.get 'selectedContainer'

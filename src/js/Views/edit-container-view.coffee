@@ -1,6 +1,7 @@
 Backbone = require 'backbone'
 Container = require './container'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	events:
@@ -16,9 +17,11 @@ module.exports = Backbone.View.extend
 			url: ''
 			urlsuffix: ''
 			access: 0
-
+			accesslink: ''
+		
+		this.accesslink = ''
 		this.template = templates['edit-container-view']
-		this.listenTo this.model, 'change:selectedContainer' , this.changingContainer
+		this.listenTo this.model, 'change:selectedContainer' , this.containerChanged
 		if options.hasOwnProperty('containerType')
 			this.defaultData.createNew = true
 			this.defaultData.type = options.containerType
@@ -41,14 +44,20 @@ module.exports = Backbone.View.extend
 		if this.defaultData.createNew
 			this.$('input[name="url"]').val e.target.value.toLowerCase().replace(/ /g,'-')
 
-	changingContainer: (vm) ->
-		this.render()
+	containerChanged: (vm) ->
+		self = this
+		container = vm.get 'selectedContainer'
+		$.get(config.urlBase + '/services/pathfromcontainer/' + container.id, (json) ->
+			self.accesslink = config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
+			self.render()
+		)
 
 	render: ->
 		container = this.model.get 'selectedContainer'
 		data = this.defaultData
 		if container and not this.defaultData.createNew
 			data = container.toJSON()
+			data.accesslink = this.accesslink
 			data.createNew = false
 		this.$el.html this.template(data)
 		this

@@ -2,7 +2,7 @@
 
 BaseView = require './base-view'
 Dragula = require 'dragula'
-PhotoView = require './photo-view'
+ThumbnailView = require './thumbnail-view'
 templates = require './jst'
 PhotoViewerModel= require './photoviewer'
 Photo = require './photo'
@@ -19,8 +19,6 @@ module.exports = BaseView.extend
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
-		#'click .set-featured-gallery' : 'setFeaturedGalleryPhoto'
-		#'click .set-featured-folder' : 'setFeaturedFolderPhoto'
 		'click .delete-gallery' : 'deleteGallery'
 		'click .select-all' : 'selectAll'
 		'click .deselect-all' : 'deselectAll'
@@ -123,21 +121,11 @@ module.exports = BaseView.extend
 		this.model.set {addingPhotosToggle: !this.model.get('addingPhotosToggle')}
 		e.preventDefault()
 
-	setFeaturedGalleryPhoto: (e) ->
-		ids = this.currentGallery.getSelectedPhotos true
-		return if ids.length==0
-		this.model.setFeaturedPhoto this.currentGallery.id, ids[0]
-
-	setFeaturedFolderPhoto: (e) ->
-		ids = this.currentGallery.getSelectedPhotos true
-		return if ids.length==0
-		this.model.setFeaturedPhoto this.currentGallery.get('idparent'), ids[0]
-
 	render: ->
 		this.$el.html this.template {name: 'Default'}
 		
 		this.assign this.dropzoneView, '.dropzone-view'
-		this.assign this.editContainerView, '.edit-gallery-view'
+		this.assign this.editContainerView, '.edit-container-view'
 		this.assign this.breadcrumbsView, '.breadcrumbs-view'
 
 		this.drag.containers.pop()
@@ -145,7 +133,7 @@ module.exports = BaseView.extend
 
 	addOne: (photo) ->
 		if !(this.photoViews.hasOwnProperty photo.id)
-			view = this.photoViews[photo.id] = new PhotoView {model:photo, id: 'gallery-photo-' + photo.id}
+			view = this.photoViews[photo.id] = new ThumbnailView {model:photo, id: 'gallery-photo-' + photo.id}
 		view = this.photoViews[photo.id]
 		this.$('.photo-list').append view.render().el
 		view.delegateEvents()

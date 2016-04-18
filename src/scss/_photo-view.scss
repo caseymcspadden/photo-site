@@ -1,0 +1,42 @@
+.photo-view {
+
+	.photo-container {
+
+		position: relative;
+		display: block;
+		text-align: center;
+			
+		.next, .prev {
+			position: absolute;
+			top: 45%;
+			//background-color: lighten($body-background,20%);
+			opacity: 0.5;
+			font-size: 50px;
+			font-weight: bold;
+			user-select: none;
+			
+			&:hover {
+				cursor: pointer;
+				opacity: 1;
+			}
+		}
+
+		.prev {
+			left: 0;
+		}
+
+		.next {
+			right: 0;
+		}
+
+		a.photo-wrapper {
+			outline: none;
+			vertical-align: middle;
+		}
+	}
+
+	.photo-tools {
+		margin-top: 1rem;
+		text-align: center;
+	}
+}

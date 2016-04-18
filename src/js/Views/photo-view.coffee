@@ -1,51 +1,44 @@
-Backbone = require 'backbone'
-Photo = require './photo'
+BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
 
-module.exports = Backbone.View.extend
-	tagName: 'div'
-
-	className: 'photo-thumbnail'
+module.exports = BaseView.extend
 
 	events:
-		'click img' : 'photoClicked'
-		'mouseover' : 'setFocus'
+		'click .prev' : 'shiftLeft'
+		'click .next' : 'shiftRight'
+		'closed.zf.reveal' : 'close'
+		'keyup' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['photo-view']
-		this.listenTo this.model, 'change:selected', this.setSelected
-		this.listenTo this.model, 'remove', this.removeView
-		###
-		this.render()
-		downloadingImage = new Image
-		self = this	
-		downloadingImage.onload = ->
-			self.$('img')[0].src = downloadingImage.src
-		downloadingImage.src = config.urlBase + '/photos/T/' + this.model.id + '.jpg'
-		###
 
-	setFocus: (e) ->
-		this.$('a').focus()
+	open: ->
+		this.changePhoto this.model
+		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
+		this.$el.foundation 'open'
+
+	close: ->
+		this.stopListening this.model
 
 	render: ->
-		obj = this.model.toJSON()
-		obj.urlBase = config.urlBase
-		this.$el.html this.template(obj)
+		this.$el.html this.template()
 
-		if this.model.get('selected')
-			this.$('img').addClass 'selected'
-		this
+	keyUp: (e) ->
+		offset = switch e.keyCode
+			when 37 then -1
+			when 39 then 1
+			else 0
+		this.model.offsetCurrentPhoto offset
 
-	removeView: ->
-		this.$el.remove()
+	shiftLeft: ->
+		this.model.offsetCurrentPhoto -1
+		this.$('.photo-container a').focus()
+		
+	shiftRight: ->
+		this.model.offsetCurrentPhoto 1
+		this.$('.photo-container a').focus()
 
-	setSelected: ->
-		if this.model.get 'selected'
-			this.$('img').addClass('selected')
-		else
-			this.$('img').removeClass('selected')
-
-	photoClicked: (e) ->
-		this.model.set 'selected', !this.model.get('selected')
-		e.preventDefault()
+	changePhoto: (m) ->
+		photo = m.get 'currentPhoto'
+		this.$('img.photo').attr 'src' , config.urlBase + '/photos/L/' + photo.id + '.jpg'

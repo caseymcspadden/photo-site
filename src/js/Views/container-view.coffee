@@ -19,8 +19,8 @@ module.exports = Backbone.View.extend
 		this.listenTo this.model, 'remove', this.remove
 
 	featuredPhotoSource: ->
-		if this.model.get('featuredPhoto') != 0 
-			return config.urlBase + '/photos/T/' + this.model.get('featuredPhoto') + '.jpg'
+		if this.model.get('featuredphoto') != 0 
+			return config.urlBase + '/photos/T/' + this.model.get('featuredphoto') + '.jpg'
 		else if this.model.get('type') == 'folder' 
 			return config.urlBase + '/images/thumbnail-folder.jpg'
 		return config.urlBase + '/images/thumbnail-gallery.jpg'		

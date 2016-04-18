@@ -168,7 +168,7 @@ $app->get('/services/session', function($request, $response, $args) {
 $app->put('/services/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
   if ($ret)
-    setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, FALSE, $this->services->cookie_http);
+    setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, TRUE, $this->services->cookie_http);
   $result=array();
   $result['error'] = !$ret;
   $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
@@ -181,7 +181,7 @@ $app->post('/services/session', function($request, $response, $args) {
   if ($result['error']==true)
     $json = json_encode($result);
   else {
-    setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, FALSE, $this->services->cookie_http);
+    setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, TRUE, $this->services->cookie_http);
     $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
   }
   
@@ -244,20 +244,12 @@ $app->get('/services/featuredphotos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
 });
 
-/*
-$app->get('/services/portfolio', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT C.* FROM containers C INNER JOIN settings S ON S.portfoliofolder=C.idparent WHERE S.iduser=1 AND C.type='gallery' ORDER BY C.position");
-
-  return $response->withHeader('Content-Type','application/json')->getBody()->write($json);
-});
-*/
-
 $app->get('/services/containerfrompath/[{path:.*}]', function($request, $response, $args) {
-    $gallery = $this->services->getContainer($args['path']);
-    if (!$gallery)
-      $gallery = array('error'=>'gallery not found');
+    $container = $this->services->getContainer($args['path']);
+    if (!$container)
+      $container = array('error'=>'gallery not found');
 
-    $response->getBody()->write(json_encode($gallery,JSON_NUMERIC_CHECK));
+    $response->getBody()->write(json_encode($container,JSON_NUMERIC_CHECK));
 
     return $response->withHeader('Content-Type','application/json');
 });
@@ -271,7 +263,7 @@ $app->get('/services/pathfromcontainer/{id:[0-9]+}', function($request, $respons
 });
 
 $app->get('/services/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredPhoto, name, description, url, urlsuffix, access, watermark FROM containers ORDER BY idparent, position");
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark FROM containers ORDER BY idparent, position");
 
   $response->getBody()->write($json);
 
@@ -288,9 +280,9 @@ $app->post('/services/containers', function($request, $response, $args) {
 
     $position = $row ? 1 + $row[0] : 1;
 
-    $urlsuffix = $this->services->getRandomKey(6);
+    $vals['urlsuffix'] = $this->services->getRandomKey(6);
 
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$urlsuffix', $vals[access])");
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access])");
 
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
@@ -309,7 +301,7 @@ $app->put('/services/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredPhoto=$vals[featuredPhoto] WHERE id=$args[id]");
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredphoto=$vals[featuredphoto] WHERE id=$args[id]");
   }
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($vals));
 });

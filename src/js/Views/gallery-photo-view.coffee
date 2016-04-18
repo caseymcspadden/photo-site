@@ -1,22 +1,28 @@
 BaseView = require './base-view'
 templates = require './jst'
-PhotoView = require './photo-view'
 config = require './config'
+PhotoView = require './photo-view'
 
 module.exports = BaseView.extend
 
 	events:
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
+		'click img' : 'viewImage'
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['gallery-photo-view']
+		this.photoView = new PhotoView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 
 	render: ->
 		this.$el.html this.template {urlBase: config.urlBase}
+		this.assign this.photoView, '.photo-view'
 		this
+
+	viewImage: ->
+		this.photoView.open()
 
 	keyUp: (e) ->
 		offset = switch e.keyCode

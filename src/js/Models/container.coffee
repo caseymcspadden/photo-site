@@ -16,7 +16,7 @@ module.exports = Backbone.Model.extend
 		urlsuffix: ''
 		access: 0
 		populated: false
-		featuredPhoto: 0
+		featuredphoto: 0
 		watermark: 1
 	
 	initialize: (attributes, options) ->
@@ -42,7 +42,7 @@ module.exports = Backbone.Model.extend
 	addPhotos: (arr) ->
 		addArray = []
 		for id in arr
-			addArray.push id if this.photos.get(id)
+			addArray.push id if not this.photos.get(id)
 
 		$.ajax(
 			url: config.urlBase +  '/services/containers/' + this.id + '/containerphotos'

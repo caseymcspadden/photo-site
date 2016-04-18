@@ -1,5 +1,4 @@
 Backbone = require 'backbone'
-PhotoViewer = require './photoviewer'
 templates = require './jst'
 
 module.exports = Backbone.View.extend
