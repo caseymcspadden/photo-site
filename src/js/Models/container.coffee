@@ -45,12 +45,11 @@ module.exports = Backbone.Model.extend
 			addArray.push id if not this.photos.get(id)
 
 		$.ajax(
-			url: config.serviceslBase +  '/containers/' + this.id + '/containerphotos'
+			url: config.servicesBase +  '/containers/' + this.id + '/containerphotos'
 			type: 'POST'
 			context: this
 			data: {ids: addArray.join(',')}
-			success: (result) ->
-				json = $.parseJSON(result)
+			success: (json) ->
 				ids = json.ids.split ','
 				for id in ids
 					this.addPhoto id
@@ -74,7 +73,7 @@ module.exports = Backbone.Model.extend
 		for id in ids
 			collection.remove id
 
-		url = if deletePhotos then 'photos' else 'containers/' + this.id + 'containerphotos'
+		url = if deletePhotos then 'photos' else 'containers/' + this.id + '/containerphotos'
 
 		$.ajax(
 			url: config.servicesBase + '/' + url
@@ -82,7 +81,7 @@ module.exports = Backbone.Model.extend
 			context: this
 			data: {ids: ids.join(',')}
 			success: (result) ->
-				json = $.parseJSON(result)
+				console.log result
 		)
 
 	rearrangePhotos: (ids) ->

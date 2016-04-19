@@ -112,6 +112,7 @@ module.exports = BaseView.extend
 			this.addChildContainers child.id
 
 	resetContainers: ->
+		this.$tree.html ''
 		this.addChildContainers 0
 
 	addChildToParent: (id) ->

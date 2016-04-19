@@ -312,7 +312,7 @@ class Services
     	if (!$this->auth->isLogged())
     		return (object) ['id'=>0, 'isadmin'=>0];
     	$hash = $this->auth->getSessionHash();
-    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company, U.idcontainer FROM sessions S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$hash'");
+    	$result = $this->dbh->query("SELECT S.hash, U.id, U.isadmin, U.email, U.name, U.company, U.idcontainer FROM {$this->table_sessions} S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$hash'");
     	return $result->fetchObject();
     }
 

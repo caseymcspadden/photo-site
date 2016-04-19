@@ -47,6 +47,7 @@ module.exports = Backbone.View.extend
 	containerChanged: (vm) ->
 		self = this
 		container = vm.get 'selectedContainer'
+		return if !container
 		$.get(config.servicesBase + '/pathfromcontainer/' + container.id, (json) ->
 			self.accesslink = config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
 			self.render()

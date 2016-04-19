@@ -76,6 +76,7 @@ module.exports = BaseView.extend
 		this.model.set 'viewingPhotosToggle' , !this.model.get('viewingPhotosToggle')
 
 	deleteGallery: ->
+		console.log 'delete gallery clicked'
 		this.model.deleteContainer this.currentGallery
 
 	changeGallery: ->
