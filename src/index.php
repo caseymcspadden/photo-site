@@ -2,6 +2,12 @@
 require './vendor/autoload.php';
 require './classes/CrossRiver/Services.php';
 
+    session_name('CRID');
+    session_start();
+    $crid = session_id();
+
+    error_log($crid);
+
 // Get admin and services paths
 
 $contents = file('/Users/caseymcspadden/sites/photo-site/fileroot/paths.cfg');
@@ -412,6 +418,13 @@ $app->delete($paths->servicespath . '/containers/{id:[0-9]+}/containerphotos', f
   return $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
 });
 
+$app->get($paths->servicespath . '/cartitems/{idsession:[0-9]+}', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT CT.*, CO.printmarkup, PH.title, PH.width, PH.height, PR.description, PR.size,PR.minppi, PR.price FROM cartitems CT INNER JOIN containers CO ON CO.id=CT.idcontainer INNER JOIN photos PH ON PH.id=CT.idphoto INNER JOIN products PR ON PR.id=CT.idproduct WHERE CT.idsession=$args[idsession]");
+
+  $response->getBody()->write($json);
+
+  return $response->withHeader('Content-Type','application/json');    
+});
 
 $app->post($paths->servicespath . '/upload', function($request, $response, $args) {
     if (!$this->services->isAdmin())

@@ -155,6 +155,9 @@ gulp.task('root', ['fileroot'], function() {
   gulp.src(['src/classes/**/*.*'])
     .pipe(gulp.dest('build/classes'));
  
+  gulp.src(['src/test/**/*.*'])
+    .pipe(gulp.dest('build/test'));
+
   return gulp.src(['src/.htaccess', './src/*.*'])
     .pipe(gulp.dest('build'))
     .pipe(browserSync.stream());

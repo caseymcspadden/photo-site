@@ -7,6 +7,7 @@ class Services
 {
 	private $auth;
 	private $config;
+	private $crid; // SESSION ID
 
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';

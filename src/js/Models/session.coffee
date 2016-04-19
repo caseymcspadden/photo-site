@@ -14,6 +14,7 @@ module.exports = Backbone.Model.extend
 		idcontainer: 0
 
 	initialize: (attributes, options) ->
+		console.log 'initializing session'
 		self = this
 		###
 		$.get(this.urlRoot, (result) ->
