@@ -7,6 +7,7 @@ module.exports = Backbone.View.extend
 	events:
 		'submit form' : 'doSubmit'
 		'keyup input[name="name"]' : 'nameChanged'
+		'change select[name="access"]' : 'changeAccess'
 
 	initialize: (options) ->
 		this.defaultData =
@@ -44,6 +45,14 @@ module.exports = Backbone.View.extend
 		if this.defaultData.createNew
 			this.$('input[name="url"]').val e.target.value.toLowerCase().replace(/ /g,'-')
 
+	changeAccess: ->
+		console.log 'change access'
+		val = this.$('select[name="access"]').val()
+		if val=='1'
+			this.$('.access-link').removeClass 'hide'
+		else
+			this.$('.access-link').addClass 'hide'
+
 	containerChanged: (vm) ->
 		self = this
 		container = vm.get 'selectedContainer'
@@ -51,6 +60,7 @@ module.exports = Backbone.View.extend
 		$.get(config.servicesBase + '/pathfromcontainer/' + container.id, (json) ->
 			self.accesslink = config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
 			self.render()
+			self.changeAccess()
 		)
 
 	render: ->

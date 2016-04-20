@@ -13,6 +13,7 @@ module.exports = BaseView.extend
 
 	events:
 		'click .featured-thumbnail' : 'selectContainer'
+		'click .delete-folder' : 'deleteFolder'
 
 	initialize: (options) ->
 		this.template = templates['admin-folder-view']
@@ -30,6 +31,9 @@ module.exports = BaseView.extend
 		if (this.currentContainer)
 			this.listenTo this.currentContainer, 'change' , this.currentContainerChanged
 			this.addAll()
+
+	deleteFolder: ->
+		this.model.deleteContainer this.currentContainer
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}

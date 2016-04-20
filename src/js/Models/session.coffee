@@ -29,8 +29,7 @@ module.exports = Backbone.Model.extend
 			type: 'POST'
 			context: this
 			data: data
-			success: (result) ->
-				json = $.parseJSON(result)
+			success: (json) ->
 				if json.hasOwnProperty 'error'
 					this.set 'errorMessage' , json.message
 				else
@@ -42,8 +41,7 @@ module.exports = Backbone.Model.extend
 			url: this.urlRoot
 			type: 'PUT'
 			context: this
-			success: (result) ->
-				json = $.parseJSON(result)
+			success: (json) ->
 				this.set 'uid', 0
 		)
 

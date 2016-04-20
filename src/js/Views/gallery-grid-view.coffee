@@ -19,18 +19,14 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
 
 	render: ->
+		console.log this.model
 		if this.model.get('access')==1
-			this.$('.gallery-breadcrumbs').addClass('hidden')
-			return
-
-		this.$('.gallery-breadcrumbs').removeClass('hidden')
-
-		breadcrumbs =  document.location.pathname.replace(/^.*\/galleries\//,'').split '/'
-		
-		count = breadcrumbs.length
-
-		if count>1 and breadcrumbs[count-1] == this.model.get('urlsuffix')
-			breadcrumbs.pop()
+			breadcrumbs = [this.model.get('name')]
+		else
+			breadcrumbs =  document.location.pathname.replace(/^.*\/galleries\//,'').split '/'		
+			count = breadcrumbs.length
+			if count>1 and breadcrumbs[count-1] == this.model.get('urlsuffix')
+				breadcrumbs.pop()
 
 		this.$el.html this.template {urlBase: config.urlBase, breadcrumbs: breadcrumbs}
 		this

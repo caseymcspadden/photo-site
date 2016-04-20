@@ -9,7 +9,7 @@
 		.next, .prev {
 			position: absolute;
 			z-index: 1;
-			top: rem-calc(200);
+			top: rem-calc(222);
 			font-size: rem-calc(30);
 			color: $white;
 			opacity: 0.7;
@@ -66,13 +66,19 @@
 	text-align: center;
 	margin-left: rem-calc(20);
 	.content {
-		padding-top: rem-calc(20);
-		min-height: rem-calc(474);
-		a {
+		height: rem-calc(474);
+		white-space: nowrap;
+		text-align: center;
+		.aligner {
+			display: inline-block;
+			height: 100%;
+			vertical-align: middle;
+		}
+		img {
 			outline: none;
-			img {
-				max-height: rem-calc(370);
-    		}
+			vertical-align: middle;
+			max-height: rem-calc(370);
+			cursor: pointer;
 		}
 	}
 	.photo-tools {
@@ -92,10 +98,4 @@
 			text-align: center;
 		}		
 	}
-}
-
-@include breakpoint(small down) {
-  .gallery-photo-view {
-    display: none;
-  }
 }

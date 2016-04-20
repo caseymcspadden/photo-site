@@ -250,26 +250,18 @@ $app->delete('/containers/{id}', function($request, $response, $args) {
 
   if ($this->services->isAdmin()) {
 
-    function test($obj, $id, &$master) {
+    function doDelete($obj, $id) {
       //$master[] = $id;
-      error_log($id);
+      $obj->services->dbh->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$id");
       $result = $obj->services->dbh->query("SELECT id FROM containers where idparent=$id");
       $arr = array();
-      while($row = $result->fetch()) {
+      while($row = $result->fetch())
         $arr[] = $row[0];
-        $master[] = $row[0];
-      }
       foreach ($arr as $child)
-        test($obj, $child, $master);
+        doDelete($obj, $child);
     }
 
-    $todelete = array($args['id']);
-    test($this, $args['id'], $todelete);
-
-    error_log(implode(',',$todelete));
-
-    //$this->services->dbh->query("DELETE C.*, CP.* FROM containers C LEFT JOIN containerphotos CP ON CP.idcontainer=C.id WHERE C.id=$args[id]");
-    //$this->services->dbh->query("UPDATE containers SET idparent=0 WHERE idparent = $args[id]");
+    doDelete($this, $args['id']);
   }
 
   $response->getBody()->write(json_encode($parsedBody));
@@ -362,7 +354,7 @@ $app->delete('/containers/{id:[0-9]+}/containerphotos', function($request, $resp
 });
 
 $app->any('/cart[/{path:.*}]', function($request, $response, $args) {
-  session_name('CRID');
+  session_name('cart');
   session_start();
   $crid = session_id();
   error_log($crid);

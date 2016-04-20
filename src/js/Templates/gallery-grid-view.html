@@ -1,12 +1,17 @@
 <div class="grid">
 <div class="gallery-breadcrumbs">
 <%
- url = urlBase + '/galleries';
- for (i=0;i<breadcrumbs.length;i++) {
- 	url += '/' + breadcrumbs[i] 
- 	print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
- 	if (i<breadcrumbs.length-1)
- 		print(' &gt; ');
+ if (breadcrumbs.length==1) {
+ 	print('<span class="single-crumb">' + breadcrumbs[0] + '</span>');
+ }
+ else {
+	 url = urlBase + '/galleries';
+	 for (i=0;i<breadcrumbs.length;i++) {
+	 	url += '/' + breadcrumbs[i] 
+	 	print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
+	 	if (i<breadcrumbs.length-1)
+	 		print(' &gt; ');
+	 }
  }
 %>
 </div>

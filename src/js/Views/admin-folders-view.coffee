@@ -19,7 +19,7 @@ module.exports = BaseView.extend
 		'click .folder-icon' : 'folderIconClicked'
 		'click .node-name' : 'selectContainer'
 		'submit #afv-addFolder form' : 'addFolder'
-		'click .delete-folder' : 'deleteFolder'
+		#'click .delete-folder' : 'deleteFolder'
 		'mousedown .mtree' : 'mouseDown'
 		'mouseup .mtree' : 'mouseUp'
 		'mouseleave .mtree' : 'mouseUp'
@@ -134,10 +134,12 @@ module.exports = BaseView.extend
 	containerRemoved: (c) ->
 		this.$tree.find('#node-' + c.id).remove()
 
+	###
 	deleteFolder: (e) ->
 		selectedContainer = this.model.get 'selectedContainer'
 		if selectedContainer.get('type') == 'folder'
 			this.model.deleteContainer selectedContainer
+	###
 
 	setNodeClass: (elem, isOpen) ->
 		if isOpen

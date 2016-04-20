@@ -1,3 +1,5 @@
 .edit-container-view {
-
+	select:focus {
+		outline: none;
+	}
 }
