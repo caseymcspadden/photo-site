@@ -19,7 +19,6 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
 
 	render: ->
-		console.log this.model
 		if this.model.get('access')==1
 			breadcrumbs = [this.model.get('name')]
 		else

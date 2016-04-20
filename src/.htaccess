@@ -14,8 +14,6 @@ RewriteRule \.(gif|jpe?g|png|bmp)$ - [R=403,NC]
 
 RewriteRule ^photos/(T|S|M|L|X)/([0-9]+([0-9][0-9])).jpg photos/$3/$2_$1.jpg [NC,L]
 
-RewriteRule ^bamenda/.* bamenda/servicesrouter.php
-
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule .* index.php [L]
+RewriteRule !^(bamenda|douala)($|/) index.php [QSA,L]
 

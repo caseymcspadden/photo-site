@@ -9,6 +9,7 @@ module.exports = BaseView.extend
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
 		'click img' : 'viewImage'
+		'click .create-download' : 'createDownload'
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
@@ -50,3 +51,6 @@ module.exports = BaseView.extend
 		photo = m.get 'currentPhoto'
 		this.$('.content img').attr 'src' , config.urlBase + '/photos/M/' + photo.id + '.jpg'
 		this.updateCounter()
+
+	createDownload: (e) ->
+		console.log "creating download file"
