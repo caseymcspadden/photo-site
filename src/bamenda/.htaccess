@@ -1,1 +1,0 @@
-RewriteRule ^(settings|users|session|photos|featuredphotos|containerfrompath|pathfromcontainer|containers|cart|upload)/?.* bamenda.php [L]

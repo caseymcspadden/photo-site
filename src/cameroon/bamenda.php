@@ -1,6 +1,14 @@
 <?php
+
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
+
+foreach ($_SERVER as $key => $value) {
+  error_log("$key = $value");
+}
+error_log($_SERVER['PHP_SELF']);
+
+
 
 // Get admin and services paths
 
