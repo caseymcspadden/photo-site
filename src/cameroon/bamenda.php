@@ -3,9 +3,11 @@
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
 
+error_log("IN BAMENDA.PHP");
 foreach ($_SERVER as $key => $value) {
   error_log("$key = $value");
 }
+error_log("\n\n");
 
 // Get admin and services paths
 

@@ -4,6 +4,12 @@ require './classes/CrossRiver/Services.php';
 
 // Get admin and services paths
 
+error_log("IN INDEX.PHP");
+foreach ($_SERVER as $key => $value) {
+  error_log("$key = $value");
+}
+error_log("\n\n");
+
 $contents = file('/Users/caseymcspadden/sites/photo-site/fileroot/paths.cfg');
 $paths = array();
 
@@ -30,6 +36,12 @@ $container['view'] = function ($container) {
     ));
 
     return $view;
+};
+
+$container['notFoundHandler'] = function ($container) {
+    return function ($request, $response) use ($container) {
+        return $container['view']->render($response, '404.html', [])->withStatus(404);
+    };
 };
 
 $container['services'] = function($container) {
