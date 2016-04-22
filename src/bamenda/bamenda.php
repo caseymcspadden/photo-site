@@ -2,6 +2,11 @@
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
 
+error_log("\n\nNEW REQUEST\n");
+
+foreach ($_SERVER as $k=>$v)
+  error_log("$k = $v");
+
 // Get admin and services paths
 
 // Get container
