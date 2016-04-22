@@ -1,6 +1,11 @@
 <?php
+
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
+
+foreach ($_SERVER as $key => $value) {
+  error_log("$key = $value");
+}
 
 // Get admin and services paths
 
@@ -26,7 +31,7 @@ $container['services'] = function($container) {
     return new CrossRiver\Services();
 };
 
-$app->get('/settings/{id:[0-9]*}', function($request, $response, $args) {
+$app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -36,7 +41,7 @@ $app->get('/settings/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/settings/{id:[0-9]*}', function($request, $response, $args) {
+$app->put('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) 
@@ -46,7 +51,7 @@ $app->put('/settings/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/users', function($request, $response, $args) {
+$app->get('/bamenda/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -56,7 +61,7 @@ $app->get('/users', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/users/{id:[0-9]*}', function($request, $response, $args) {
+$app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if (!$this->services->isAdmin())
@@ -75,7 +80,7 @@ $app->put('/users/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/users', function($request, $response, $args) {
+$app->post('/bamenda/users', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if (!$this->services->isAdmin())
@@ -94,13 +99,13 @@ $app->post('/users', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/session', function($request, $response, $args) {
+$app->get('/bamenda/session', function($request, $response, $args) {
   $user = $this->services->getSessionUser();
   
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($user,JSON_NUMERIC_CHECK));
 });
 
-$app->put('/session', function($request, $response, $args) {
+$app->put('/bamenda/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
   if ($ret)
     setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
@@ -110,7 +115,7 @@ $app->put('/session', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/session', function($request, $response, $args) {
+$app->post('/bamenda/session', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
   if ($result['error']==true)
@@ -124,7 +129,7 @@ $app->post('/session', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/photos', function($request, $response, $args) {
+$app->get('/bamenda/photos', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -134,7 +139,7 @@ $app->get('/photos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->delete('/photos', function($request, $response, $args) {
+$app->delete('/bamenda/photos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) {
@@ -156,7 +161,7 @@ $app->delete('/photos', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->put('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) 
@@ -166,7 +171,7 @@ $app->put('/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/photos/{id:[0-9]*}', function($request, $response, $args) {
+$app->get('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else
@@ -176,14 +181,14 @@ $app->get('/photos/{id:[0-9]*}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/featuredphotos', function($request, $response, $args) {
+$app->get('/bamenda/featuredphotos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN settings S ON S.featuredgallery=CP.idcontainer WHERE S.iduser=1 ORDER BY CP.position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/containerfrompath/[{path:.*}]', function($request, $response, $args) {
+$app->get('/bamenda/containerfrompath/[{path:.*}]', function($request, $response, $args) {
     $container = $this->services->getContainer($args['path']);
     if (!$container)
       $container = array('error'=>'gallery not found');
@@ -192,21 +197,21 @@ $app->get('/containerfrompath/[{path:.*}]', function($request, $response, $args)
     return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
+$app->get('/bamenda/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
     $path = $this->services->getContainerPath($args['id']);
 
     $response->getBody()->write(json_encode(array('path'=>$path)));
     return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/containers', function($request, $response, $args) {
+$app->get('/bamenda/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark FROM containers ORDER BY idparent, position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
 });
 
-$app->post('/containers', function($request, $response, $args) {
+$app->post('/bamenda/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
 
   if ($this->services->isAdmin()) {
@@ -226,7 +231,7 @@ $app->post('/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/containers', function($request, $response, $args) {
+$app->put('/bamenda/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
     error_log("adjusting container ownership");
@@ -235,7 +240,7 @@ $app->put('/containers', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/containers/{id}', function($request, $response, $args) {
+$app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
@@ -245,7 +250,7 @@ $app->put('/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->delete('/containers/{id}', function($request, $response, $args) {
+$app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
 
   if ($this->services->isAdmin()) {
@@ -268,21 +273,21 @@ $app->delete('/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
+$app->get('/bamenda/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
+$app->get('/bamenda/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
 
   $arr = array();
@@ -294,7 +299,7 @@ $app->get('/containers/{id:[0-9]+}/containerphotos', function($request, $respons
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->post('/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->post('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   
   if ($this->services->isAdmin()) {
@@ -315,7 +320,7 @@ $app->post('/containers/{id:[0-9]+}/containerphotos', function($request, $respon
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->put('/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->put('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
     $ids = explode(',', $parsedBody['ids']);
@@ -330,7 +335,7 @@ $app->put('/containers/{id:[0-9]+}/containerphotos', function($request, $respons
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->delete('/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+$app->delete('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody(); 
   if ($this->services->isAdmin()) {
     $ids = $parsedBody['ids'];
@@ -353,7 +358,7 @@ $app->delete('/containers/{id:[0-9]+}/containerphotos', function($request, $resp
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->any('/cart[/{path:.*}]', function($request, $response, $args) {
+$app->any('bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   session_name('cart');
   session_start();
   $crid = session_id();
@@ -367,7 +372,7 @@ $app->any('/cart[/{path:.*}]', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');    
 });
 
-$app->post('/upload', function($request, $response, $args) {
+$app->post('/bamenda/upload', function($request, $response, $args) {
     if (!$this->services->isAdmin())
       return;
 

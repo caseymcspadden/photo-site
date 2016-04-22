@@ -155,8 +155,8 @@ gulp.task('root', ['fileroot'], function() {
   gulp.src(['src/classes/**/*.*'])
     .pipe(gulp.dest('build/classes'));
  
-  gulp.src(['src/bamenda/.htaccess','src/bamenda/**/*.*'])
-    .pipe(gulp.dest('build/bamenda'));
+  gulp.src(['src/cameroon/**/*.*'])
+    .pipe(gulp.dest('build/cameroon'));
 
   return gulp.src(['src/.htaccess', './src/*.*'])
     .pipe(gulp.dest('build'))
