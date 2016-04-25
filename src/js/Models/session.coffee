@@ -33,7 +33,7 @@ module.exports = Backbone.Model.extend
 				if json.hasOwnProperty 'error'
 					this.set 'errorMessage' , json.message
 				else
-					this.set json
+					location.reload();
 		)
 
 	logout: ->
@@ -42,6 +42,7 @@ module.exports = Backbone.Model.extend
 			type: 'PUT'
 			context: this
 			success: (json) ->
+				#location.reload();
 				this.set 'uid', 0
 		)
 

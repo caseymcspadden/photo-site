@@ -22,7 +22,8 @@ $('body').append loginView.render().el
 galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view'}
 galleryMainView.render()
 
-session.fetch()
+$ ->
+	session.fetch()
 #galleries.fetch {reset: true}
 
 $(document).foundation()

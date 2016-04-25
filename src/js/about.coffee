@@ -31,6 +31,7 @@ $('.crop-photo').cropper({
 		#console.log(e.scaleY);
 });
 
-session.fetch()
+$ ->
+	session.fetch()
 
 $(document).foundation()

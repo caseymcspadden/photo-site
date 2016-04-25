@@ -8,6 +8,10 @@ module.exports = Backbone.Model.extend
 		urlsuffix: ''
 		error: null
 		archive: null
+		archiveProgress: 0
+		access: 0
+		maxdownloadsize: 0
+		downloadgallery: 0
 
 	initialize: ->
 		this.photos = new Backbone.Collection null, {model: Photo}
@@ -15,6 +19,7 @@ module.exports = Backbone.Model.extend
 		self = this
 		$.get(config.servicesBase + '/containerfrompath/' + document.location.pathname.replace(/^.*\/galleries\//,''), (data) ->
 			self.set data
+			console.log data
 			self.id = data.id
 			self.photos.url = config.servicesBase + '/containers/' + data.id + '/photos'
 			self.photos.fetch {reset: true}
@@ -33,17 +38,40 @@ module.exports = Backbone.Model.extend
 		this.set 'currentPhoto', photo		
 		photo.set 'selected', true
 
+	addPhotosToArchive: (startindex, count) ->
+		return if startindex>=this.photos.length
+		add = [];
+		end = Math.min(startindex+count,this.photos.length)
+		add.push this.photos.at(i).id for i in [startindex...end]
+		$.ajax(
+			url: config.servicesBase + '/containers/' + this.id + '/archive/' + this.get('archive')
+			type: 'PUT'
+			context: this
+			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-')}
+			success: (json) ->
+				console.log json
+				this.set 'archiveProgress' , json.count + this.get('archiveProgress')
+				this.addPhotosToArchive(startindex+count, count)
+		)
+
 	createArchive: ->
 		console.log 'creating archive'
+		this.archiveName = null
+		this.archiveProgress = 0
+		add = [];
+		end = Math.min(10,this.photos.length)
+		add.push this.photos.at(i).id for i in [0...end]
 		$.ajax(
 			url: config.servicesBase + '/containers/' + this.id + '/archive'
 			type: 'POST'
 			context: this
+			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-')}
 			success: (json) ->
 				console.log json
-				if (json.error)
-					this.set 'error', json.message
-				else
-					console.log 'setting archive'
+				if (!json.error)
 					this.set 'archive' , json.archive
+					this.set 'archiveProgress' , json.count + this.get('archiveProgress')
+					this.addPhotosToArchive 10,10
+				else
+					this.set 'error', json.message
 		)

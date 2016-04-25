@@ -17,12 +17,20 @@ module.exports = BaseView.extend
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
+		this.listenTo this.model, 'change:downloadgallery', this.updateAccess
+		#this.listenTo this.model.photos, 'reset', this.render
 
 	render: ->
-		this.$el.html this.template {urlBase: config.urlBase}
+		data = this.model.toJSON()
+		data.urlBase = config.urlBase
+		console.log data
+		this.$el.html this.template data
 		this.assign this.photoView, '.photo-view'
 		this.assign this.downloadGalleryView, '.download-gallery-view'
 		this
+
+	updateAccess: (m) ->
+		this.$('.tool-download').removeClass('hide') if m.get('downloadgallery')
 
 	viewImage: ->
 		this.photoView.open()

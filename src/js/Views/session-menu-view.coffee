@@ -14,7 +14,9 @@ module.exports = Backbone.View.extend
 		this.setUser(this.model)
 
 	setUser: (m) ->
+		console.log "setting user"
 		if m.id==0
+			console.log "id is 0"
 			this.$('ul.submenu').html ''
 			this.$('.top-item').html 'LOGIN'
 			this.$('.top-item').addClass('login-item')

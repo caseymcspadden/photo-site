@@ -6,8 +6,6 @@ PhotoTextEditor = require './photo-text-editor-view'
 config = require './config'
 
 module.exports = BaseView.extend
-	tagName: 'div'
-
 	events:
 		'click .scroll-left' : 'scrollLeft'
 		'click .scroll-right' : 'scrollRight'

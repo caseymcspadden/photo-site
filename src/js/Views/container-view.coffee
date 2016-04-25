@@ -3,15 +3,8 @@ templates = require './jst'
 config = require './config'
 
 module.exports = Backbone.View.extend
-	tagName: 'div'
-
-	#className: 'featured-thumbnail'
-
 	id: ->
 		'container-' + this.model.id
-
-	#events:
-	#	'click img' : 'galleryClicked'
 
 	initialize: (options) ->
 		this.template = templates['container-view']

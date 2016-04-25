@@ -12,6 +12,7 @@ sessionMenuView = new SessionMenuView {el: '.session-menu', model: session}
 
 $('body').append loginView.render().el
 
-session.fetch()
+$ ->
+	session.fetch()
 
 $(document).foundation()

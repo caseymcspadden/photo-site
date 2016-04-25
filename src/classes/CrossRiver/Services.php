@@ -407,7 +407,7 @@ class Services
     }
     */
 
-   	public function addFilesToArchive($archive, $files)
+   	public function addFilesToArchive($archive, $galleryname, $files)
     {
 	    $zip = new \ZipArchive();
 
@@ -415,8 +415,10 @@ class Services
 
 	 	$filename = $this->fileroot . '/downloads/' . $name .'.zip';
 
-	 	if ($archive==NULL)
+	 	if ($archive==NULL) {
 	 		$open = $zip->open($filename, \ZipArchive::CREATE);
+	 		$zip->addEmptyDir($galleryname);
+	 	}
 	 	else
 	 		$open = $zip->open($filename);
 
@@ -425,9 +427,9 @@ class Services
     		return FALSE;
 		}
 		else {
-			$i = $zip->numFiles + 1;
+			$i = $zip->numFiles;
 			foreach ($files as $file) {
-				$zip->addFile($file, 'photo_' . $i . '.jpg');
+				$zip->addFile($file, '/' . $galleryname .'/' . $galleryname . '-' . $i . '.jpg');
 				$i++;
 			}
 			$zip->close();
@@ -442,9 +444,9 @@ class Services
     	$user = $this->getSessionUser();
     	$onUserBranch = FALSE;
 
-    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0];
+    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, type, idparent, name, url, urlsuffix, access FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$result = $this->dbh->query("SELECT id, type, idparent, name, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
     		$currentContainer = $result->fetchObject();
 
     		if (!$currentContainer)

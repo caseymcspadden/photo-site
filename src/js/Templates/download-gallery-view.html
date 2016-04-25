@@ -2,10 +2,16 @@
 	<span aria-hidden="true">&times;</span>
 </button>
 <h2>Download Gallery</h2>
-<p>Click the button below to create an archive file containing high-resolution versions of all of the photos in the gallery. This may take some time, depending on the size of the gallery. If you wish, you may close this box and we will send you an email with a link to the file. If you keep the box open, the link will appear below when the file is ready to download.</p>
+<p>Click the button below to create an archive file containing high-resolution versions of all of the photos in the gallery. This may take some time, depending on the size of the gallery. Please don't leave this page while the archive is being created. When the archive is complete, a link will appear below that you may click to download the archive. We will also end you an email with this link.</p>
 <div class="button-group">
 <a class="button create-archive">Create Archive</a>
 <a class="button" data-close>Close</a>
 </div>
 <div class="archive-wait hide"><img src="<%= waitsrc %>" alt="wait"/></div>
+
+<div class="progress hide" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuetext="0%" aria-valuemax="100">
+  <span class="progress-meter" style="width: 0%">
+    <p class="progress-meter-text"></p>
+  </span>
+</div>
 <div class="archive-notify hide"></div>

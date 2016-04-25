@@ -366,32 +366,50 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
   $ret = new stdClass();
   $ret->error = FALSE;
 
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+  $galleryname = $parsedBody['name'];
+
   $files = array();
 
-  $result = $this->services->dbh->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
-  while ($row=$result->fetch()) {
-    $id = $row[0];
+  foreach ($ids as $id) {
     $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
     if (count($arr)>0)
       $files[] = $arr[0];
   }
   try {
-    //$name = $this->services->createArchive($files);
-    $name = NULL;
+    $archive = $this->services->addFilesToArchive(NULL,$galleryname,$files);
+    $ret->archive = $archive;
+    $ret->count = count($ids);
+    $this->services->dbh->query("INSERT INTO archives (id, idcontainer) VALUES ('$archive', $args[id])");
+  }
+  catch (Exception $e) {
+    $ret->error = TRUE;
+    $ret->message = $e->getMessage();
+  }
+  $response->getBody()->write(json_encode($ret));
+  return $response->withHeader('Content-Type','application/json');
+});
 
-    $add = array();
+$app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request, $response, $args) {
+  $ret = new stdClass();
+  $ret->error = FALSE;
 
-    for ($i=0;$i<count($files);$i++) {
-      array_push($add, $files[$i]);
+  $parsedBody = $request->getParsedBody();
+  $ids = explode(',', $parsedBody['ids']);
+  $galleryname = $parsedBody['name'];
 
-      if (($i+1)%10==0 || $i==count($files)-1) {
-        $name = $this->services->addFilesToArchive($name,$add);
-        $add = array();
-      }
-    }
+  $files = array();
 
-    $this->services->dbh->query("INSERT INTO archives (id, idcontainer) VALUES ('$name', $args[id])");
-    $ret->archive = $name;
+  foreach ($ids as $id) {
+    $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    if (count($arr)>0)
+      $files[] = $arr[0];
+  }
+  try {
+    $this->services->addFilesToArchive($args['archive'], $galleryname, $files);
+    $ret->archive = $args['archive'];
+    $ret->count = count($ids);
   }
   catch (Exception $e) {
     $ret->error = TRUE;

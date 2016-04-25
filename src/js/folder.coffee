@@ -19,7 +19,8 @@ folderView = new FolderView {model: new Folder, el: '.folder-view'}
 
 folderView.render()
 
-session.fetch()
+$ ->
+	session.fetch()
 
 $(document).foundation()
 #new Foundation.DropdownMenu($('.dropdown'))
