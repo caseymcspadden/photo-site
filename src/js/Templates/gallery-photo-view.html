@@ -4,17 +4,13 @@
 </div>
 <div class="photo-tools">
 	<div class="counter"><span class="prev">&lt;</span><span class="index"></span> / <span class="total"></span><span class="next">&gt;</span></div>
-	<div class="tools"><i class="fa fa-download download-gallery" data-open="downloadGallery"></i></div>
+	<div class="tools">
+		<a href="#" class="download-gallery" data-open="downloadGallery"><i class="fa fa-download"></i></a>
+	</div>
 </div>
 
 <div class="reveal form full photo-view" data-reveal>
 </div>
 
-<div id="downloadGallery" class="reveal form" data-reveal>
-<button type="button" class="close-button" data-close aria-label="Close">
-	<span aria-hidden="true">&times;</span>
-</button>
-<p>Create a download file</p>
-<button class="button create-download">Create Download File</button>
-<p class="create-complete hide">Complete message goes here</p>
+<div id="downloadGallery" class="reveal form download-gallery-view" data-reveal>
 </div>

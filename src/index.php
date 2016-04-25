@@ -4,11 +4,13 @@ require './classes/CrossRiver/Services.php';
 
 // Get admin and services paths
 
+/*
 error_log("IN INDEX.PHP");
 foreach ($_SERVER as $key => $value) {
   error_log("$key = $value");
 }
 error_log("\n\n");
+*/
 
 $contents = file('/Users/caseymcspadden/sites/photo-site/fileroot/paths.cfg');
 $paths = array();

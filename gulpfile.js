@@ -55,6 +55,7 @@ gulp.task('fileroot', function() {
       .pipe(gulp.dest('fileroot'));
     }
   });
+  mkdirp('fileroot/downloads', '0777');
 });
 
 gulp.task('jst', function() {
@@ -155,6 +156,9 @@ gulp.task('root', ['fileroot'], function() {
   gulp.src(['src/classes/**/*.*'])
     .pipe(gulp.dest('build/classes'));
  
+  gulp.src(['src/downloads/.htaccess','src/downloads/**/*.*'])
+    .pipe(gulp.dest('build/downloads'));
+
   gulp.src(['src/cameroon/**/*.*'])
     .pipe(gulp.dest('build/cameroon'));
 

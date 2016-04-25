@@ -2,6 +2,7 @@ BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
 PhotoView = require './photo-view'
+DownloadGalleryView = require './download-gallery-view'
 
 module.exports = BaseView.extend
 
@@ -9,17 +10,18 @@ module.exports = BaseView.extend
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
 		'click img' : 'viewImage'
-		'click .create-download' : 'createDownload'
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
 		this.template = templates['gallery-photo-view']
 		this.photoView = new PhotoView {model: this.model}
+		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 
 	render: ->
 		this.$el.html this.template {urlBase: config.urlBase}
 		this.assign this.photoView, '.photo-view'
+		this.assign this.downloadGalleryView, '.download-gallery-view'
 		this
 
 	viewImage: ->
@@ -51,6 +53,3 @@ module.exports = BaseView.extend
 		photo = m.get 'currentPhoto'
 		this.$('.content img').attr 'src' , config.urlBase + '/photos/M/' + photo.id + '.jpg'
 		this.updateCounter()
-
-	createDownload: (e) ->
-		console.log "creating download file"

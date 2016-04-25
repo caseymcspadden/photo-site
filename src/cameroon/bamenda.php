@@ -3,11 +3,13 @@
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
 
+/*
 error_log("IN BAMENDA.PHP");
 foreach ($_SERVER as $key => $value) {
   error_log("$key = $value");
 }
 error_log("\n\n");
+*/
 
 // Get admin and services paths
 
@@ -357,6 +359,45 @@ $app->delete('/bamenda/containers/{id:[0-9]+}/containerphotos', function($reques
   }
 
   $response->getBody()->write(json_encode($parsedBody));
+  return $response->withHeader('Content-Type','application/json');
+});
+
+$app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $response, $args) {
+  $ret = new stdClass();
+  $ret->error = FALSE;
+
+  $files = array();
+
+  $result = $this->services->dbh->query ("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
+  while ($row=$result->fetch()) {
+    $id = $row[0];
+    $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    if (count($arr)>0)
+      $files[] = $arr[0];
+  }
+  try {
+    //$name = $this->services->createArchive($files);
+    $name = NULL;
+
+    $add = array();
+
+    for ($i=0;$i<count($files);$i++) {
+      array_push($add, $files[$i]);
+
+      if (($i+1)%10==0 || $i==count($files)-1) {
+        $name = $this->services->addFilesToArchive($name,$add);
+        $add = array();
+      }
+    }
+
+    $this->services->dbh->query("INSERT INTO archives (id, idcontainer) VALUES ('$name', $args[id])");
+    $ret->archive = $name;
+  }
+  catch (Exception $e) {
+    $ret->error = TRUE;
+    $ret->message = $e->getMessage();
+  }
+  $response->getBody()->write(json_encode($ret));
   return $response->withHeader('Content-Type','application/json');
 });
 

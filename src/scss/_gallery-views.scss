@@ -107,6 +107,20 @@
 		.tools {
 			overflow: hidden;
 			text-align: right;
+			a {
+				color: $body-font-color;
+				&:hover {color: $white;}
+			}
 		}		
+	}
+}
+
+.download-gallery-view {
+	a {
+		color: white;
+		&:hover {text-decoration: underline;}
+	}
+	.archive-wait {
+		text-align: center;
 	}
 }

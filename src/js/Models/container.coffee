@@ -91,8 +91,11 @@ module.exports = Backbone.Model.extend
 		this.photos.sort()
 
 		$.ajax(
-			url: config.servicesBase + '/containers/' + this.id + '/containerphotos'
+			url: this.urlRoot + '/' + this.id + '/containerphotos'
 			type: 'PUT'
 			context: this
 			data: {ids: ids.join(',')}
 		)
+
+
+

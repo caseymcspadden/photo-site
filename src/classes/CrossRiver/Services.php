@@ -2,7 +2,6 @@
 
 namespace CrossRiver;
 
-
 class Services
 {
 	private $auth;
@@ -378,6 +377,63 @@ class Services
     		$idcontainer = $container->idparent;
     	}
     	return implode('/',array_reverse($pathArray));
+    }
+
+    /*
+    public function createArchive($files=NULL)
+    {
+	    $zip = new \ZipArchive();
+
+	    $name = $this->getRandomKey(20);
+
+	 	$filename = $this->fileroot . '/downloads/' . $name .'.zip';
+
+		if ($zip->open($filename, \ZipArchive::CREATE)!==TRUE) {
+    		error_log("Cannot create $filename");
+    		return FALSE;
+		}
+		else if ($files!==NULL && count($files)>0) {
+			$i = 1;
+			foreach ($files as $file) {
+				$zip->addFile($file, 'photo_' . $i . '.jpg');
+				$i++;
+			}
+		}
+		
+		$zip->setArchiveComment("Test comment");
+		$zip->close();
+
+		return $name;
+    }
+    */
+
+   	public function addFilesToArchive($archive, $files)
+    {
+	    $zip = new \ZipArchive();
+
+	   	$name = $archive==NULL ? $this->getRandomKey(20) : $archive;
+
+	 	$filename = $this->fileroot . '/downloads/' . $name .'.zip';
+
+	 	if ($archive==NULL)
+	 		$open = $zip->open($filename, \ZipArchive::CREATE);
+	 	else
+	 		$open = $zip->open($filename);
+
+		if ($open!==TRUE) {
+    		error_log("Cannot open $filename");
+    		return FALSE;
+		}
+		else {
+			$i = $zip->numFiles + 1;
+			foreach ($files as $file) {
+				$zip->addFile($file, 'photo_' . $i . '.jpg');
+				$i++;
+			}
+			$zip->close();
+		}
+
+		return $name;
     }
 
     public function getContainer($path)
