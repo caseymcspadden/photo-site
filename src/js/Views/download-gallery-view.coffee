@@ -56,4 +56,4 @@ module.exports = BaseView.extend
 			this.$('.progress').addClass 'hide'
 			this.$('.archive-notify').removeClass 'hide'
 			$archive = this.model.get 'archive'
-			this.$('.archive-notify').html('You may download your file using this link: <a href="' + config.urlBase + '/downloads/' + $archive + '">' + config.urlBase + '/downloads/' + $archive + '</a>')
+			this.$('.archive-notify').html('You may download your file using this link: <a href="' + config.urlBase + '/downloads/gallery/' + $archive + '">' + config.urlBase + '/downloads/gallery/' + $archive + '</a>')

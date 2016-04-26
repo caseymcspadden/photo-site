@@ -3,6 +3,7 @@
 @import "settings";
 @import "common";
 @import "slideshow";
+@import "cart-summary-view";
 @import "../../node_modules/foundation-sites/scss/foundation";
 
 @include foundation-global-styles;
@@ -40,3 +41,5 @@
 @include foundation-title-bar;
 @include foundation-tooltip;
 @include foundation-top-bar;
+
+@import "../../node_modules/font-awesome/scss/font-awesome.scss";

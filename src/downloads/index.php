@@ -1,7 +1,10 @@
 <?php 
-$arr = explode('/', $_SERVER['REQUEST_URI']);
 
-if (count($arr)!==3)
+$str = preg_replace('/^.*\/downloads\/(.*)$/','$1', $_SERVER['REQUEST_URI']);
+
+$arr = explode('/', $str);
+
+if (count($arr)!==2)
 	exit ('File link is missing or invalid');
 
 $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
@@ -16,7 +19,7 @@ foreach ($contents as $line) {
 
 $dbh = new \PDO("mysql:host=localhost;dbname=" . $config['mysqldb'],  $config['mysqluser'] , $config['mysqlpwd']);
 
-$filename =  array_pop($arr);
+$filename =  $arr[1];
 
 $result = $dbh->query("SELECT * FROM archives WHERE id='$filename'");
 

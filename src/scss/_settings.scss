@@ -68,6 +68,11 @@ $global-weight-bold: bold;
 $global-radius: 0;
 $global-text-direction: ltr;
 
+$foundation-palette: (
+  primary: #384b9f,
+  secondary: #f05c23
+);
+
 // 2. Breakpoints
 // --------------
 
@@ -529,8 +534,9 @@ $titlebar-icon-spacing: 0.25rem;
 // -----------
 
 $has-tip-font-weight: $global-weight-bold;
-$has-tip-border-bottom: dotted 1px $dark-gray;
-$tooltip-background-color: $white;
+//$has-tip-border-bottom: dotted 1px $dark-gray;
+$has-tip-border-bottom: 0;
+$tooltip-background-color: #878794;
 $tooltip-color: $black;
 $tooltip-padding: 0.75rem;
 $tooltip-font-size: $small-font-size;

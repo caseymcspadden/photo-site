@@ -7,10 +7,12 @@ LoginView = require('../../require/login-view')
 FeaturedPhotos = require('../../require/featuredphotos')
 SessionMenuView = require('../../require/session-menu-view')
 SlideshowView = require('../../require/slideshow-view')
+CartSummaryView = require('../../require/cart-summary-view')
 
 session = new Session
 loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
+cartSummaryView = new CartSummaryView {el: '.cart-summary-view'}
 
 featuredPhotos = new FeaturedPhotos
 

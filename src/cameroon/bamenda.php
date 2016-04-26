@@ -375,7 +375,7 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
     $user = $this->services->getSessionUser();
     if ($user->id==0)
       $ret->error = TRUE;
-    else if (!$user->isadmin && !$this->services->userOwnsContainer($user->id,$args[id]))
+    else if (!$user->isadmin && !$this->services->userOwnsContainer($user->id,$args['id']))
      $ret->error = TRUE;
   }
   if ($ret->error==TRUE) {

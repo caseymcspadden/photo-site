@@ -1,35 +1,35 @@
 require 'foundation'
 Backbone = require 'backbone'
+templates = require './jst'
 config = require './config'
 
 module.exports = Backbone.View.extend
-	className: 'reveal'
-
 	events:
 		'click a.login-item' : 'login'
 		'click a.logout-item' : 'logout'
 
 	initialize: (options) ->
-		this.listenTo this.model, 'change:id' , this.setUser
-		this.setUser(this.model)
+		this.template = templates['session-menu-view']
+		this.listenTo this.model, 'change:id' , this.render
+		this.render this.model
 
-	setUser: (m) ->
-		console.log "setting user"
+	render: (m) ->
+		console.log "rendering"
+		console.log m
+		data = 
+			uid: m.id
+			config: config
+			isadmin: m.get('isadmin')
+
 		if m.id==0
-			console.log "id is 0"
-			this.$('ul.submenu').html ''
-			this.$('.top-item').html 'LOGIN'
-			this.$('.top-item').addClass('login-item')
+			this.$el.html this.template(data)
 		else
-			this.$('.top-item').html 'CLIENT'
-			this.$('.top-item').removeClass('login-item')
 			self = this
 			$.get(config.servicesBase + '/pathfromcontainer/' + m.get('idcontainer'), (json) ->
-				html = 	'<li><a href="#">PROFILE</a></li><li><a href="' + config.urlBase + '/galleries/' + json.path + '">MY GALLERIES</a></li>'
-				html += '<li><a href="' + config.adminBase + '">ADMIN</a></li>' if m.get('isadmin')
-				html += '<li><a href="#" class="logout-item">LOGOUT</a></li>'
-				self.$('ul.submenu').html html
+				data.galleryPath = json.path
+				self.$el.html self.template(data)
 			)
+		this
 
 	login: (e) ->
 		this.model.set 'loggingIn', true
@@ -37,6 +37,3 @@ module.exports = Backbone.View.extend
 	logout: (e) ->
 		this.model.logout()
 		document.location = config.urlBase
-
-	render: ->
-		this

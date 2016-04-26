@@ -1,1 +1,12 @@
-<a class="top-item" href="#">CLIENT</a><ul class="submenu menu vertical" data-submenu></ul>
+<li><a href="<%= config.urlBase %>/about">ABOUT</a></li>
+<li><a href="#">CONTACT</a></li>
+<% if (uid==0) { %> 
+	<li><a href="#" class="login-item">LOGIN</a></li>
+<% } else { %>
+	<li><a href="#">PROFILE</a></li>
+	<li><a href="<%= config.urlBase %>/galleries/<%= galleryPath %>">MY GALLERIES</a></li>
+	<% if (isadmin) { %> 
+		<li><a href="<%= config.adminBase %>">ADMIN</a></li>
+	<% } %> 
+	<li><a href="#" class="logout-item">LOGOUT</a></li>
+<% } %> 

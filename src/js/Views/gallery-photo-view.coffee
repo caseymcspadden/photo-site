@@ -17,7 +17,7 @@ module.exports = BaseView.extend
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
-		this.listenTo this.model, 'change:downloadgallery', this.updateAccess
+		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
 		#this.listenTo this.model.photos, 'reset', this.render
 
 	render: ->
@@ -31,6 +31,8 @@ module.exports = BaseView.extend
 
 	updateAccess: (m) ->
 		this.$('.tool-download').removeClass('hide') if m.get('downloadgallery')
+		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
+		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
 
 	viewImage: ->
 		this.photoView.open()

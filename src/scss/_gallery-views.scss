@@ -1,11 +1,11 @@
 .gallery-grid-view {
-	float: left;
-
+	@include breakpoint(medium up) {
+		float: left;
+	}
 	.grid {
 		position: relative;
 		padding-left: rem-calc(20);
 		padding-right: rem-calc(20);
-
 		.next, .prev {
 			position: absolute;
 			z-index: 1;
@@ -38,7 +38,9 @@
 
 		.content {
 			width: rem-calc(336);
-		 	min-height: rem-calc(450);
+			@include breakpoint(medium up) {
+			 	min-height: rem-calc(450);
+			}
 		}
 		
 		.photo-thumbnail {
@@ -62,11 +64,14 @@
 }
 
 .gallery-photo-view {
-	overflow: hidden;
-	text-align: center;
-	margin-left: rem-calc(20);
+	@include breakpoint(medium up) {
+		overflow: hidden;
+		margin-left: rem-calc(20);
+	}
 	.content {
-		height: rem-calc(474);
+		@include breakpoint(medium up) {
+			height: rem-calc(474);
+		}
 		white-space: nowrap;
 		text-align: center;
 		a {
@@ -87,6 +92,9 @@
 		line-height: 2.4375rem;
 		color: $white;
 		.counter {
+			@include breakpoint(medium down) {
+				display: none;
+			}
 			float: left;
 			text-align: left;
 			margin-left: rem-calc(20);
@@ -107,9 +115,13 @@
 		.tools {
 			overflow: hidden;
 			text-align: right;
+			.has-tip {
+				cursor: pointer;
+			}
 			a {
 				color: $body-font-color;
 				&:hover {color: $white;}
+				margin-left: 1rem;
 			}
 		}		
 	}
@@ -122,5 +134,8 @@
 	}
 	.archive-wait {
 		text-align: center;
+	}
+	.button.separate {
+		margin-left: 5rem;
 	}
 }

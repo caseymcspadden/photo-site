@@ -17,17 +17,17 @@
       <div class="top-bar-left menu-text">
         <a class="title-main" href="{{webroot}}/">Cross River</a><span class="title-sub">photography by Casey McSpadden</span>
       </div>
+      <div class="show-cart">
+        <div class="cart-summary-view"></div>
+      </div>
     </div>
   
     <div class="large-12 columns">
       <div class="top-bar-right">
         <ul class="menu horizontal dropdown" data-dropdown-menu>
         <li><a class="top-item" href="{{webroot}}/galleries/portfolio">PORTFOLIO</a></li>
-        <li><a class="top-item" href="{{webroot}}/about">ABOUT</a></li>
-        <li><a class="top-item" href="#">CONTACT</a></li>
-        <li class="session-menu"><a class="top-item" href="#">{% if islogged %}CLIENT{% else %}LOGIN{% endif %}        
-        </a>
-          <ul class="submenu menu vertical" data-submenu></ul>
+        <li><a class="top-item" href="#">MORE</a>
+          <ul class="submenu menu vertical session-menu" data-submenu></ul>
         </li>
         </ul>
       </div>

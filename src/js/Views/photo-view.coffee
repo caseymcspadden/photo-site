@@ -12,12 +12,7 @@ module.exports = BaseView.extend
 
 	initialize: (options) ->
 		this.template = templates['photo-view']
-		this.listenTo this.model, 'change:maxdownloadsize change:buyprints', this.updateAccess
 		#this.listenTo this.model.photos, 'reset', this.render
-
-	updateAccess: (m) ->
-		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
-		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
 
 	open: ->
 		this.changePhoto this.model
