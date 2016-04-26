@@ -6,6 +6,7 @@ module.exports = BaseView.extend
 
 	events:
 		'click .create-archive' : 'createArchive'
+		'click .cancel-archive' : 'cancelArchive'
 		'open.zf.reveal' : 'open'
 
 	initialize: (options) ->
@@ -32,10 +33,15 @@ module.exports = BaseView.extend
 		this.$('.progress').removeClass 'hide'
 		this.model.createArchive()
 
+	cancelArchive: ->
+		this.model.set 'cancelArchive', true
+
 	notifyError: ->
 		console.log 'notifyError'
-		this.$('.archive-notify').removeClass 'hide'
+		this.$('.archive-wait').addClass 'hide'
+		this.$('.progress').addClass 'hide'
 		this.$('.archive-notify').html('Problem creating archive: ' + this.model.get 'error')
+		this.$('.archive-notify').removeClass 'hide'
 
 	archiveProgress: (m) ->
 		progress = m.get('archiveProgress') 

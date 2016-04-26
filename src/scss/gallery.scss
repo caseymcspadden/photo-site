@@ -43,5 +43,9 @@
 @include foundation-tooltip;
 @include foundation-top-bar;
 
+.tooltip {
+  z-index: 1006;
+}
+
 @import "../../node_modules/font-awesome/scss/font-awesome.scss";
 

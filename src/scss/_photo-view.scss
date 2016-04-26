@@ -38,5 +38,11 @@
 	.photo-tools {
 		margin-top: 1rem;
 		text-align: center;
+		a {
+			margin: 0 1rem 0 1rem;
+		}
+		.buy-print {
+			color: $secondary-color;
+		}
 	}
 }

@@ -379,33 +379,26 @@ class Services
     	return implode('/',array_reverse($pathArray));
     }
 
-    /*
-    public function createArchive($files=NULL)
+    public function userOwnsContainer($iduser, $idcontainer)
     {
-	    $zip = new \ZipArchive();
+   		$result = $this->dbh->query("SELECT isadmin, idcontainer FROM users WHERE id=$iduser");
 
-	    $name = $this->getRandomKey(20);
+   		$user = $result->fetchObject();
 
-	 	$filename = $this->fileroot . '/downloads/' . $name .'.zip';
+   		if (!$user || $user->idcontainer==0)
+   			return FALSE;
 
-		if ($zip->open($filename, \ZipArchive::CREATE)!==TRUE) {
-    		error_log("Cannot create $filename");
-    		return FALSE;
-		}
-		else if ($files!==NULL && count($files)>0) {
-			$i = 1;
-			foreach ($files as $file) {
-				$zip->addFile($file, 'photo_' . $i . '.jpg');
-				$i++;
-			}
-		}
-		
-		$zip->setArchiveComment("Test comment");
-		$zip->close();
-
-		return $name;
+   		while (TRUE) {
+	   		if ($user->idcontainer==$idcontainer)
+   				return TRUE;
+   			$result = $this->dbh->query("SELECT idparent FROM containers WHERE id=$idcontainer");
+   			$row = $result->fetch();
+   			if (!$row || $row[0]==0)
+   				return FALSE;
+   			$idcontainer =$row[0];
+   		}
+   		return FALSE;
     }
-    */
 
    	public function addFilesToArchive($archive, $galleryname, $files)
     {
@@ -444,9 +437,9 @@ class Services
     	$user = $this->getSessionUser();
     	$onUserBranch = FALSE;
 
-    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0];
+    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0, 'buyprints'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, type, idparent, name, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$result = $this->dbh->query("SELECT id, type, idparent, name, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery, buyprints FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
     		$currentContainer = $result->fetchObject();
 
     		if (!$currentContainer)

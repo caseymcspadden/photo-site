@@ -12,6 +12,8 @@ module.exports = Backbone.Model.extend
 		access: 0
 		maxdownloadsize: 0
 		downloadgallery: 0
+		buyprints: 0
+		cancelArchive: false
 
 	initialize: ->
 		this.photos = new Backbone.Collection null, {model: Photo}
@@ -40,6 +42,10 @@ module.exports = Backbone.Model.extend
 
 	addPhotosToArchive: (startindex, count) ->
 		return if startindex>=this.photos.length
+		if this.get('cancelArchive')
+			this.set 'archiveProgress', this.photos.length
+			return
+
 		add = [];
 		end = Math.min(startindex+count,this.photos.length)
 		add.push this.photos.at(i).id for i in [startindex...end]
@@ -56,8 +62,10 @@ module.exports = Backbone.Model.extend
 
 	createArchive: ->
 		console.log 'creating archive'
-		this.archiveName = null
-		this.archiveProgress = 0
+
+		this.set 'archive', null
+		this.set 'archiveProgress', 0
+		this.set 'cancelArchive', false
 		add = [];
 		end = Math.min(10,this.photos.length)
 		add.push this.photos.at(i).id for i in [0...end]

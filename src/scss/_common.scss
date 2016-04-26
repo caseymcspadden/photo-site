@@ -1,5 +1,5 @@
-.hidden {
-  display: none;
+a {
+  outline: none;
 }
 
 .photo-thumbnail {
@@ -24,13 +24,14 @@
 .reveal.form {
   color: $white;
   &:focus {
-    outline: 0;
+    outline: none;
   }
   .close-button:hover {
     color: $white
   }
   a {
     color: $light-gray;
+    outline: none;
   }
   input[type="submit"] {
     background-color: lighten($black,10%);
