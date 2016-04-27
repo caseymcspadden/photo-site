@@ -1,24 +1,63 @@
 <button type="button" class="close-button" data-close aria-label="Close">
 	<span aria-hidden="true">&times;</span>
 </button>
+
 <h2><% print(createNew ? 'new' : 'edit'); %> <%= type %></h2>
-<form method="POST">
-	<label>name
-		<input type="text" name="name" value="<%= name %>">
-	</label>
-	<label>description
-		<input type="text" name="description" value="<%= description %>">
-	</label>
-	<label>custom url
-		<input type="text" name="url" value="<%= url %>">
-	</label>
-	<label>access
-		<select name="access">
-			<option value="0"<% if (access==0) print(" selected") %>>public</option>
-			<option value="1"<% if (access==1) print(" selected") %>>public with link</option>
-			<option value="2"<% if (access==2) print(" selected") %>>login required</option>
-		</select>
-	</label>
-	<p class="access-link"><%= accesslink %></p>
+
+<form method="post">
+
+<div class="large-3 columns">
+	<ul class="tabselector">
+		<li class="selected"><a href="#panel-general">General</a></li>
+		<li><a href="#panel-security">Security</a></li>
+		<li><a href="#panel-test1">Test 1</a></li>
+		<li><a href="#panel-test2">Test 2</a></li>
+		<li><a href="#panel-test3">Test 3</a></li>
+	</ul>
+</div>
+
+<div class="large-9 columns">
+	<div class="tabcontent">
+		<div class="tabpanel" id="panel-general">
+			<label>name
+				<input type="text" name="name" value="<%= name %>">
+			</label>
+			<label>description
+				<input type="text" name="description" value="<%= description %>">
+			</label>
+			<label>custom url
+				<input type="text" name="url" value="<%= url %>">
+			</label>
+			<label>access
+				<select name="access">
+					<option value="0"<% if (access==0) print(" selected") %>>public</option>
+					<option value="1"<% if (access==1) print(" selected") %>>public with link</option>
+					<option value="2"<% if (access==2) print(" selected") %>>login required</option>
+				</select>
+			</label>
+			<p class="access-link"><%= accesslink %></p>
+		</div>
+
+		<div class="tabpanel hide" id="panel-security">
+			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto facere facilis ea cumque magnam nostrum voluptas, consequuntur mollitia nihil iste nulla. Facilis quis doloremque optio velit, tempora. Ex alias repellendus commodi aperiam quo soluta sapiente porro! Dignissimos nulla minima qui perferendis libero impedit earum dicta, vero dolorem. Necessitatibus excepturi error, delectus, dicta cupiditate consequatur cum illum! Expedita explicabo beatae aliquam eos alias amet aliquid aspernatur at facilis tempora ut atque quos, nisi debitis! Blanditiis in deserunt esse rerum placeat. Commodi soluta iure vel! Explicabo libero voluptatum, sequi enim amet provident voluptate omnis veniam autem et eaque, debitis repellat culpa tenetur.
+		</div>
+
+		<div class="tabpanel hide" id="panel-test1">
+			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eveniet saepe delectus similique impedit, doloremque sint, aliquid a culpa necessitatibus illum, ut atque dolorem! Optio doloribus at autem minus, doloremque nihil explicabo odio veniam, laborum, officiis ratione repellat illum modi ea. Vel, omnis reiciendis similique est necessitatibus blanditiis commodi cupiditate iusto beatae sapiente in iure explicabo deleniti quo consequuntur harum praesentium ea, voluptas suscipit minus architecto cumque nemo fugiat! Illum assumenda adipisci nam vel dolor ipsum, sint enim ad sequi, laborum rem cumque aliquam commodi velit magni nihil accusantium inventore excepturi eum! Aliquam, doloribus! Voluptatum, recusandae laboriosam optio cum inventore natus.
+		</div>
+
+		<div class="tabpanel hide" id="panel-test2">
+			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos explicabo cumque repudiandae facere modi pariatur aperiam commodi labore amet, expedita architecto beatae a officiis quos dicta perferendis dolor saepe facilis alias id illum nulla. Esse veritatis cumque sint eaque suscipit voluptatibus minima, labore eos molestiae? Cum recusandae voluptates fugit, dolor, cupiditate hic harum, mollitia eaque consequuntur ad a saepe. Deleniti sint, dignissimos fugiat quibusdam laboriosam nostrum aperiam quis maxime quaerat recusandae fugit beatae non quo necessitatibus rem nisi quae ducimus delectus facere autem, sed. Quam aut, repellendus doloribus quidem nam dolores eum, illum eaque neque ea, beatae rem quos sed?
+		</div>
+
+		<div class="tabpanel hide" id="panel-test3">
+			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rem iure, numquam itaque velit soluta hic eum deleniti praesentium illum assumenda, at. Porro, in. Sequi, est odio. Quisquam repellat, deleniti, placeat reiciendis maxime beatae ab quod accusantium. Commodi similique maiores inventore eaque provident itaque dolorum delectus, impedit, hic nobis quasi, molestiae placeat praesentium nam, ducimus vero. Delectus nihil veniam asperiores aperiam magni amet ducimus, eius quo minima vel accusantium perferendis quam dolores atque neque placeat sint necessitatibus inventore temporibus eligendi rem sed itaque odit recusandae? Magnam consequatur similique aperiam sed, quae odio, quibusdam laudantium non? Mollitia est praesentium eius a eaque!
+		</div>
+	</div>
+</div>
+
+<div class="large-12 columns">
 	<input type="submit" class="button" value="Submit">
-</form>
+</div>
+
+<form>

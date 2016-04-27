@@ -2,4 +2,22 @@
 	select:focus {
 		outline: none;
 	}
+
+	.tabselector {
+		li {
+			list-style: none; // Lets remove default bullets for all elements
+			//list-style-position: inside;
+			padding: .5rem 0 .2rem .5rem;
+			border-bottom: 1px solid $body-background;
+			&:hover {
+				background-color: lighten($body-background,20%);
+			}
+			&.selected {
+				border-bottom: 1px solid $secondary-color;
+			}
+		}
+	}
+	.tabpanel {
+		min-height: 360px;
+	}
 }

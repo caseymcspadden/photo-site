@@ -18,6 +18,9 @@ module.exports = Backbone.Model.extend
 		populated: false
 		featuredphoto: 0
 		watermark: 1
+		maxdownloadsize: 0
+		downloadgallery: 0
+		buyprints: 0
 	
 	initialize: (attributes, options) ->
 		this.masterPhotoCollection = if options.collection then options.collection.masterPhotoCollection else null

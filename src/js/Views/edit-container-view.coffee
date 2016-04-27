@@ -1,13 +1,14 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 Container = require './container'
 templates = require './jst'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	events:
 		'submit form' : 'doSubmit'
 		'keyup input[name="name"]' : 'nameChanged'
 		'change select[name="access"]' : 'changeAccess'
+		'click .tabselector a' : 'selectTab'
 
 	initialize: (options) ->
 		this.defaultData =
@@ -26,6 +27,14 @@ module.exports = Backbone.View.extend
 		if options.hasOwnProperty('containerType')
 			this.defaultData.createNew = true
 			this.defaultData.type = options.containerType
+
+	selectTab: (e) ->
+		e.preventDefault()
+		panelid = e.target.href.replace(/^.*#/,'')
+		this.$('.tabpanel').addClass('hide')
+		this.$('#'+panelid).removeClass('hide')
+		this.$('.tabselector li').removeClass('selected')
+		this.getContainingElement(e.target, 'li').addClass('selected')
 
 	doSubmit: (e) ->
 		e.preventDefault()
