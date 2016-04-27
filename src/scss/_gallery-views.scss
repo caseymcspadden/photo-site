@@ -133,7 +133,8 @@
 		&:hover {text-decoration: underline;}
 	}
 	.archive-wait {
-		text-align: center;
+		img {float: left; margin-right: 1rem;}
+		.progress {overflow: hidden;}
 	}
 	.button.separate {
 		margin-left: 5rem;

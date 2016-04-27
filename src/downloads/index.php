@@ -7,6 +7,10 @@ $arr = explode('/', $str);
 if (count($arr)!==2)
 	exit ('File link is missing or invalid');
 
+$isarchive = ($arr[0]=='archive');
+
+error_log("download type = $arr[0]");
+
 $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 
 $contents = file($fileroot . '/app.cfg');

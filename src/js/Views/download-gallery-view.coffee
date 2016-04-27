@@ -16,12 +16,11 @@ module.exports = BaseView.extend
 		this.listenTo this.model.photos, 'reset', this.initializeProgress
 
 	render: ->
-		this.$el.html this.template {waitsrc: config.urlBase+'/images/wait-bar.gif'}
+		this.$el.html this.template {waitsrc: config.urlBase+'/images/wait-circle.gif'}
 
 	open: ->
 		this.$('.archive-wait').addClass 'hide'
 		this.$('.archive-notify').addClass 'hide'
-		this.$('.progress').addClass 'hide'
 
 	initializeProgress: ->
 		this.$('.progress').attr 'aria-valuenow', 0
@@ -30,7 +29,6 @@ module.exports = BaseView.extend
 	
 	createArchive: ->
 		this.$('.archive-wait').removeClass 'hide'
-		this.$('.progress').removeClass 'hide'
 		this.model.createArchive()
 
 	cancelArchive: ->
@@ -39,7 +37,6 @@ module.exports = BaseView.extend
 	notifyError: ->
 		console.log 'notifyError'
 		this.$('.archive-wait').addClass 'hide'
-		this.$('.progress').addClass 'hide'
 		this.$('.archive-notify').html('Problem creating archive: ' + this.model.get 'error')
 		this.$('.archive-notify').removeClass 'hide'
 
@@ -53,7 +50,6 @@ module.exports = BaseView.extend
 
 		if progress >= m.photos.length
 			this.$('.archive-wait').addClass 'hide'
-			this.$('.progress').addClass 'hide'
 			this.$('.archive-notify').removeClass 'hide'
 			$archive = this.model.get 'archive'
-			this.$('.archive-notify').html('You may download your file using this link: <a href="' + config.urlBase + '/downloads/gallery/' + $archive + '">' + config.urlBase + '/downloads/gallery/' + $archive + '</a>')
+			this.$('.archive-notify').html('You may download your file using this link: <a href="' + config.urlBase + '/downloads/archive/' + $archive + '">' + config.urlBase + '/downloads/archive/' + $archive + '</a>')
