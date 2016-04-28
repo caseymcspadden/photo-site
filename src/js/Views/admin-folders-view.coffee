@@ -6,7 +6,6 @@ templates = require './jst'
 Container = require './container'
 Containers = require './containers'
 NodeView = require './node-view'
-EditContainerView = require('./edit-container-view')
 
 module.exports = BaseView.extend
 	$tree: null
@@ -18,7 +17,7 @@ module.exports = BaseView.extend
 	events:
 		'click .folder-icon' : 'folderIconClicked'
 		'click .node-name' : 'selectContainer'
-		'submit #afv-addFolder form' : 'addFolder'
+		'click .add-folder' : 'addFolder'
 		#'click .delete-folder' : 'deleteFolder'
 		'mousedown .mtree' : 'mouseDown'
 		'mouseup .mtree' : 'mouseUp'
@@ -35,7 +34,6 @@ module.exports = BaseView.extend
 		this.allowDrop = 0
 
 		this.$el.html(this.template());
-		this.editContainerView = new EditContainerView {model: this.model, containerType: 'folder'}
 		this.$tree = this.$('.mtree');
 		this.listenTo this.model, 'change:selectedContainer', this.selectedContainerChanged
 		this.listenTo(this.model.containers, 'add', this.containerAdded)
@@ -72,6 +70,10 @@ module.exports = BaseView.extend
 		this.model.setDragModel 0
 		this.dragElement = null
 
+	addFolder: ->
+		this.model.set 'newContainerType', 'folder'
+		this.model.toggleValue 'editContainerToggle'
+
 	mouseOver: (e) ->
 		if this.model.get('dragModel') != null
 			$li = this.getContainingElement e.target, 'li'
@@ -98,12 +100,6 @@ module.exports = BaseView.extend
 
 	render: ->
 		this.$tree.html('')
-		this.assign this.editContainerView, '#afv-addFolder'
-
-		#this.$tree.find('ul').css
-		#	'overflow':'hidden'
-		#	'height': if this.collapsed then 0 else 'auto'
-		#	'display': if this.collapsed then 'none' else 'block'
 
 	addChildContainers: (idParent) ->
 		children = this.model.containers.where {idparent: idParent}

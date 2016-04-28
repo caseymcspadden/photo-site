@@ -7,7 +7,6 @@ templates = require './jst'
 PhotoViewerModel= require './photoviewer'
 Photo = require './photo'
 DropzoneView = require('./dropzone-view')
-EditContainerView = require('./edit-container-view')
 BreadcrumbsView = require ('./admin-breadcrumbs-view')
 
 module.exports = BaseView.extend
@@ -16,6 +15,7 @@ module.exports = BaseView.extend
 	photoViews: {}
 
 	events:
+		'click .edit-gallery' : 'editGallery'
 		'click .add-photos' : 'addPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
@@ -33,7 +33,6 @@ module.exports = BaseView.extend
 		this.currentPhoto = null
 
 		this.dropzoneView = new  DropzoneView {model: this.model}
-		this.editContainerView = new EditContainerView {model: this.model}
 		this.breadcrumbsView = new BreadcrumbsView {model: this.model} 
 
 		this.drag = Dragula({direction: 'horizontal'})
@@ -73,7 +72,11 @@ module.exports = BaseView.extend
 		this.currentPhoto = photo
 
 	openViewer: (e) ->
-		this.model.set 'viewingPhotosToggle' , !this.model.get('viewingPhotosToggle')
+		this.model.toggleValue 'viewingPhotosToggle'
+
+	editGallery: (e) ->
+		this.model.set 'newContainerType', null
+		this.model.toggleValue 'editContainerToggle'
 
 	deleteGallery: ->
 		console.log 'delete gallery clicked'
@@ -126,7 +129,6 @@ module.exports = BaseView.extend
 		this.$el.html this.template {name: 'Default'}
 		
 		this.assign this.dropzoneView, '.dropzone-view'
-		this.assign this.editContainerView, '.edit-container-view'
 		this.assign this.breadcrumbsView, '.breadcrumbs-view'
 
 		this.drag.containers.pop()

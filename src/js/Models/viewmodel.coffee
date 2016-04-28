@@ -9,6 +9,8 @@ module.exports = Backbone.Model.extend
 		selectedPhoto: null
 		addingPhotosToggle: false
 		viewingPhotosToggle: false
+		editContainerToggle: false
+		newContainerType: null
 		viewPhotoSize: 'M'
 		viewPhoto: 0
 		fetching: false
@@ -95,6 +97,10 @@ module.exports = Backbone.Model.extend
 				#	c.master = self.photos
 				self.photos.fetch()
 		)
+
+	toggleValue: (property) ->
+		this.set property, !this.get(property)
+		console.log (property + " = " + this.get(property))
 
 	createContainer: (data) ->
 		selectedContainer = this.get 'selectedContainer'

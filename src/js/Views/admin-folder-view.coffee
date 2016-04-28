@@ -5,7 +5,6 @@ templates = require './jst'
 Containers = require './containers'
 Container = require './container'
 ContainerView = require './container-view'
-EditContainerView = require('./edit-container-view')
 
 module.exports = BaseView.extend
 	currentContainer: null
@@ -13,13 +12,12 @@ module.exports = BaseView.extend
 
 	events:
 		'click .featured-thumbnail' : 'selectContainer'
+		'click .edit-folder' : 'editFolder'
+		'click .add-gallery' : 'addGallery'
 		'click .delete-folder' : 'deleteFolder'
 
 	initialize: (options) ->
 		this.template = templates['admin-folder-view']
-		this.editContainerView = new EditContainerView {model: this.model}
-		this.addGalleryView = new EditContainerView {model: this.model, containerType: 'gallery'}
-
 		this.listenTo this.model, 'change:selectedContainer', this.changeContainer
 		this.listenTo this.model.containers, 'add remove change', this.addAll
 
@@ -32,13 +30,19 @@ module.exports = BaseView.extend
 			this.listenTo this.currentContainer, 'change' , this.currentContainerChanged
 			this.addAll()
 
+	editFolder: (e) ->
+		this.model.set 'newContainerType', null
+		this.model.toggleValue 'editContainerToggle'
+
+	addGallery: (e) ->
+		this.model.set 'newContainerType', 'gallery'
+		this.model.toggleValue 'editContainerToggle'
+
 	deleteFolder: ->
 		this.model.deleteContainer this.currentContainer
 
 	render: ->
 		this.$el.html this.template {name: 'Default'}
-		this.assign this.editContainerView, '#fv-editFolder'
-		this.assign this.addGalleryView, '#fv-addGallery'
   		
 	addOne: (container) ->
 		return if this.currentContainer==null or container.get('idparent') != this.currentContainer.id

@@ -2,44 +2,67 @@
 	<span aria-hidden="true">&times;</span>
 </button>
 
-<h2><% print(createNew ? 'new' : 'edit'); %> <%= type %></h2>
+<h2 class="title"></h2>
 
 <form method="post">
 
 <div class="large-3 columns">
 	<ul class="tabselector">
-		<li class="selected"><a href="#panel-general">General</a></li>
-		<li><a href="#panel-security">Security</a></li>
-		<li><a href="#panel-test1">Test 1</a></li>
-		<li><a href="#panel-test2">Test 2</a></li>
-		<li><a href="#panel-test3">Test 3</a></li>
+		<li id="tab-general" class="selected">General</li>
+		<li id="tab-security">Security</li>
+		<li id="tab-test1">Test 1</li>
+		<li id="tab-test2">Test 2</li>
+		<li id="tab-test3">Test 3</li>
 	</ul>
 </div>
 
 <div class="large-9 columns">
 	<div class="tabcontent">
 		<div class="tabpanel" id="panel-general">
-			<label>name
-				<input type="text" name="name" value="<%= name %>">
+			<label>Name
+				<input type="text" name="name">
 			</label>
-			<label>description
-				<input type="text" name="description" value="<%= description %>">
+			<label>Description
+				<input type="text" name="description">
 			</label>
-			<label>custom url
-				<input type="text" name="url" value="<%= url %>">
+			<label>Custom url
+				<input type="text" name="url">
 			</label>
-			<label>access
+			<label>Access
 				<select name="access">
-					<option value="0"<% if (access==0) print(" selected") %>>public</option>
-					<option value="1"<% if (access==1) print(" selected") %>>public with link</option>
-					<option value="2"<% if (access==2) print(" selected") %>>login required</option>
+					<option value="0">Public</option>
+					<option value="1">Public with link</option>
+					<option value="2">Login required</option>
 				</select>
 			</label>
-			<p class="access-link"><%= accesslink %></p>
 		</div>
 
 		<div class="tabpanel hide" id="panel-security">
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto facere facilis ea cumque magnam nostrum voluptas, consequuntur mollitia nihil iste nulla. Facilis quis doloremque optio velit, tempora. Ex alias repellendus commodi aperiam quo soluta sapiente porro! Dignissimos nulla minima qui perferendis libero impedit earum dicta, vero dolorem. Necessitatibus excepturi error, delectus, dicta cupiditate consequatur cum illum! Expedita explicabo beatae aliquam eos alias amet aliquid aspernatur at facilis tempora ut atque quos, nisi debitis! Blanditiis in deserunt esse rerum placeat. Commodi soluta iure vel! Explicabo libero voluptatum, sequi enim amet provident voluptate omnis veniam autem et eaque, debitis repellat culpa tenetur.
+			<label>Maximum download image size
+				<select name="maxdownloadsize">
+					<option value="0">No downloads</option>
+					<option value="1">Small (height=300)</option>
+					<option value="2">Medium (height=450)</option>
+					<option value="3">Large (height=600)</option>
+					<option value="4">x-large (height=960)</option>
+					<option value="5">full resolution</option>
+				</select>
+			</label>
+
+			<label>Allow gallery downloads?
+				<select name="downloadgallery">
+					<option value="0">Never</option>
+					<option value="1">Yes, after payment</option>
+					<option value="2">Always</option>
+				</select>
+			</label>
+
+			<label>Allow print purchases?
+				<select name="buyprints">
+					<option value="0">No</option>
+					<option value="1">Yes</option>
+				</select>
+			</label>
 		</div>
 
 		<div class="tabpanel hide" id="panel-test1">
@@ -57,6 +80,7 @@
 </div>
 
 <div class="large-12 columns">
+	<p class="access-link" hide><%= urlBase %><span class="access-path"></span></p>
 	<input type="submit" class="button" value="Submit">
 </div>
 

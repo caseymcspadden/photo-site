@@ -8,7 +8,7 @@ module.exports = BaseView.extend
 		'submit form' : 'doSubmit'
 		'keyup input[name="name"]' : 'nameChanged'
 		'change select[name="access"]' : 'changeAccess'
-		'click .tabselector a' : 'selectTab'
+		'click .tabselector li' : 'selectTab'
 
 	initialize: (options) ->
 		this.defaultData =
@@ -20,21 +20,35 @@ module.exports = BaseView.extend
 			urlsuffix: ''
 			access: 0
 			accesslink: ''
+			maxdownloadsize: 0
+			downloadgallery: 0
+			buyprints: 0
 		
 		this.accesslink = ''
 		this.template = templates['edit-container-view']
 		this.listenTo this.model, 'change:selectedContainer' , this.containerChanged
-		if options.hasOwnProperty('containerType')
+		this.listenTo this.model, 'change:editContainerToggle' , this.open
+	
+	open: ->
+		if this.model.get('newContainerType') != null
 			this.defaultData.createNew = true
-			this.defaultData.type = options.containerType
+			this.defaultData.type = this.model.get('newContainerType')
+		this.setFormValues()
+		this.$('.tabpanel').addClass('hide')
+		this.$('#panel-general').removeClass('hide')
+		this.$('#panel-general').removeClass('hide')
+		this.$('.tabselector li').removeClass('selected')
+		this.$('#tab-general').addClass('selected')
+		this.$el.foundation 'open'
 
 	selectTab: (e) ->
 		e.preventDefault()
-		panelid = e.target.href.replace(/^.*#/,'')
+		#panelid = e.target.href.replace(/^.*#/,'')
+		panelid = e.target.id.replace('tab-','panel-')
 		this.$('.tabpanel').addClass('hide')
 		this.$('#'+panelid).removeClass('hide')
 		this.$('.tabselector li').removeClass('selected')
-		this.getContainingElement(e.target, 'li').addClass('selected')
+		$(e.target).addClass('selected')
 
 	doSubmit: (e) ->
 		e.preventDefault()
@@ -67,17 +81,33 @@ module.exports = BaseView.extend
 		container = vm.get 'selectedContainer'
 		return if !container
 		$.get(config.servicesBase + '/pathfromcontainer/' + container.id, (json) ->
-			self.accesslink = config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
-			self.render()
-			self.changeAccess()
+			self.$('.access-path').html json.path + '/' + container.get('urlsuffix')
 		)
 
-	render: ->
+	setFormValues: ->
 		container = this.model.get 'selectedContainer'
+		newType = this.model.get('newContainerType')
 		data = this.defaultData
-		if container and not this.defaultData.createNew
+		if container and newType == null
 			data = container.toJSON()
-			data.accesslink = this.accesslink
-			data.createNew = false
-		this.$el.html this.template(data)
-		this
+
+		this.$('.title').html if newType==null then 'Edit ' + container.get('type') else 'New ' + newType
+		this.$('input[name="name"]').val data.name
+		this.$('input[name="description"]').val data.description
+		this.$('input[name="url"]').val data.url
+		this.$('select[name="access"]').val data.access
+		this.$('select[name="maxdownloadsize"]').val data.maxdownloadsize
+		this.$('select[name="downloadgallery"]').val data.downloadgallery
+		this.$('select[name="buyprints"]').val data.buyprints
+
+		if (data.access==1)
+			this.$('.access-link').removeClass 'hide'
+		else
+			this.$('.access-link').addClass 'hide'
+
+		#this.$('.access-link').html config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
+
+
+	render: ->
+		console.log "rendering edit container view"
+		this.$el.html this.template {urlBase: config.urlBase + '/galleries/'}

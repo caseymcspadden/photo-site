@@ -11,4 +11,5 @@ adminUsersView.render()
 
 usersCollection.fetch {reset: true}
 
-$(document).foundation()
+$ ->
+	$(document).foundation()

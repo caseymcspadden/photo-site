@@ -23,4 +23,5 @@ adminSettingsView.render()
 session.fetch()
 viewModel.fetchAll()
 
-$(document).foundation()
+$ ->
+	$(document).foundation()
