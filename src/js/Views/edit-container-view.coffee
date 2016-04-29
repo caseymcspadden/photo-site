@@ -8,22 +8,26 @@ module.exports = BaseView.extend
 		'submit form' : 'doSubmit'
 		'keyup input[name="name"]' : 'nameChanged'
 		'change select[name="access"]' : 'changeAccess'
+		'change select[name="downloadgallery"]' : 'changeDownloadGallery'
 		'click .tabselector li' : 'selectTab'
 
-	initialize: (options) ->
-		this.defaultData =
-			createNew: false
-			type: 'folder'
-			name: ''
-			description: ''
-			url: ''
-			urlsuffix: ''
-			access: 0
-			accesslink: ''
-			maxdownloadsize: 0
-			downloadgallery: 0
-			buyprints: 0
-		
+	defaultData:
+		createNew: false
+		type: 'folder'
+		name: ''
+		description: ''
+		url: ''
+		urlsuffix: ''
+		access: 0
+		accesslink: ''
+		maxdownloadsize: 0
+		downloadgallery: 0
+		downloadfee: 0
+		paymentreceived: 0
+		buyprints: 0
+		markup: 100			
+
+	initialize: (options) ->		
 		this.accesslink = ''
 		this.template = templates['edit-container-view']
 		this.listenTo this.model, 'change:selectedContainer' , this.containerChanged
@@ -69,12 +73,18 @@ module.exports = BaseView.extend
 			this.$('input[name="url"]').val e.target.value.toLowerCase().replace(/ /g,'-')
 
 	changeAccess: ->
-		console.log 'change access'
 		val = this.$('select[name="access"]').val()
 		if val=='1'
 			this.$('.access-link').removeClass 'hide'
 		else
 			this.$('.access-link').addClass 'hide'
+
+	changeDownloadGallery: ->
+		val = this.$('select[name="downloadgallery"]').val()
+		if val=='1'
+			this.$('.download-payment').removeClass 'hide'
+		else
+			this.$('.download-payment').addClass 'hide'
 
 	containerChanged: (vm) ->
 		self = this
@@ -98,15 +108,26 @@ module.exports = BaseView.extend
 		this.$('select[name="access"]').val data.access
 		this.$('select[name="maxdownloadsize"]').val data.maxdownloadsize
 		this.$('select[name="downloadgallery"]').val data.downloadgallery
+		this.$('download[name="downloadfee"]').val data.downloadfee
+		this.$('checkbox[name="payment.received"]').checked = data.paymentreceived
 		this.$('select[name="buyprints"]').val data.buyprints
+		this.$('input[name="markup"]').val data.markup
+		this.changeAccess()
+		this.changeDownloadGallery()
+		
+		###
+		if (data.access==1)
+			this.$('.access-link').removeClass 'hide'
+		else
+			this.$('.access-link').addClass 'hide'
 
 		if (data.access==1)
 			this.$('.access-link').removeClass 'hide'
 		else
 			this.$('.access-link').addClass 'hide'
 
-		#this.$('.access-link').html config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
-
+		this.$('.access-link').html config.urlBase + '/galleries/' + json.path + '/' + container.get('urlsuffix')
+		###
 
 	render: ->
 		console.log "rendering edit container view"

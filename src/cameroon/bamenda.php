@@ -2,6 +2,7 @@
 
 require '../vendor/autoload.php';
 require '../classes/CrossRiver/Services.php';
+require '../classes/CrossRiver/Commerce.php';
 
 /*
 error_log("IN BAMENDA.PHP");
@@ -34,6 +35,31 @@ $container['view'] = function ($container) {
 $container['services'] = function($container) {
     return new CrossRiver\Services();
 };
+
+$container['commerce'] = function($container) {
+    return new CrossRiver\Commerce();
+};
+
+$app->get('/bamenda/test', function($request, $response, $args) {
+  $json = $this->commerce->makePayment(
+    2, 
+    'Test Transaction',
+    'Casey McSpadden',
+    'amex',
+    '373284099616004',
+    '07/19',
+    '8888',
+    '123 Main St',
+    NULL,
+    'Leawood',
+    'KS',
+    '66206'
+  );
+
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 
 $app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
