@@ -209,7 +209,7 @@ $app->get('/bamenda/pathfromcontainer/{id:[0-9]+}', function($request, $response
 });
 
 $app->get('/bamenda/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, buyprints FROM containers ORDER BY idparent, position");
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers ORDER BY idparent, position");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
@@ -227,7 +227,7 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
 
     $vals['urlsuffix'] = $this->services->getRandomKey(6);
 
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, buyprints) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access], $vals[maxdownloadsize], $vals[downloadgallery], $vals[buyprints])");
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access], $vals[maxdownloadsize], $vals[downloadgallery], $vals[downloadfee], $vals[paymentreceived], $vals[buyprints], $vals[markup])");
 
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
@@ -248,7 +248,7 @@ $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
 
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], buyprints=$vals[buyprints] WHERE id=$args[id]");
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], paymentreceived=$vals[paymentreceived], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
   }
   $response->getBody()->write(json_encode($vals));
   return $response->withHeader('Content-Type','application/json');

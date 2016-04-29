@@ -10,9 +10,7 @@
 	<ul class="tabselector">
 		<li id="tab-general" class="selected">General</li>
 		<li id="tab-security">Security</li>
-		<li id="tab-test1">Test 1</li>
-		<li id="tab-test2">Test 2</li>
-		<li id="tab-test3">Test 3</li>
+		<li id="tab-sales">Sales</li>
 	</ul>
 </div>
 
@@ -28,6 +26,9 @@
 			<label>Custom url
 				<input type="text" name="url">
 			</label>
+		</div>
+
+		<div class="tabpanel hide" id="panel-security">
 			<label>Access
 				<select name="access">
 					<option value="0">Public</option>
@@ -35,9 +36,7 @@
 					<option value="2">Login required</option>
 				</select>
 			</label>
-		</div>
 
-		<div class="tabpanel hide" id="panel-security">
 			<label>Maximum download image size
 				<select name="maxdownloadsize">
 					<option value="0">No downloads</option>
@@ -57,16 +56,24 @@
 				</select>
 			</label>
 
+			<label>Download fee
+				<input type="text" name="downloadfee">
+			</label>
+
+		</div>
+
+		<div class="tabpanel hide" id="panel-sales">
 			<label>Allow print purchases?
 				<select name="buyprints">
 					<option value="0">No</option>
 					<option value="1">Yes</option>
 				</select>
 			</label>
-		</div>
 
-		<div class="tabpanel hide" id="panel-test1">
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eveniet saepe delectus similique impedit, doloremque sint, aliquid a culpa necessitatibus illum, ut atque dolorem! Optio doloribus at autem minus, doloremque nihil explicabo odio veniam, laborum, officiis ratione repellat illum modi ea. Vel, omnis reiciendis similique est necessitatibus blanditiis commodi cupiditate iusto beatae sapiente in iure explicabo deleniti quo consequuntur harum praesentium ea, voluptas suscipit minus architecto cumque nemo fugiat! Illum assumenda adipisci nam vel dolor ipsum, sint enim ad sequi, laborum rem cumque aliquam commodi velit magni nihil accusantium inventore excepturi eum! Aliquam, doloribus! Voluptatum, recusandae laboriosam optio cum inventore natus.
+			<label>Markup percent
+				<input type="text" name="markup">
+			</label>
+
 		</div>
 
 		<div class="tabpanel hide" id="panel-test2">
