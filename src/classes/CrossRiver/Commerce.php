@@ -74,7 +74,7 @@ class Commerce {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 			
 		$results = curl_exec($ch);
 		curl_close($ch);
@@ -108,51 +108,56 @@ class Commerce {
 	{
 		// ADDRESS
 
-		$address = array();
-		$address['line1'] = $address1;
+		$address = new \stdClass();	
+		$address->line1 = $address1;
 		if ($address2)
-			$address['line2'] = $address2;
-		$address['city'] = $city;
-		$address['state'] = $state;
-		$address['postal_code'] = $zip;
-		$address['country_code'] = 'US';
+			$address->line2 = $address2;
+		$address->city = $city;
+		$address->state = $state;
+		$address->postal_code = $zip;
+		$address->country_code = 'US';
 
 		// CARD
 
-		$card = array();
+		$card = new \stdClass();	
 		$name = explode(' ', $card_name);
 		$expires = explode('/', $card_expires);
-		$card['first_name'] = $name[0];
-		$card['last_name']  = array_pop($name);
-		$card['type'] = $card_type;
-		$card['number'] = $card_number;
-		$card['expire_month'] = $expires[0];
-		$card['expire_year'] = $expires[1];
-		$card['cvv2'] = $cvv2;
-		$card['billing_address'] = $address;
+		$card->first_name = $name[0];
+		$card->last_name  = array_pop($name);
+		$card->type = $card_type;
+		$card->number = $card_number;
+		$card->expire_month = $expires[0];
+		$card->expire_year = $expires[1];
+		$card->cvv2 = $cvv2;
+		$card->billing_address = $address;
 
 		// TRANSACTIONS
-		
-		$transaction = array();
-		$transaction['description'] = $description;
-		$transaction['amount'] = array();
-		$transaction['amount']['total'] = sprintf('%0.2f',$amount);
-		$transaction['amount']['currency'] = 'USD';
 
+		$transactions = array();		
+
+		$transaction = new \stdClass();	
+		$transaction->description = $description;
+		$transaction->amount = new \stdClass();
+		$transaction->amount->total = sprintf('%0.2f', $amount);
+		$transaction->amount->currency = 'USD';
+		$transactions[] = $transaction;
+	
 		// PAYER
 
-		$payer = array();
-		$payer['payment_method'] = 'credit_card';
-		$payer['funding_instruments'][] = array('credit_card'=>$card);
+		$payer = new \stdClass();	
+		$payer->payment_method = 'credit_card';
+		$funding_instrument = new \stdClass();
+		$funding_instrument->credit_card = $card;
+		$payer->funding_instruments = array($funding_instrument);
 			
 		// PAYLOAD
 
-		$payload = array();		
-		$payload['intent'] = 'sale';
-		$payload['payer'] = $payer;
-		$payload['transactions'] = array($transaction);
+		$payload = new \stdClass();	
+		$payload->intent = 'sale';
+		$payload->payer = $payer;
+		$payload->transactions = $transactions;
 
-		return json_encode($payload);
+		return $payload;
 	}
 };
 ?>

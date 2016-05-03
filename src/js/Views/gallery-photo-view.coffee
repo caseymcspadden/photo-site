@@ -10,9 +10,13 @@ module.exports = BaseView.extend
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
 		'click img' : 'viewImage'
+		'click .tool-download' : 'downloadGallery'
+		'click .download-photo' : 'downloadPhoto'
+		'click .buy-print' : 'buyPrint'
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
+		this.cart = options.cart
 		this.template = templates['gallery-photo-view']
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
@@ -23,7 +27,6 @@ module.exports = BaseView.extend
 	render: ->
 		data = this.model.toJSON()
 		data.urlBase = config.urlBase
-		console.log data
 		this.$el.html this.template data
 		this.assign this.photoView, '.photo-view'
 		this.assign this.downloadGalleryView, '.download-gallery-view'
@@ -34,8 +37,21 @@ module.exports = BaseView.extend
 		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
 		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
 
-	viewImage: ->
+	viewImage: (e) ->
+		e.preventDefault()
 		this.photoView.open()
+
+	downloadGallery: (e) ->
+		e.preventDefault()
+		this.downloadGalleryView.open()
+
+	downloadPhoto: (e) ->
+		e.preventDefault()
+		console.log 'download photo'
+
+	buyPrint: (e) ->
+		e.preventDefault()
+		this.cart.create {idproduct: 1}
 
 	keyUp: (e) ->
 		offset = switch e.keyCode

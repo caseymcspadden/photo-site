@@ -42,7 +42,7 @@ $container['commerce'] = function($container) {
 
 $app->get('/bamenda/test', function($request, $response, $args) {
   $json = $this->commerce->makePayment(
-    2, 
+    100, 
     'Test Transaction',
     'Casey McSpadden',
     'amex',
@@ -60,7 +60,7 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/bamenda/test2/{path:.*}', function($request, $response, $args) {
+$app->get('/bamenda/test2[/{path:.*}]', function($request, $response, $args) {
   $json = $this->commerce->getPayments($args['path']);
 
   $response->getBody()->write($json);
@@ -469,17 +469,45 @@ $app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->any('bamenda/cart[/{path:.*}]', function($request, $response, $args) {
+$app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   session_name('cart');
   session_start();
-  $crid = session_id();
-  error_log($crid);
+  $idcart = session_id();
 
-  $path = (isset($args['path'])) ? $args['path'] : '';
+  if (!$idcart) {
+    $err = array('error'=>'cannot create shopping cart');
+    $response->getBody()->write(json_encode($err));
+    return $response->withHeader('Content-Type','application/json');
+  }
 
-  $arr = array('path'=>$path);
+  $this->services->dbh->query("INSERT IGNORE INTO cart (id) VALUES ('$idcart')");
 
-  $response->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
+  switch ($request->getMethod()) {
+    case 'GET':
+      $json = $this->services->fetchJSON("SELECT id, idproduct, quantity, cropx, cropy, cropwidth, cropheight FROM cartitems WHERE idcart='$idcart'");
+      break;
+    case 'POST':
+      $json = $request->getParsedBody();
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idproduct, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idproduct], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
+      $json['id'] = $this->services->dbh->lastInsertId();
+      $json = json_encode($json,JSON_NUMERIC_CHECK);
+      break;
+    case 'PUT':
+      $json = $request->getParsedBody();
+      $this->services->dbh->query("UPDATE cartitems SET idproduct=$json[idproduct], quantity=$json[quantity], cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$json[id]");
+      $json = json_encode($json,JSON_NUMERIC_CHECK);
+      break;
+    case 'DELETE':
+      $json = $request->getParsedBody();
+      $this->services->dbh->query("DELETE FROM cartitems WHERE id=$json[id]");
+      $json = json_encode($json,JSON_NUMERIC_CHECK);
+      break;
+    default:
+      $json = array('error'=>'unrecognized request');
+      break;
+  }
+
+  $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
 });
 

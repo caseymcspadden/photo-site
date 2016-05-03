@@ -7,7 +7,6 @@ module.exports = BaseView.extend
 	events:
 		'click .create-archive' : 'createArchive'
 		'click .cancel-archive' : 'cancelArchive'
-		'open.zf.reveal' : 'open'
 
 	initialize: (options) ->
 		this.template = templates['download-gallery-view']
@@ -21,6 +20,7 @@ module.exports = BaseView.extend
 	open: ->
 		this.$('.archive-wait').addClass 'hide'
 		this.$('.archive-notify').addClass 'hide'
+		this.$el.foundation 'open'
 
 	initializeProgress: ->
 		this.$('.progress').attr 'aria-valuenow', 0

@@ -8,8 +8,8 @@ module.exports = BaseView.extend
 
 	initialize: (options) ->
 		this.template = templates['gallery-main-view']
-		this.galleryGridView = new GalleryGridView {model: this.model}
-		this.galleryPhotoView = new GalleryPhotoView {model: this.model}
+		this.galleryGridView = new GalleryGridView options
+		this.galleryPhotoView = new GalleryPhotoView options
 
 	render: ->
 		this.$el.html this.template()
