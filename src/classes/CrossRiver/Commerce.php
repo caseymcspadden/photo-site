@@ -27,23 +27,23 @@ class Commerce {
 		$ret = new \stdClass();
 		$ret->endpoint = ($this->paypal_live ? $this->config->endpoint_live : $this->config->endpoint_sandbox);
 
-		error_log("Client id = $clientId");
-		error_log("secret = $secret");
-
 		$ch = curl_init(); 
 
 		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/v1/oauth2/token"); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);       
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, 'CURL_SSLVERSION_TLSv0');
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Accept-Language: en_US'));
 		curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $secret);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=client_credentials");
      
 		$results = curl_exec($ch);
+		//$error = curl_error($ch);
+		//error_log("cURL error: " . $error);
 		curl_close($ch);   
-		error_log($results);
 		$arr = json_decode($results,TRUE);
 		$ret->access_token = $arr['access_token'];
 		
@@ -65,6 +65,9 @@ class Commerce {
 	public function makePayment($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip)
 	{
 		$paypal = $this->get_paypal_properties();
+		error_log("access token = " . $paypal->access_token);
+		
+		/*
 		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
 
 		error_log("endpoint = " . $paypal->endpoint);
@@ -83,6 +86,7 @@ class Commerce {
 		curl_close($ch);   
   
 		return json_decode($results,TRUE);
+		*/
 	}
 
 	private function get_card_type($number)
