@@ -4,7 +4,7 @@ namespace CrossRiver;
 class Commerce {
 	
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $paypal_live = false;
+	private $paypal_live = FALSE;
 
 	public function __construct() 
 	{	
@@ -27,35 +27,33 @@ class Commerce {
 		$ret = new \stdClass();
 		$ret->endpoint = ($this->paypal_live ? $this->config->endpoint_live : $this->config->endpoint_sandbox);
 
-		error_log("Client id = $clientId");
-		error_log("secret = $secret");
-
-		$ch = curl_init(); 
-
+		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/v1/oauth2/token"); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);       
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Accept-Language: en_US'));
 		curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $secret);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=client_credentials");
      
 		$results = curl_exec($ch);
 		curl_close($ch);   
-		error_log($results);
 		$arr = json_decode($results,TRUE);
 		$ret->access_token = $arr['access_token'];
 		
 		return $ret;
 	}
 
-	private function get_payments($id=NULL)
+	public function getPayments($id=NULL)
 	{
 		$paypal = $this->get_paypal_properties();
 		
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint ."/v1/payments/payment" . ($id!==NULL ? "/$id" : "")); 
+		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint ."/v1/payments/payment" . ($id ? "/$id" : ""));
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
 		$results = curl_exec($ch);
 		curl_close($ch);
@@ -65,24 +63,28 @@ class Commerce {
 	public function makePayment($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip)
 	{
 		$paypal = $this->get_paypal_properties();
-		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
+		//error_log("endpoint = " . $paypal->endpoint);
+		//error_log("access token = " . $paypal->access_token);
 
-		error_log("endpoint = " . $paypal->endpoint);
-		error_log("access token = " . $paypal->access_token);
+		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
 					
 		$ch = curl_init(); 
+		//curl_setopt($ch, CURLOPT_PORT , 8089);
 		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint . "/v1/payments/payment"); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);       
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 			
 		$results = curl_exec($ch);
-		curl_close($ch);   
+		curl_close($ch);
   
-		return json_decode($results,TRUE);
+		return $results;
+		//return json_decode($results,TRUE);
 	}
 
 	private function get_card_type($number)
@@ -128,7 +130,7 @@ class Commerce {
 		$card['first_name'] = $name[0];
 		$card['last_name']  = array_pop($name);
 		$card['type'] = $card_type;
-		$card['card_number'] = $card_number;
+		$card['number'] = $card_number;
 		$card['expire_month'] = $expires[0];
 		$card['expire_year'] = $expires[1];
 		$card['cvv2'] = $cvv2;
