@@ -16,7 +16,7 @@ RewriteEngine On
 RewriteRule ^photos/(T|S|M|L|X)/([0-9]+([0-9][0-9])).jpg photos/$3/$2_$1.jpg [NC,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !^/(bamenda|douala|downloads)
+RewriteCond %{REQUEST_URI} !^/(bamenda|douala|test|downloads)
 RewriteRule .* index.php [QSA,L]
 
 RewriteRule ^bamenda/(.*) cameroon/bamenda.php

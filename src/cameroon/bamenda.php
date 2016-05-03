@@ -47,7 +47,7 @@ $app->get('/bamenda/test', function($request, $response, $args) {
     'Casey McSpadden',
     'amex',
     '373284099616004',
-    '07/19',
+    '07/2019',
     '8888',
     '123 Main St',
     NULL,
@@ -60,6 +60,12 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->get('/bamenda/test2/{path:.*}', function($request, $response, $args) {
+  $json = $this->commerce->getPayments($args['path']);
+
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
 
 $app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
