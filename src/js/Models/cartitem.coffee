@@ -3,6 +3,9 @@ config = require './config'
 
 module.exports = Backbone.Model.extend
 	defaults:
+		idphoto: 0
+		idcontainer: 0
+		price: 0
 		idproduct: 0
 		quantity: 1
 		cropx: 0

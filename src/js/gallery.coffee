@@ -9,12 +9,14 @@ Gallery = require('../../require/gallery')
 GalleryMainView = require('../../require/gallery-main-view')
 CartSummaryView = require('../../require/cart-summary-view')
 CartItems = require('../../require/cartitems')
+Catalog = require '../../require/catalog'
 
 #Galleries = require('../../require/galleries')
 #PortfolioView = require('../../require/portfolio-view')
 
 session = new Session
 loginView = new LoginView {model: session}
+catalog = new Catalog
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 cartItems = new CartItems
 cartSummaryView = new CartSummaryView {el: '.cart-summary-view', collection: cartItems}
@@ -24,12 +26,14 @@ cartSummaryView = new CartSummaryView {el: '.cart-summary-view', collection: car
 
 $('body').append loginView.render().el
 
-galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view', cart: cartItems}
+galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view', cart: cartItems, catalog: catalog}
 galleryMainView.render()
 
 $ ->
 	session.fetch()
 	cartItems.fetch {reset: true}
+	catalog.fetch()
+
 #galleries.fetch {reset: true}
 
 $(document).foundation()
