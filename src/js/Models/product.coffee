@@ -3,19 +3,17 @@ config = require './config'
 
 module.exports = Backbone.Model.extend
 	defaults :
-		name: ''
+		id: ''
+		type: ''
 		description: ''
-		imageHorizontalSize: 0
-		imageVerticalSize: 0
-		fullProductionHorizontalSize: 0
-		fullProductionVerticalSize: 0
-		recommendedHorizontalResolution: 0
-		recommendedVerticalResolution: 0
-		sizeUnits: 'inches'
-		itemType: ''
-		priceGPB: 0
-		priceUSD: 0
-		shippingBand: ''
-		attributes: []
+		hsize: 0
+		vsize: 0
+		hsizeprod: 0
+		vsizeprod: 0
+		hres: 0
+		vres: 0
+		price: 0
+		shippingtype: ''
+		attributes: ''
 
 

@@ -60,23 +60,41 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/bamenda/store/catalog', function($request, $response, $args) {
+$app->get('/bamenda/catalog', function($request, $response, $args) {
   $str = $this->commerce->getProductCatalog('US','Pro');
 
-  $json = json_decode($str,true);
+  $response->getBody()->write($str);
+  return $response->withHeader('Content-Type','application/json');
+});
 
-  foreach ($json['items'] as $item) {
-    $result = $this->services->dbh->query("SELECT id FROM products WHERE id='$item[name]'");
-    if ($result->fetch()) {
-      $query = "UPDATE products SET price=$item[priceUSD], attributes='" . json_encode($item['attributes']) . "' WHERE id='$item[name]'";
+$app->put('/bamenda/catalog', function($request, $response, $args) {
+  if (!$this->services->isAdmin())
+    $json = $this->services->unauthorizedJSON;
+  else {
+    $str = $this->commerce->getProductCatalog('US','Pro');
+
+    $json = json_decode($str,true);
+
+    foreach ($json['items'] as $item) {
+      $result = $this->services->dbh->query("SELECT id FROM products WHERE id='$item[name]'");
+      if ($result->fetch()) {
+        $query = "UPDATE products SET type='$item[itemType]', price=$item[priceUSD], shippingtype='$item[shippingBand]', attributes='" . json_encode($item['attributes']) . "' WHERE id='$item[name]'";
+      }
+      else {
+        $query = "INSERT INTO products (id, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, attributes) VALUES ('$item[name]', '$item[itemType]', '$item[description]', $item[imageHorizontalSize], $item[imageVerticalSize], $item[fullProductHorizontalSize], $item[fullProductVerticalSize], $item[recommendedHorizontalResolution], $item[recommendedVerticalResolution], $item[priceUSD], '$item[shippingBand]', '" . json_encode($item['attributes']) . "')";
+      }
+      $this->services->dbh->query($query);
     }
-    else {
-      $query = "INSERT INTO products (id, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, attributes) VALUES ('$item[name]', '$item[description]', $item[imageHorizontalSize], $item[imageVerticalSize], $item[fullProductHorizontalSize], $item[fullProductVerticalSize], $item[recommendedHorizontalResolution], $item[recommendedVerticalResolution], $item[priceUSD], '" . json_encode($item['attributes']) . "')";
-    }
-    $this->services->dbh->query($query);
   }
 
-  $response->getBody()->write($str);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
+  return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/bamenda/products', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT id, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, attributes, price, shippingtype FROM products ORDER BY type, id");
+
+  $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -330,7 +348,7 @@ $app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
 });
 
 $app->get('/bamenda/containers/{id:[0-9]+}/products', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT P.id, P.description, P.code, P.size, P.minppi, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id]");
+  $json = $this->services->fetchJSON("SELECT P.id, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, P.attributes, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id]");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');

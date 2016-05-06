@@ -4,7 +4,7 @@ namespace CrossRiver;
 class Commerce {
 	
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $live = FALSE;
+	private $live = TRUE;
 
 	public function __construct() 
 	{	
