@@ -120,8 +120,9 @@
 			}
 			a {
 				i {outline: none;}
-				color: $body-font-color;
-				&:hover {color: $white;}
+				color: $white;
+				&.in-cart {color: $body-font-color;}
+				//&:hover {color: $secondary-color;}
 				margin-left: 1rem;
 			}
 		}		

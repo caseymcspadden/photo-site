@@ -51,7 +51,11 @@ module.exports = BaseView.extend
 
 	buyPrint: (e) ->
 		e.preventDefault()
-		this.cart.create {idproduct: 1}
+		photo = this.model.get 'currentPhoto'
+		test = this.cart.where {idphoto: photo.id}
+		if test.length==0
+			this.cart.create {idcontainer: this.model.id, idphoto: photo.id, idproduct: 1}
+			this.$('.buy-print').addClass('in-cart')			
 
 	keyUp: (e) ->
 		offset = switch e.keyCode
@@ -78,4 +82,9 @@ module.exports = BaseView.extend
 	changePhoto: (m) ->
 		photo = m.get 'currentPhoto'
 		this.$('.content img').attr 'src' , config.urlBase + '/photos/M/' + photo.id + '.jpg'
+		test = this.cart.where {idphoto: photo.id}
+		if test.length==0
+			this.$('.buy-print').removeClass('in-cart')
+		else
+			this.$('.buy-print').addClass('in-cart')
 		this.updateCounter()

@@ -7,9 +7,9 @@ $arr = explode('/', $str);
 if (count($arr)!==2)
 	exit ('File link is missing or invalid');
 
-$isarchive = ($arr[0]=='archive');
+$downloadtype = $arr[0];
 
-error_log("download type = $arr[0]");
+error_log("download type = $downloadtype");
 
 $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 
