@@ -60,8 +60,28 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->get('/bamenda/store/catalog', function($request, $response, $args) {
+  $str = $this->commerce->getProductCatalog('US','Pro');
+
+  $json = json_decode($str,true);
+
+  foreach ($json['items'] as $item) {
+    $result = $this->services->dbh->query("SELECT id FROM products WHERE id='$item[name]'");
+    if ($result->fetch()) {
+      $query = "UPDATE products SET price=$item[priceUSD], attributes='" . json_encode($item['attributes']) . "' WHERE id='$item[name]'";
+    }
+    else {
+      $query = "INSERT INTO products (id, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, attributes) VALUES ('$item[name]', '$item[description]', $item[imageHorizontalSize], $item[imageVerticalSize], $item[fullProductHorizontalSize], $item[fullProductVerticalSize], $item[recommendedHorizontalResolution], $item[recommendedVerticalResolution], $item[priceUSD], '" . json_encode($item['attributes']) . "')";
+    }
+    $this->services->dbh->query($query);
+  }
+
+  $response->getBody()->write($str);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 $app->get('/bamenda/test2[/{path:.*}]', function($request, $response, $args) {
-  $json = $this->commerce->getPayments($args['path']);
+  $json = $this->commerce->getPayments(isset($args['path']) ? $args['path'] : NULL);
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
@@ -491,20 +511,20 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT id, idcontainer, idphoto, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight FROM cartitems WHERE idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT id, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight FROM cartitems WHERE idcart='$idcart'");
       break;
     case 'POST':
       $json = $request->getParsedBody();
-      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id = $json[idproduct]");
+      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id=$json[idproduct]");
       $row = $result->fetch();
       $json['price'] = $row ? $row[0] : 0;
-      $this->services->dbh->query("INSERT INTO cartitems (idcart, idcontainer, idphoto, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idcontainer], $json[idphoto], $json[idproduct], $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], $json[idproduct], $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'PUT':
       $json = $request->getParsedBody();
-      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id = $json[idproduct]");
+      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id=$json[idproduct]");
       $row = $result->fetch();
       $json['price'] = $row ? $row[0] : 0;
       $this->services->dbh->query("UPDATE cartitems SET idproduct=$json[idproduct], price=$json[price], quantity=$json[quantity], cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$json[id]");

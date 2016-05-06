@@ -16,12 +16,15 @@ module.exports = BaseView.extend
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
+		console.log 'initializing gallery photo view'
 		this.cart = options.cart
+		this.catalog = options.catalog
 		this.template = templates['gallery-photo-view']
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
+		this.listenTo this.catalog, 'change', this.updateCatalog
 		#this.listenTo this.model.photos, 'reset', this.render
 
 	render: ->
@@ -36,6 +39,10 @@ module.exports = BaseView.extend
 		this.$('.tool-download').removeClass('hide') if m.get('downloadgallery')
 		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
 		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
+
+	updateCatalog: (m) ->
+		console.log 'updateCatalog'
+		console.log m
 
 	viewImage: (e) ->
 		e.preventDefault()

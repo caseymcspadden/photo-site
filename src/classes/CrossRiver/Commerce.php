@@ -4,7 +4,7 @@ namespace CrossRiver;
 class Commerce {
 	
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $paypal_live = FALSE;
+	private $live = FALSE;
 
 	public function __construct() 
 	{	
@@ -21,14 +21,14 @@ class Commerce {
 
 	private function get_paypal_properties()
 	{
-		$clientId = ($this->paypal_live ? $this->config->clientId_live : $this->config->clientId_sandbox);
-		$secret = ($this->paypal_live ? $this->config->secret_live : $this->config->secret_sandbox);
+		$clientId = ($this->live ? $this->config->clientId_live : $this->config->clientId_sandbox);
+		$secret = ($this->live ? $this->config->secret_live : $this->config->secret_sandbox);
 
 		$ret = new \stdClass();
-		$ret->endpoint = ($this->paypal_live ? $this->config->endpoint_live : $this->config->endpoint_sandbox);
+		$ret->endpoint = ($this->live ? $this->config->endpoint_live : $this->config->endpoint_sandbox);
 
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/v1/oauth2/token"); 
+		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/oauth2/token"); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_HEADER, FALSE);
 		curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -46,12 +46,23 @@ class Commerce {
 		return $ret;
 	}
 
+	private function get_pwinty_properties()
+	{
+		$ret = new \stdClass();
+		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);
+		$ret->merchantId = $this->config->pwinty_merchantId;
+		$ret->apiKey = $this->config->pwinty_apiKey;
+
+		return $ret;
+	}
+
 	public function getPayments($id=NULL)
 	{
 		$paypal = $this->get_paypal_properties();
 		
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint ."/v1/payments/payment" . ($id ? "/$id" : ""));
+		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint ."/payments/payment" . ($id ? "/$id" : ""));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
@@ -67,7 +78,7 @@ class Commerce {
 		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
 					
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint . "/v1/payments/payment"); 
+		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint . "/payments/payment"); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_HEADER, FALSE);
 		curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -80,6 +91,20 @@ class Commerce {
 		curl_close($ch);
   
 		return $results;
+	}
+
+	public function getProductCatalog($country, $quality)
+	{
+		$pwinty = $this->get_pwinty_properties();
+		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint ."/Catalogue/$country/$quality");
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		$results = curl_exec($ch);
+		curl_close($ch);
+	 	return $results;		
 	}
 
 	private function get_card_type($number)
