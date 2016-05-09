@@ -18,13 +18,13 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		console.log 'initializing gallery photo view'
 		this.cart = options.cart
-		this.catalog = options.catalog
+		#this.catalog = options.catalog
 		this.template = templates['gallery-photo-view']
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
-		this.listenTo this.catalog, 'change', this.updateCatalog
+		#this.listenTo this.catalog, 'change', this.updateCatalog
 		#this.listenTo this.model.photos, 'reset', this.render
 
 	render: ->
@@ -40,10 +40,12 @@ module.exports = BaseView.extend
 		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
 		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
 
+	###
 	updateCatalog: (m) ->
 		console.log 'updateCatalog'
 		console.log m
-
+	###
+	
 	viewImage: (e) ->
 		e.preventDefault()
 		this.photoView.open()
@@ -61,7 +63,7 @@ module.exports = BaseView.extend
 		photo = this.model.get 'currentPhoto'
 		test = this.cart.where {idphoto: photo.id}
 		if test.length==0
-			this.cart.create {idcontainer: this.model.id, idphoto: photo.id, idproduct: 1}
+			this.cart.create {idcontainer: this.model.id, idphoto: photo.id, idproduct: '5x7'}
 			this.$('.buy-print').addClass('in-cart')			
 
 	keyUp: (e) ->
