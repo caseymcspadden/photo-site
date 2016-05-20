@@ -12,10 +12,11 @@ module.exports = BaseView.extend
 		this.template = templates['download-gallery-view']
 		this.listenTo this.model, 'change:error', this.notifyError
 		this.listenTo this.model, 'change:archiveProgress', this.archiveProgress
+		this.listenTo this.model, 'change:maxdownloadsize', this.render
 		this.listenTo this.model.photos, 'reset', this.initializeProgress
 
 	render: ->
-		this.$el.html this.template {waitsrc: config.urlBase+'/images/wait-circle.gif'}
+		this.$el.html this.template {waitsrc: config.urlBase+'/images/wait-circle.gif', maxdownloadsize: parseInt(this.model.get('maxdownloadsize'))}
 
 	open: ->
 		this.$('.archive-wait').addClass 'hide'
@@ -29,7 +30,8 @@ module.exports = BaseView.extend
 	
 	createArchive: ->
 		this.$('.archive-wait').removeClass 'hide'
-		this.model.createArchive()
+		imagesize = this.$('#imagesize').val()
+		this.model.createArchive(imagesize)
 
 	cancelArchive: ->
 		this.model.set 'cancelArchive', true

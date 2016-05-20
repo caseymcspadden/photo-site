@@ -440,11 +440,13 @@ $app->delete('/bamenda/containers/{id:[0-9]+}/containerphotos', function($reques
 });
 
 $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $response, $args) {
+  $sizemap = array(1=>'S', 2=>'M', 3=>'L', 4=>'X');
+
   $ret = new stdClass();
   $ret->error = FALSE;
 
   // Check to see if user has permission to create an archive
-  $result = $this->services->dbh->query("SELECT type, access, downloadgallery FROM containers WHERE id=$args[id]");
+  $result = $this->services->dbh->query("SELECT type, access, downloadgallery, maxdownloadsize FROM containers WHERE id=$args[id]");
   $obj = $result->fetchObject();
   if (!$obj || $obj->type!='gallery' || $obj->downloadgallery==0)
     $ret->error = TRUE;
@@ -464,11 +466,16 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
   $galleryname = $parsedBody['name'];
+  $imagesize = min($obj->maxdownloadsize , $parsedBody['imagesize']);
 
   $files = array();
 
   foreach ($ids as $id) {
-    $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    if ($imagesize==5) // full-resolution
+      $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    else
+      $arr = glob($this->services->photoroot . '/' . sprintf("%02d",$id%100) . '/' . $id . '_' . $sizemap[$imagesize] . '.jpg');
+
     if (count($arr)>0)
       $files[] = $arr[0];
   }
@@ -476,7 +483,8 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
     $archive = $this->services->addFilesToArchive(NULL,$galleryname,$files);
     $ret->archive = $archive;
     $ret->count = count($ids);
-    $this->services->dbh->query("INSERT INTO archives (id, idcontainer) VALUES ('$archive', $args[id])");
+    $ret->imagesize = $imagesize;
+    $this->services->dbh->query("INSERT INTO archives (id, idcontainer, imagesize) VALUES ('$archive', $args[id], $imagesize)");
   }
   catch (Exception $e) {
     $ret->error = TRUE;
@@ -487,17 +495,22 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
 });
 
 $app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request, $response, $args) {
+  $sizemap = array(1=>'S', 2=>'M', 3=>'L', 4=>'X');  
   $ret = new stdClass();
   $ret->error = FALSE;
 
   $parsedBody = $request->getParsedBody();
   $ids = explode(',', $parsedBody['ids']);
   $galleryname = $parsedBody['name'];
+  $imagesize = $parsedBody['imagesize'];
 
   $files = array();
 
   foreach ($ids as $id) {
-    $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    if ($imagesize==5) // full-resolution
+      $arr = glob($this->services->fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+    else
+      $arr = glob($this->services->photoroot . '/' . sprintf("%02d",$id%100) . '/' . $id . '_' . $sizemap[$imagesize] . '.jpg');
     if (count($arr)>0)
       $files[] = $arr[0];
   }

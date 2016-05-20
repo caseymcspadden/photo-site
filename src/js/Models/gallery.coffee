@@ -9,6 +9,7 @@ module.exports = Backbone.Model.extend
 		error: null
 		archive: null
 		archiveProgress: 0
+		imagesize: 5
 		access: 0
 		maxdownloadsize: 0
 		downloadgallery: 0
@@ -53,14 +54,14 @@ module.exports = Backbone.Model.extend
 			url: config.servicesBase + '/containers/' + this.id + '/archive/' + this.get('archive')
 			type: 'PUT'
 			context: this
-			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-')}
+			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-'), imagesize: this.get('imagesize')}
 			success: (json) ->
 				console.log json
 				this.set 'archiveProgress' , json.count + this.get('archiveProgress')
 				this.addPhotosToArchive(startindex+count, count)
 		)
 
-	createArchive: ->
+	createArchive: (imagesize) ->
 		console.log 'creating archive'
 
 		this.set 'archive', null
@@ -73,11 +74,12 @@ module.exports = Backbone.Model.extend
 			url: config.servicesBase + '/containers/' + this.id + '/archive'
 			type: 'POST'
 			context: this
-			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-')}
+			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-'), imagesize: imagesize}
 			success: (json) ->
 				console.log json
 				if (!json.error)
 					this.set 'archive' , json.archive
+					this.set 'imagesize' , json.imagesize
 					this.set 'archiveProgress' , json.count + this.get('archiveProgress')
 					this.addPhotosToArchive 10,10
 				else

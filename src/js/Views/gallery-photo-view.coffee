@@ -10,7 +10,7 @@ module.exports = BaseView.extend
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
 		'click img' : 'viewImage'
-		'click .tool-download' : 'downloadGallery'
+		'click .download-gallery' : 'downloadGallery'
 		'click .download-photo' : 'downloadPhoto'
 		'click .buy-print' : 'buyPrint'
 		'keyup' : 'keyUp'
@@ -36,7 +36,7 @@ module.exports = BaseView.extend
 		this
 
 	updateAccess: (m) ->
-		this.$('.tool-download').removeClass('hide') if m.get('downloadgallery')
+		this.$('.download-gallery').removeClass('hide') if m.get('downloadgallery')
 		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
 		this.$('.buy-print').removeClass('hide') if m.get('buyprints')
 
@@ -56,7 +56,8 @@ module.exports = BaseView.extend
 
 	downloadPhoto: (e) ->
 		e.preventDefault()
-		console.log 'download photo'
+		photo = this.model.get 'currentPhoto'
+		this.$('#download-iframe').attr 'src' , config.urlBase + '/downloads/file/' + this.model.id + '/' + this.model.get('urlsuffix') + '/' + photo.id
 
 	buyPrint: (e) ->
 		e.preventDefault()

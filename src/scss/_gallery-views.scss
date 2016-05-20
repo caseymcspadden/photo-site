@@ -88,6 +88,11 @@
 			cursor: pointer;
 		}
 	}
+	
+	#download-iframe {
+		display: none;
+	}
+
 	.photo-tools {
 		line-height: 2.4375rem;
 		color: $white;
@@ -135,9 +140,12 @@
 	}
 	.archive-wait {
 		img {float: left; margin-right: 1rem;}
-		.progress {overflow: hidden;}
+		.progress {
+			width: 80%;
+			overflow: hidden;
+		}
 	}
 	.button.separate {
-		margin-left: 5rem;
+		margin-left: 1rem;
 	}
 }
