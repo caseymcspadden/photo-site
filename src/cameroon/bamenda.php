@@ -542,13 +542,24 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT id, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight FROM cartitems WHERE idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, CI.price, CI.quantity, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $json = $request->getParsedBody();
-      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
-      $row = $result->fetch();
-      $json['price'] = $row ? $row[0] : 0;
+      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
+      $product = $result->fetch();
+      $json['price'] = $product ? $product[0] : 0;
+      $result = $this->services->dbh->query("SELECT width, height FROM photos WHERE id='$json[idphoto]'");
+      $photo = $result->fetch();
+      $landscape = ($photo->width > $photo->height);
+      $photoaspect = $landscape ? $photo->width / $photo->height : $photo->height / $photo->width;
+      $prodaspect = $product->vsize / $product->hsize;
+      if ($photoaspect > $prodaspect) {
+        
+        
+      }
+
+
       $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);

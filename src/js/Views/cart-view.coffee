@@ -1,6 +1,7 @@
 BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
+CartItemView = require './cartitem-view'
 
 module.exports = BaseView.extend
 	initialize: (options) ->
@@ -11,5 +12,10 @@ module.exports = BaseView.extend
 	render: ->
 		this.$el.html this.template()
 
+	addOne: (item) ->
+		view = new CartItemView {model: item}
+		view.render()
+		this.$('.cart-items').append view.el
+
 	addAll: ->
-		console.log "Adding all cart items"
+		this.collection.each this.addOne, this		

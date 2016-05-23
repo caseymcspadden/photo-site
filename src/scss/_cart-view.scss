@@ -3,6 +3,12 @@
 
 	.cart-items {
 		//background-color: lighten($body-background, 10%);
+		.cart-item {
+			margin-bottom: 1rem;
+			img {
+				height: 150px;
+			}
+		}
 	}
 
 	.order-summary-view {
