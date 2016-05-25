@@ -545,22 +545,40 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, CI.price, CI.quantity, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
+      $cropx = $cropy = 0;
+      $cropwidth = $cropheight = 100; 
       $json = $request->getParsedBody();
       $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
-      $product = $result->fetch();
-      $json['price'] = $product ? $product[0] : 0;
-      $result = $this->services->dbh->query("SELECT width, height FROM photos WHERE id='$json[idphoto]'");
-      $photo = $result->fetch();
-      $landscape = ($photo->width > $photo->height);
-      $photoaspect = $landscape ? $photo->width / $photo->height : $photo->height / $photo->width;
+      $product = $result->fetchObject();
+      $json['price'] = $product ? $product->price : 0;
       $prodaspect = $product->vsize / $product->hsize;
-      if ($photoaspect > $prodaspect) {
-        
-        
+      $result = $this->services->dbh->query("SELECT width, height FROM photos WHERE id='$json[idphoto]'");
+      $photo = $result->fetchObject();
+      if ($photo->width > $photo->height) { //landscape
+        if ($photo->height * $prodaspect < $photo->width) {
+          $cropwidth = 100 * ($photo->height * $prodaspect)/$photo->width;
+          $cropx = (100 - $cropwidth)/2;
+        }
+        else {
+          $cropheight = 100 * ($photo->width / $prodaspect)/$photo->height;
+          $cropy = (100 - $cropheight)/2;
+        }
       }
-
-
-      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
+      else { //portrait
+        if ($photo->width * $prodaspect < $photo->height) {
+          $cropheight = 100 * ($photo->width * $prodaspect)/$photo->height;
+          $cropy = (100 - $cropheight)/2;
+        }
+        else {
+          $cropwidth = 100 * ($photo->height / $prodaspect)/$photo->width;
+          $cropx = (100 - $cropwidth)/2;
+        }
+      }
+      $json['cropx'] = $cropx;
+      $json['cropy'] = $cropy;
+      $json['cropwidth'] = $cropwidth;
+      $json['cropheight'] = $cropheight;
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $cropx, $cropy, $cropwidth, $cropheight)");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
