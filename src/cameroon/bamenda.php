@@ -542,7 +542,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, CI.price, CI.quantity, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct WHERE CI.idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $cropx = $cropy = 0;

@@ -1,7 +1,6 @@
 Backbone = require 'backbone'
-Photo = require './photo'
+Product = require './product'
 config = require './config'
 
 module.exports = Backbone.Collection.extend
-	model: Photo
-	url: config.servicesBase + '/featuredphotos'		 
+	model: Product

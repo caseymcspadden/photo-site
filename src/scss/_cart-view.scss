@@ -5,8 +5,21 @@
 		//background-color: lighten($body-background, 10%);
 		.cart-item {
 			margin-bottom: 1rem;
-			img {
+			.image-container {
+				position: relative;
 				height: 150px;
+				width: 250px;
+				overflow: hidden;
+				img {
+					height: 150px;
+					position: absolute;
+				}
+				.crop-rect {
+					position: absolute;
+					height: 100px;
+					width: 100px;
+					border: 1px solid blue;
+				}
 			}
 		}
 	}
