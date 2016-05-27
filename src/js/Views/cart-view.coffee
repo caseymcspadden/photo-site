@@ -8,6 +8,7 @@ module.exports = BaseView.extend
 		this.template = templates['cart-view']
 		this.render()
 		this.listenTo this.collection, 'reset', this.addAll
+		this.listenTo this.collection, 'remove', this.addAll
 
 	render: ->
 		this.$el.html this.template()
@@ -18,4 +19,5 @@ module.exports = BaseView.extend
 		this.$('.cart-items').append view.el
 
 	addAll: ->
+		this.$('.cart-items').html ''
 		this.collection.each this.addOne, this		
