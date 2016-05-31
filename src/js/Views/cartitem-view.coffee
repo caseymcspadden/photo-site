@@ -7,7 +7,8 @@ module.exports = BaseView.extend
 		class: 'large-12 columns cart-item'
 
 	events:
-		'click .crop-item' : 'cropItem'
+		'click .crop-item , .crop-rect' : 'cropItem'
+		'click .change-product' : 'changeProduct'
 		'click .decrease-quantity' : 'decreaseQuantity'
 		'click .increase-quantity' : 'increaseQuantity'
 		'click .crop-item' : 'cropItem'
@@ -22,13 +23,16 @@ module.exports = BaseView.extend
 		#this.listenTo this.model.photos, 'reset', this.render
 
 	render: ->
-		console.log 'rendering cropitem'
 		data = this.model.toJSON()
 		imagewidth = 150 * data.width/data.height
 		data.cropx *= (imagewidth/250)
 		data.cropwidth *= (imagewidth/250)
 		data.urlBase = config.urlBase
 		this.$el.html this.template(data)
+
+	changeProduct: (e) ->
+		e.preventDefault()
+		console.log "change product"
 
 	cropItem: (e) ->
 		e.preventDefault()

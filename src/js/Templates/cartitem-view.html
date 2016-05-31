@@ -5,7 +5,7 @@
 </div>
 </div>
 <div class="large-7 columns">
-<div class="large-12 columns"><%= description %></div>
+<div class="large-12 columns"><%= description %> <a class="change-product">change</a></div>
 <div class="large-4 columns">$<span class="unit-price"><% print((price/100).toFixed(2)); %></span></div>
 <div class="large-4 columns"><a class="decrease-quantity" href="#">-</a><span class="quantity"><%= quantity %></span><a class="increase-quantity" href="#">+</a></div>
 <div class="large-4 columns text-right">$<span class="total-price"><% print((quantity*price/100).toFixed(2)); %></span></div>

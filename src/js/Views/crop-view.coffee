@@ -18,7 +18,6 @@ module.exports = BaseView.extend
 	open: (cartitem)->
 		this.cartitem = cartitem
 		item = cartitem.toJSON()
-		console.log item
 		this.$el.foundation 'open'
 		$image = this.$('.crop-photo')
 		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
@@ -28,7 +27,7 @@ module.exports = BaseView.extend
 		this.$('.crop-photo').cropper({
 			viewMode: 2
 			aspectRatio: aspect
-			autoCropArea: 1
+			autoCropArea: 0
 			scalable: false
 			rotatable: false
 			zoomable: false
@@ -49,34 +48,8 @@ module.exports = BaseView.extend
 				data.height = item.cropheight * canvas.height / 100 
 				data.left = canvas.left + item.cropx * canvas.width / 100 
 				data.top = canvas.top + item.cropy * canvas.height / 100 
-
-				console.log $image.cropper('getCropBoxData')
-				console.log data
 				$image.cropper('setCropBoxData' , data)
-				console.log $image.cropper('getCropBoxData')
 		})
-
-		###
-		downloadingImage = new Image
-		downloadingImage.onload = -> 
-    		image.attr 'src' , this.src
-  			$('.crop-photo').cropper({
-				viewMode: 2
-				aspectRatio: cartitem.get('vsizeprod') / cartitem.get('hsizeprod'),
-				autoCropArea: 1,
-				scalable: false,
-				rotatable: false,
-				zoomable: false,
-				background: false,
-				minCropBoxHeight: 300 
-				crop: (e) ->
-					console.log(e.x);
-					console.log(e.y);
-					console.log(e.width);
-					console.log(e.height);
-			})
-		downloadingImage.src = config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
-		###
 
 	saveCrop: (e) ->
 		e.preventDefault()
@@ -84,11 +57,6 @@ module.exports = BaseView.extend
 		img = $image.cropper('getImageData')
 		canvas = $image.cropper('getCanvasData')
 		crop = $image.cropper('getCropBoxData')
-
-		console.log img
-		console.log canvas
-		console.log crop
-		console.log this.cartitem
 
 		this.cartitem.set 'cropwidth' , 100*(crop.width/canvas.width)
 		this.cartitem.set 'cropx' , 100*((crop.left-canvas.left)/canvas.width)
@@ -101,8 +69,3 @@ module.exports = BaseView.extend
 
 	closed: ->
 		this.$('.crop-photo').cropper('destroy')
-	###
-	changePhoto: (m) ->
-		photo = m.get 'currentPhoto'
-		this.$('img.photo').attr 'src' , config.urlBase + '/photos/L/' + photo.id + '.jpg'
-	###

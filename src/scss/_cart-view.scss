@@ -13,19 +13,24 @@
 				img {
 					height: 150px;
 					position: absolute;
+					opacity: 0.80;
 				}
 				.crop-rect {
 					position: absolute;
 					height: 100px;
 					width: 100px;
 					border: 1px solid $primary-color;
-					background-color: $secondary-color;
+					background-color: $white;
 					opacity: 0.25;
+					cursor: pointer;
 				}
 			}
 			a {
 				color: $white;
 				&:visited {color: $white;}
+				&.change-product {
+					margin-left: 1rem;
+				}
 			}
 			.quantity {
 				margin-left: 1rem;
