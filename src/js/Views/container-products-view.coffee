@@ -4,20 +4,16 @@ ContainerProducts = require './containerproducts'
 config = require './config'
 
 module.exports = BaseView.extend
-
 	events:
 		'click .select-product' : 'selectProduct'
 
 	initialize: (options) ->
 		this.template = templates['container-products-view']
-		this.cart = options.cart		
+		#this.cart = options.cart		
+		this.onSelect = options.onSelect
+		this.context = options.context		
 		this.containerProducts = new ContainerProducts
-		this.listenTo this.model, 'change:buyprints', this.updateProducts
 		this.listenTo this.containerProducts, 'reset', this.addAll
-
-	updateProducts: (m) ->
-		this.containerProducts.url = config.urlBase + '/bamenda/containers/' + m.id + '/products'
-		this.containerProducts.fetch {reset: true}
 
 	render: ->
 		this.$el.html this.template()
@@ -25,14 +21,21 @@ module.exports = BaseView.extend
 	open: ->
 		this.$el.foundation 'open'
 
+	updateProducts: (idcontainer) ->
+		this.containerProducts.update idcontainer
+
 	selectProduct: (e) ->
 		e.preventDefault()
+		this.onSelect(this.$('#products').val(), this.context)
+		this.$el.foundation 'close'
+
+		###
 		photo = this.model.get 'currentPhoto'
 		test = this.cart.where {idphoto: photo.id}
 		if test.length==0
 			this.cart.create {idcontainer: this.model.id, idphoto: photo.id, idproduct: this.$('#products').val()}
 			this.$el.foundation 'close'		
-			#this.$('.buy-print').addClass('in-cart')
+		###
 
 	addOne: (product) ->
 		price = product.get('price')/100

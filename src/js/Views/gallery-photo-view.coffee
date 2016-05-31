@@ -20,9 +20,11 @@ module.exports = BaseView.extend
 		console.log 'initializing gallery photo view'
 		this.cart = options.cart
 		this.template = templates['gallery-photo-view']
-		this.containerProductsView = new ContainerProductsView {model: this.model, cart: options.cart}
+		this.containerProductsView = new ContainerProductsView {onSelect: this.selectProduct, context: this}
+		##this.containerProductsView = new ContainerProductsView {idcontainer: this.model.id, onSelect: this.selectProduct}
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
+		this.listenTo this.model, 'change:buyprints', this.updateProducts
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
 		this.listenTo this.cart, 'add' , this.cartItemAdded
@@ -35,6 +37,9 @@ module.exports = BaseView.extend
 		this.assign this.containerProductsView, '.container-products-view'
 		this.assign this.downloadGalleryView, '.download-gallery-view'
 		this
+
+	updateProducts: (m) ->
+		this.containerProductsView.updateProducts m.id
 
 	updateAccess: (m) ->
 		this.$('.download-gallery').removeClass('hide') if m.get('downloadgallery')
@@ -57,6 +62,12 @@ module.exports = BaseView.extend
 	buyProduct: (e) ->
 		e.preventDefault()
 		this.containerProductsView.open()
+
+	selectProduct: (idproduct, context) ->
+		photo = context.model.get 'currentPhoto'
+		test = context.cart.where {idphoto: photo.id}
+		if test.length==0
+			context.cart.create {idcontainer: context.model.id, idphoto: photo.id, idproduct: idproduct}
 
 	keyUp: (e) ->
 		offset = switch e.keyCode

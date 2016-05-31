@@ -24,6 +24,8 @@ cartView = new CartView {el: '.cart-view', collection: cartItems}
 
 $('body').append loginView.render().el
 
+cartView.render()
+
 #galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view', cart: cartItems}
 #galleryMainView.render()
 

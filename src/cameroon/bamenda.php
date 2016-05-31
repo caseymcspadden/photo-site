@@ -538,7 +538,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
     return $response->withHeader('Content-Type','application/json');
   }
 
-  $this->services->dbh->query("INSERT IGNORE INTO cart (id) VALUES ('$idcart')");
+  $this->services->dbh->query("INSERT IGNORE INTO carts (id) VALUES ('$idcart')");
 
   switch ($request->getMethod()) {
     case 'GET':
@@ -548,37 +548,15 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $cropx = $cropy = 0;
       $cropwidth = $cropheight = 100; 
       $json = $request->getParsedBody();
-      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
-      $product = $result->fetchObject();
-      $json['price'] = $product ? $product->price : 0;
-      $prodaspect = $product->vsize / $product->hsize;
-      $result = $this->services->dbh->query("SELECT width, height FROM photos WHERE id='$json[idphoto]'");
-      $photo = $result->fetchObject();
-      if ($photo->width > $photo->height) { //landscape
-        if ($photo->height * $prodaspect < $photo->width) {
-          $cropwidth = 100 * ($photo->height * $prodaspect)/$photo->width;
-          $cropx = (100 - $cropwidth)/2;
-        }
-        else {
-          $cropheight = 100 * ($photo->width / $prodaspect)/$photo->height;
-          $cropy = (100 - $cropheight)/2;
-        }
-      }
-      else { //portrait
-        if ($photo->width * $prodaspect < $photo->height) {
-          $cropheight = 100 * ($photo->width * $prodaspect)/$photo->height;
-          $cropy = (100 - $cropheight)/2;
-        }
-        else {
-          $cropwidth = 100 * ($photo->height / $prodaspect)/$photo->width;
-          $cropx = (100 - $cropwidth)/2;
-        }
-      }
-      $json['cropx'] = $cropx;
-      $json['cropy'] = $cropy;
-      $json['cropwidth'] = $cropwidth;
-      $json['cropheight'] = $cropheight;
-      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $cropx, $cropy, $cropwidth, $cropheight)");
+      
+      $vals = $this->services->initializeCartItem($json['idcontainer'], $json['idproduct'], $json['idphoto']);
+
+      $json['price'] = $vals->price;
+      $json['cropx'] = $vals->cropx;
+      $json['cropy'] = $vals->cropy;
+      $json['cropwidth'] = $vals->cropwidth;
+      $json['cropheight'] = $vals->cropheight;
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
@@ -587,12 +565,12 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
       $row = $result->fetch();
       $json['price'] = $row ? $row[0] : 0;
-      $this->services->dbh->query("UPDATE cartitems SET idproduct='$json[idproduct]', price=$json[price], quantity=$json[quantity], cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$json[id]");
+      $this->services->dbh->query("UPDATE cartitems SET idproduct='$json[idproduct]', price=$json[price], quantity=$json[quantity], cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'DELETE':
       $json = $request->getParsedBody();
-      $this->services->dbh->query("DELETE FROM cartitems WHERE id=$json[id]");
+      $this->services->dbh->query("DELETE FROM cartitems WHERE id=$args[path]");
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     default:

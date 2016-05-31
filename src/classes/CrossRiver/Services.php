@@ -460,4 +460,38 @@ class Services
     	}
     	return FALSE;
     }
+
+    public function initializeCartItem($idcontainer, $idproduct, $idphoto)
+    {
+		$ret = new \stdClass();
+		$ret->cropx = $ret->cropy = 0;
+		$ret->cropwidth = $ret->cropheight = 100;
+		$result = $this->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize FROM products P INNER JOIN containers C ON C.id=$idcontainer WHERE P.id='$idproduct'");
+      	$product = $result->fetchObject();
+		$ret->price = $product ? $product->price : 0;
+		$prodaspect = $product->vsize / $product->hsize;
+		$result = $this->dbh->query("SELECT width, height FROM photos WHERE id=$idphoto");
+		$photo = $result->fetchObject();
+		if ($photo->width > $photo->height) { //landscape
+			if ($photo->height * $prodaspect < $photo->width) {
+			  $ret->cropwidth = 100 * ($photo->height * $prodaspect)/$photo->width;
+			  $ret->cropx = (100 - $ret->cropwidth)/2;
+			}
+			else {
+			  $ret->cropheight = 100 * ($photo->width / $prodaspect)/$photo->height;
+			  $ret->cropy = (100 - $ret->cropheight)/2;
+			}
+		}
+		else { //portrait
+			if ($photo->width * $prodaspect < $photo->height) {
+			  $ret->cropheight = 100 * ($photo->width * $prodaspect)/$photo->height;
+			  $ret->cropy = (100 - $ret->cropheight)/2;
+			}
+			else {
+			  $ret->cropwidth = 100 * ($photo->height / $prodaspect)/$photo->width;
+			  $ret->cropx = (100 - $ret->cropwidth)/2;
+			}
+		}
+		return $ret;
+    }
 }

@@ -7,7 +7,7 @@ module.exports = BaseView.extend
 	events:
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
-		'closed.zf.reveal' : 'close'
+		'closed.zf.reveal' : 'closed'
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
@@ -19,7 +19,7 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.$el.foundation 'open'
 
-	close: ->
+	closed: ->
 		this.stopListening this.model
 
 	render: ->

@@ -18,12 +18,18 @@
 					position: absolute;
 					height: 100px;
 					width: 100px;
-					border: 1px solid blue;
+					border: 1px solid $primary-color;
+					background-color: $secondary-color;
+					opacity: 0.25;
 				}
 			}
-			p {
-				margin-top: 0px;
-				margin-bottom: 5px;
+			a {
+				color: $white;
+				&:visited {color: $white;}
+			}
+			.quantity {
+				margin-left: 1rem;
+				margin-right: 1rem;
 			}
 		}
 	}
