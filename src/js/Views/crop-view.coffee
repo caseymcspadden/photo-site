@@ -43,11 +43,21 @@ module.exports = BaseView.extend
 			built: (e) ->
 				img = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
+				console.log item
+				console.log img
+				console.log canvas
 				data = {}
-				data.width = item.cropwidth * canvas.width / 100 
-				data.height = item.cropheight * canvas.height / 100 
-				data.left = canvas.left + item.cropx * canvas.width / 100 
-				data.top = canvas.top + item.cropy * canvas.height / 100 
+				data.width = Math.round(item.cropwidth * img.width / 100)
+				data.height = Math.round(item.cropheight * img.height / 100)
+				data.left = Math.round(canvas.left + item.cropx * img.width / 100)
+				data.top = Math.round(canvas.top + item.cropy * img.height / 100)
+				###
+				data.width = 449
+				data.height = 337
+				data.left = 0 
+				data.top = 0
+				###
+				console.log data
 				$image.cropper('setCropBoxData' , data)
 		})
 
@@ -58,10 +68,10 @@ module.exports = BaseView.extend
 		canvas = $image.cropper('getCanvasData')
 		crop = $image.cropper('getCropBoxData')
 
-		this.cartitem.set 'cropwidth' , 100*(crop.width/canvas.width)
-		this.cartitem.set 'cropx' , 100*((crop.left-canvas.left)/canvas.width)
-		this.cartitem.set 'cropheight' , 100*(crop.height/canvas.height)
-		this.cartitem.set 'cropy' , 100*((crop.top-canvas.top)/canvas.height)
+		this.cartitem.set 'cropwidth' , 100*(crop.width/img.width)
+		this.cartitem.set 'cropx' , 100*((crop.left-canvas.left)/img.width)
+		this.cartitem.set 'cropheight' , 100*(crop.height/img.height)
+		this.cartitem.set 'cropy' , 100*((crop.top-canvas.top)/img.height)
 		this.cartitem.set 'togglecrop' , !this.cartitem.get('togglecrop')
 		this.cartitem.save()
 
