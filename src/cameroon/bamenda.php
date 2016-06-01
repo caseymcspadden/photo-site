@@ -542,7 +542,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $cropx = $cropy = 0;
@@ -556,7 +556,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $json['cropy'] = $vals->cropy;
       $json['cropwidth'] = $vals->cropwidth;
       $json['cropheight'] = $vals->cropheight;
-      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], '$json[attrs]', $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
@@ -565,7 +565,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
       $row = $result->fetch();
       $json['price'] = $row ? $row[0] : 0;
-      $this->services->dbh->query("UPDATE cartitems SET idproduct='$json[idproduct]', price=$json[price], quantity=$json[quantity], cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
+      $this->services->dbh->query("UPDATE cartitems SET idproduct='$json[idproduct]', price=$json[price], quantity=$json[quantity], attrs='$json[attrs]', cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'DELETE':

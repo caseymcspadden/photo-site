@@ -38,9 +38,12 @@ module.exports = BaseView.extend
 		###
 
 	addOne: (product) ->
-		price = product.get('price')/100
-		$option = $("<option></option>").attr("value",product.id).text(product.get('description') + ': $' + price.toFixed(2))		
-		this.$('#products').append $option
+		console.log product
+		type = product.get 'type'
+		if (type=='Print' or type=='Poster' or type=='Canvas')
+			price = product.get('price')/100
+			$option = $("<option></option>").attr("value",product.id).text(product.get('description') + ': $' + price.toFixed(2))		
+			this.$('#products').append $option
 
 	addAll: (collection) ->
 		this.$('#products').html ''

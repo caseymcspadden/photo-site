@@ -1,45 +1,58 @@
 .cart-view {
 	h1, h2, h3, h4, h5, h6 {color: $white;}
 
-	.cart-items {
-		//background-color: lighten($body-background, 10%);
-		.cart-item {
-			margin-bottom: 1rem;
-			.image-container {
-				position: relative;
-				height: 150px;
-				width: 250px;
-				overflow: hidden;
-				img {
-					height: 150px;
-					position: absolute;
-					opacity: 0.80;
+
+	.cart { 
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid $dark-gray;
+		.cart-items {
+			.cart-item {
+				margin-bottom: 1rem;
+				background-color: lighten($body-background, 8%);
+				padding-top: 1rem;
+				padding-bottom: 1rem;
+				border-radius: 1rem;
+				.product-description {
+					color: $white;
+					margin-bottom: 5px;
 				}
-				.crop-rect {
-					position: absolute;
-					height: 100px;
-					width: 100px;
-					border: 1px solid $primary-color;
-					background-color: $white;
-					opacity: 0.25;
-					cursor: pointer;
+				.button-group {
+					margin-top: 5px;
 				}
-			}
-			a {
-				color: $white;
-				&:visited {color: $white;}
-				&.change-product {
+				.image-container {
+					position: relative;
+					height: 220px;
+					width: 340px;
+					overflow: hidden;
+					img {
+						height: 220px;
+						position: absolute;
+						opacity: 0.80;
+					}
+					.crop-rect {
+						position: absolute;
+						height: 0px;
+						width: 0px;
+						border: 2px solid $secondary-color;
+						background-color: $white;
+						opacity: 0.2;
+						cursor: pointer;
+					}
+				}
+				a {
+					color: $white;
+					&:visited {color: $white;}
+				}
+				.quantity {
 					margin-left: 1rem;
+					margin-right: 1rem;
 				}
-			}
-			.quantity {
-				margin-left: 1rem;
-				margin-right: 1rem;
 			}
 		}
 	}
 
-	.order-summary-view {
+	.order-summary {
 		//background-color: lighten($body-background, 10%);
 	}
 }

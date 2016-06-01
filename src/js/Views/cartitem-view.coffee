@@ -13,6 +13,7 @@ module.exports = BaseView.extend
 		'click .increase-quantity' : 'increaseQuantity'
 		'click .crop-item' : 'cropItem'
 		'click .remove-item' : 'removeItem'
+		'change select' : 'changeAttribute'
 
 	initialize: (options) ->
 		this.template = templates['cartitem-view']
@@ -24,9 +25,9 @@ module.exports = BaseView.extend
 
 	render: ->
 		data = this.model.toJSON()
-		imagewidth = 150 * data.width/data.height
-		data.cropx *= (imagewidth/250)
-		data.cropwidth *= (imagewidth/250)
+		imagewidth = 220 * data.width/data.height
+		data.cropx *= (imagewidth/340)
+		data.cropwidth *= (imagewidth/340)
 		data.urlBase = config.urlBase
 		this.$el.html this.template(data)
 
@@ -53,6 +54,13 @@ module.exports = BaseView.extend
 		e.preventDefault();
 		quantity = this.model.get 'quantity'	
 		this.model.set 'quantity' , quantity + 1	
+		this.model.save()
+
+	changeAttribute: (e) ->
+		attributes = {}
+		this.$('select').each (index) ->
+			attributes[$(this).attr 'name'] = $(this).val()
+		this.model.set 'attrs' , JSON.stringify(attributes)
 		this.model.save()
 
 	quantityChanged: ->

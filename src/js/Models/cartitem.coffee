@@ -23,3 +23,4 @@ module.exports = Backbone.Model.extend
 		cropwidth: 100
 		cropheight: 100
 		togglecrop: false
+		attrs: ''

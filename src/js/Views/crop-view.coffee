@@ -24,6 +24,8 @@ module.exports = BaseView.extend
 		aspect = item.vsize / item.hsize
 		aspect = 1/aspect if item.height > item.width
 
+		this.$('.dimensions').html('' + item.hsize + ' x ' + item.vsize)
+
 		this.$('.crop-photo').cropper({
 			viewMode: 2
 			aspectRatio: aspect
