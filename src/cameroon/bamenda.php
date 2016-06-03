@@ -76,13 +76,13 @@ $app->put('/bamenda/catalog', function($request, $response, $args) {
     $json = json_decode($str,true);
 
     foreach ($json['items'] as $item) {
-      $result = $this->services->dbh->query("SELECT id FROM products WHERE id='$item[name]'");
+      $result = $this->services->dbh->query("SELECT id FROM products WHERE idapi='$item[name]'");
       if ($result->fetch()) {
-        $query = "UPDATE products SET type='$item[itemType]', price=$item[priceUSD], shippingtype='$item[shippingBand]', attributes='" . json_encode($item['attributes']) . "' WHERE id='$item[name]'";
+        $query = "UPDATE products SET price=$item[priceUSD] WHERE idapi='$item[name]'";
       }
-      else {
-        $query = "INSERT INTO products (id, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, attributes) VALUES ('$item[name]', '$item[itemType]', '$item[description]', $item[imageHorizontalSize], $item[imageVerticalSize], $item[fullProductHorizontalSize], $item[fullProductVerticalSize], $item[recommendedHorizontalResolution], $item[recommendedVerticalResolution], $item[priceUSD], '$item[shippingBand]', '" . json_encode($item['attributes']) . "')";
-      }
+      //else {
+        //$query = "INSERT INTO products (id, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, attributes) VALUES ('$item[name]', '$item[itemType]', '$item[description]', $item[imageHorizontalSize], $item[imageVerticalSize], $item[fullProductHorizontalSize], $item[fullProductVerticalSize], $item[recommendedHorizontalResolution], $item[recommendedVerticalResolution], $item[priceUSD], '$item[shippingBand]', '" . json_encode($item['attributes']) . "')";
+      //}
       $this->services->dbh->query($query);
     }
   }
@@ -92,7 +92,14 @@ $app->put('/bamenda/catalog', function($request, $response, $args) {
 }); 
 
 $app->get('/bamenda/products', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, attributes FROM products ORDER BY type, id");
+  $json = $this->services->fetchJSON("SELECT id, api, idapi, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, attributes FROM products ORDER BY type, id");
+
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/bamenda/productattributes', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT PA.idproduct, PA.idattribute , A.name, A.title, A.validvalues, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute ORDER BY idproduct, idattribute");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
@@ -348,7 +355,7 @@ $app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
 });
 
 $app->get('/bamenda/containers/{id:[0-9]+}/products', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT P.id, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, P.attributes, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id]");
+  $json = $this->services->fetchJSON("SELECT P.id, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, P.attributes, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id]");
 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
@@ -542,7 +549,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype, P.attributes FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $cropx = $cropy = 0;
@@ -556,16 +563,17 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $json['cropy'] = $vals->cropy;
       $json['cropwidth'] = $vals->cropwidth;
       $json['cropheight'] = $vals->cropheight;
-      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], '$json[idproduct]', $json[price], $json[quantity], '$json[attrs]', $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
+      $json['attrs'] = $vals->attrs;
+      $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], $json[idproduct], $json[price], $json[quantity], '$json[attrs]', $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'PUT':
       $json = $request->getParsedBody();
-      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id='$json[idproduct]'");
+      $result = $this->services->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$json[idcontainer] WHERE P.id=$json[idproduct]");
       $row = $result->fetch();
       $json['price'] = $row ? $row[0] : 0;
-      $this->services->dbh->query("UPDATE cartitems SET idproduct='$json[idproduct]', price=$json[price], quantity=$json[quantity], attrs='$json[attrs]', cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
+      $this->services->dbh->query("UPDATE cartitems SET idproduct=$json[idproduct], price=$json[price], quantity=$json[quantity], attrs='$json[attrs]', cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'DELETE':

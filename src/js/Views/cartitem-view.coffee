@@ -7,10 +7,10 @@ module.exports = BaseView.extend
 		class: 'large-12 columns cart-item'
 
 	events:
-		'click .crop-item , .crop-rect' : 'cropItem'
 		'click .change-product' : 'changeProduct'
 		'click .decrease-quantity' : 'decreaseQuantity'
 		'click .increase-quantity' : 'increaseQuantity'
+		'mousedown .crop-rect' : 'cropItem'
 		'click .crop-item' : 'cropItem'
 		'click .remove-item' : 'removeItem'
 		'change select' : 'changeAttribute'
@@ -18,6 +18,7 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['cartitem-view']
 		this.cropView = options.cropView
+		this.productAttributes = options.productAttributes
 		this.listenTo this.model, 'change:togglecrop', this.render
 		this.listenTo this.model, 'change:quantity', this.quantityChanged
 		this.listenTo this.model, 'destroy', this.remove
@@ -25,6 +26,9 @@ module.exports = BaseView.extend
 
 	render: ->
 		data = this.model.toJSON()
+		data.attributes = []
+		attributes = this.productAttributes.where {idproduct: data.idproduct}
+		data.attributes.push attributes[i].toJSON() for i in [0...attributes.length]
 		imagewidth = 220 * data.width/data.height
 		data.cropx *= (imagewidth/340)
 		data.cropwidth *= (imagewidth/340)

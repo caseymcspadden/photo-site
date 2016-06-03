@@ -5,7 +5,9 @@ module.exports = Backbone.Model.extend
 	defaults:
 		idphoto: 0
 		idcontainer: 0
-		idproduct: ''
+		idproduct: 0
+		api: ''
+		idapi: ''
 		type: ''
 		description: ''
 		hsize: 0

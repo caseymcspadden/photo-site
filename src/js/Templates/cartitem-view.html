@@ -15,15 +15,16 @@
 		<a class="button change-product">Change Product</a>
 	</div>
 	<%
-		arr = $.parseJSON(attributes);
-
-		for (i=0;i<arr.length;i++) {
-			validValues = arr[i].validValues;
-			if (validValues.length>1) {
+		itemattributes = JSON.parse(attrs);
+		for (i=0;i<attributes.length;i++) {
+			validvalues = attributes[i].validvalues.split(',');
+			if (validvalues.length>1) {
+				selected = attributes[i].name in itemattributes ? itemattributes[attributes[i].name] : null;
+				console.log(selected);
 				print('<div class="large-12 columns">');
-				print('<select name="' + arr[i].name + '">');
-				for (j=0;j<validValues.length;j++) {
-					print('<option value="' + validValues[j] + '">' + arr[i].name + ': ' + validValues[j] + '</option>');
+				print('<select name="' + attributes[i].name + '">');
+				for (j=0;j<validvalues.length;j++) {
+					print('<option value="' + validvalues[j] + '"' +  (selected==validvalues[j] ? ' selected' : '') + '>' + attributes[i].title + ': ' + validvalues[j] + '</option>');
 				}
 				print('</select></div>');
 			}
