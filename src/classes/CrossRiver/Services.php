@@ -461,9 +461,19 @@ class Services
     	return FALSE;
     }
 
-    public function initializeCartItem($idcontainer, $idproduct, $idphoto)
+    public function initializeCartItem($idcontainer, $idproduct, $idphoto, $idoriginal)
     {
 		$ret = new \stdClass();
+    	if ($idoriginal) {
+    		$result = $this->dbh->query("SELECT CI.idproduct, CI.price, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.hsize, P.vsize FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct WHERE CI.id=$idoriginal");
+			$original = $result->fetchObject();
+			$ret->idproduct = $original->idproduct;
+		}
+		else {
+			$original = NULL;
+			$ret->idproduct = $idproduct;
+		}
+
 		$ret->cropx = $ret->cropy = 0;
 		$ret->cropwidth = $ret->cropheight = 100;
 		$result = $this->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize FROM products P INNER JOIN containers C ON C.id=$idcontainer WHERE P.id=$idproduct");
@@ -477,27 +487,36 @@ class Services
 		$ret->attrs = json_encode($attrs,JSON_FORCE_OBJECT);      
 
 		$prodaspect = $product->vsize / $product->hsize;
-		$result = $this->dbh->query("SELECT width, height FROM photos WHERE id=$idphoto");
-		$photo = $result->fetchObject();
-		if ($photo->width > $photo->height) { //landscape
-			if ($photo->height * $prodaspect < $photo->width) {
-			  $ret->cropwidth = 100 * ($photo->height * $prodaspect)/$photo->width;
-			  $ret->cropx = (100 - $ret->cropwidth)/2;
+
+		if ($original==NULL || $original->vsize/$original->hsize != $prodaspect) {
+			$result = $this->dbh->query("SELECT width, height FROM photos WHERE id=$idphoto");
+			$photo = $result->fetchObject();
+			if ($photo->width > $photo->height) { //landscape
+				if ($photo->height * $prodaspect < $photo->width) {
+				  $ret->cropwidth = 100 * ($photo->height * $prodaspect)/$photo->width;
+				  $ret->cropx = (100 - $ret->cropwidth)/2;
+				}
+				else {
+				  $ret->cropheight = 100 * ($photo->width / $prodaspect)/$photo->height;
+				  $ret->cropy = (100 - $ret->cropheight)/2;
+				}
 			}
-			else {
-			  $ret->cropheight = 100 * ($photo->width / $prodaspect)/$photo->height;
-			  $ret->cropy = (100 - $ret->cropheight)/2;
+			else { //portrait
+				if ($photo->width * $prodaspect < $photo->height) {
+				  $ret->cropheight = 100 * ($photo->width * $prodaspect)/$photo->height;
+				  $ret->cropy = (100 - $ret->cropheight)/2;
+				}
+				else {
+				  $ret->cropwidth = 100 * ($photo->height / $prodaspect)/$photo->width;
+				  $ret->cropx = (100 - $ret->cropwidth)/2;
+				}
 			}
 		}
-		else { //portrait
-			if ($photo->width * $prodaspect < $photo->height) {
-			  $ret->cropheight = 100 * ($photo->width * $prodaspect)/$photo->height;
-			  $ret->cropy = (100 - $ret->cropheight)/2;
-			}
-			else {
-			  $ret->cropwidth = 100 * ($photo->height / $prodaspect)/$photo->width;
-			  $ret->cropx = (100 - $ret->cropwidth)/2;
-			}
+		else {
+			$ret->cropx = $original->cropx;
+			$ret->cropy = $original->cropy;
+			$ret->cropwidth = $original->cropwidth;
+			$ret->cropheight = $original->cropheight;
 		}
 		return $ret;
     }

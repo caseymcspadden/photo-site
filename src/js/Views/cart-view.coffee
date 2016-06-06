@@ -4,12 +4,14 @@ config = require './config'
 CartItemView = require './cartitem-view'
 OrderSummaryView = require './order-summary-view'
 CropView = require './crop-view'
+ContainerProductsView = require './container-products-view'
 ProductAttributes = require './productattributes'
 
 module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['cart-view']
 		this.cropView = new CropView
+		this.containerProductsView = new ContainerProductsView {model: this.model, cart: options.cart}
 		this.orderSummaryView = new OrderSummaryView {collection: this.collection}
 		this.productAttributes = new ProductAttributes
 		this.productAttributes.fetch()

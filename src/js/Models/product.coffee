@@ -16,6 +16,6 @@ module.exports = Backbone.Model.extend
 		vres: 0
 		price: 0
 		shippingtype: ''
-		attributes: ''
+		active: ''
 
 

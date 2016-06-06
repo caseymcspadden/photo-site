@@ -1,7 +1,7 @@
 BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
-#EditUserView = require './edit-user-view'
+AdminProductsRowView = require './admin-products-row-view'
 
 module.exports = BaseView.extend
 	events:
@@ -9,8 +9,6 @@ module.exports = BaseView.extend
 
 	initialize: (options) ->
 		this.template = templates['admin-products-view']
-		#this.editUserView = new EditUserView {collection: this.collection}
-		this.productTemplate = templates['admin-products-row-view']
 		this.listenTo this.collection, 'add', this.addOne
 		this.listenTo this.collection, 'reset', this.addAll
 
@@ -27,7 +25,8 @@ module.exports = BaseView.extend
 		this.$el.html this.template()
 
 	addOne: (product) ->
-		this.$('.products').append this.productTemplate product.toJSON()
+		adminProductsRowView = new AdminProductsRowView {model: product}
+		this.$('.products').append adminProductsRowView.render().el
 
 	addAll: ->
 		this.collection.each this.addOne, this
