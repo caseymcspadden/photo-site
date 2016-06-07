@@ -15,13 +15,12 @@ module.exports = BaseView.extend
 		this.listenTo this.collection, 'reset', this.addAll
 
 	addUser: (e) ->
-		this.editUserView.model = null
-		this.editUserView.open()
+		this.editUserView.open(null)
 	
 	editUser: (e) ->
 		id = e.target.id.replace('user-', '')
 		model = this.collection.get id
-		console.log model
+		this.editUserView.open(model)
 		e.preventDefault()
 
 	render: ->

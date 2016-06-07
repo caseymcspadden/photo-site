@@ -5,7 +5,7 @@ AdminUsersView = require('../../require/admin-users-view')
 
 usersCollection = new UsersCollection
 
-adminUsersView = new AdminUsersView({el: '.admin-users-view', collection: usersCollection})
+adminUsersView = new AdminUsersView {el: '.admin-users-view', collection: usersCollection}
 
 adminUsersView.render()
 

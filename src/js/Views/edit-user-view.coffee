@@ -14,17 +14,20 @@ module.exports = Backbone.View.extend
 			idcontainer: 0
 			isadmin: 0
 
-		this.newTemplate = templates['new-user-view']
-		this.editTemplate = templates['new-user-view']
-		console.log User
+		this.template= templates['edit-user-view']
 
-	open: ->
+	open: (model) ->
+		this.model = model
 		this.render()
 		this.$el.foundation 'open'
 
 	doSubmit: (e) ->
-		e.preventDefault()
+		e.preventDefault()		
 		arr = $(e.target).serializeArray()
+		console.log e
+		console.log arr
+		
+		###
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
@@ -32,10 +35,9 @@ module.exports = Backbone.View.extend
 			this.model.save data
 		else
 			this.collection.create data, {wait: true}
-		this.$('.close-button').trigger('click')
+		###
+		this.$el.foundation 'close'
 
 	render: ->
-		if this.model 
-			this.$el.html this.editTemplate(this.model.toJSON())
-		else
-			this.$el.html this.newTemplate(this.defaultData)
+		data = if this.model then this.model.toJSON() else this.defaultData 
+		this.$el.html this.template(data)
