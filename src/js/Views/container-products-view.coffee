@@ -19,11 +19,10 @@ module.exports = BaseView.extend
 	render: ->
 		this.$el.html this.template()
 
-	open: (photo, idcontainer) ->
-		this.photo = photo
-		if (idcontainer != this.currentContainer)
-			this.currentContainer = idcontainer
-			this.containerProducts.update idcontainer
+	open: (idphoto, idcontainer, cartitem) ->
+		this.cartitem = cartitem
+		this.idphoto = idphoto
+		this.updateProducts idcontainer
 		this.$el.foundation 'open'
 
 	updateProducts: (idcontainer) ->
@@ -33,15 +32,20 @@ module.exports = BaseView.extend
 
 	selectProduct: (e) ->
 		e.preventDefault()
-		#this.onSelect(this.$('#products').val(), this.context)
-		test = this.cart.where {idphoto: this.photo.id}
-		if test.length==0
-			this.cart.create {idcontainer: this.model.id, idphoto: this.photo.id, idproduct: this.$('#products').val()}
+		idproduct = this.$('#products').val()
+		if this.cartitem
+			this.cartitem.save {idproduct: idproduct, wait: true}
+		else
+			test = this.cart.where {idphoto: this.idphoto}
+			if test.length==0
+				this.cart.create {idcontainer: this.currentContainer, idphoto: this.idphoto, idproduct: idproduct}
 		this.$el.foundation 'close'
 
 	addOne: (product) ->
 		price = product.get('price')/100
 		$option = $("<option></option>").attr("value",product.id).text(product.get('description') + ': $' + price.toFixed(2))		
+		if this.cartitem and this.cartitem.get('idproduct') == product.id
+			$option.attr 'selected' , true
 		this.$('#products').append $option
 
 	addAll: (collection) ->

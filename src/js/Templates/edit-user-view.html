@@ -1,7 +1,7 @@
 <button type="button" class="close-button" data-close aria-label="Close">
 	<span aria-hidden="true">&times;</span>
 </button>
-<h2>Add a User</h2>
+<h2><%= id ? 'Edit' : 'Add' %> User</h2>
 <form method="POST">
 	<label>Name
 		<input type="text" name="name" value="<%= name %>">
