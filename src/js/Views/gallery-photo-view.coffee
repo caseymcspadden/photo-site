@@ -20,7 +20,7 @@ module.exports = BaseView.extend
 		console.log 'initializing gallery photo view'
 		this.cart = options.cart
 		this.template = templates['gallery-photo-view']
-		this.containerProductsView = new ContainerProductsView {model: this.model, cart: options.cart}
+		this.containerProductsView = new ContainerProductsView {cart: options.cart}
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:buyprints', this.updateProducts
@@ -60,7 +60,7 @@ module.exports = BaseView.extend
 
 	buyProduct: (e) ->
 		e.preventDefault()
-		this.containerProductsView.open this.model.get('currentPhoto') , this.model.id
+		this.containerProductsView.open this.model.get('currentPhoto').id , this.model.id, null
 
 	###
 	selectProduct: (idproduct, context) ->

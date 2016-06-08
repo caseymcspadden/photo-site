@@ -1,1 +1,16 @@
-<tr><td><a id="user-<%= id %>" class="edit-user" href="#"><%= name %></a></td><td><%= email %></td><td><%= company %></td><td><%= dt %></td><td><%= isadmin %></td><td><%= isactive %></td><td><%= idcontainer %></td></tr>
+<td><a class="edit-user" href="#"><%= name %></a></td>
+<td><%= email %></td>
+<td><%= company %></td>
+<td><%= dt %></td>
+<td><input type="checkbox" class="isadmin"<%= isadmin ? ' checked' : '' %>></td>
+<td><input type="checkbox" class="isactive"<%= isactive ? ' checked' : '' %>></td>
+<td>
+<select class="containers">
+<option value="0">NONE</option>
+<%
+	containers.each(function(container) {
+		print('<option value="' + container.id + '"' + (container.id==idcontainer ? ' selected' : '') + '>' + container.get('type') + ' - ' + container.get('name') + '</option>');
+	});
+%>
+</select>
+</td>

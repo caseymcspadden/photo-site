@@ -158,14 +158,16 @@ $app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else {
-    $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], 
-      ['name'=>$vals['name'], 
-       'company'=>$vals['company']
-      ]);
-    if ($result['error']==true)
+    //if (isset($vals['password']) && isset($vals['repeat-password']))
+      //$result = $this->services->changePassword($args['id'],  $vals['email'], $vals['password'], $vals['repeat-password'], 
+    //else {
+      $rslt = $this->services->dbh->query("UPDATE users SET name='$vals[name]', company='$vals[company]', email='$vals[email]', idcontainer=$vals[idcontainer], isadmin=$vals[isadmin], isactive=$vals[isactive] WHERE id=$args[id]");
+      $result = array('error'=>false);
+    //}
+   if ($result['error']==true)
       $json = json_encode($result);
     else
-      $json = $this->services->fetchJSON("SELECT * FROM users WHERE email='$vals[email]'",true);
+      $json = $this->services->fetchJSON("SELECT * FROM users WHERE id=$args[id]",true);
   }
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
@@ -179,7 +181,10 @@ $app->post('/bamenda/users', function($request, $response, $args) {
   else {
     $result = $this->services->register($vals['email'], $vals['password'], $vals['repeat-password'], 
       ['name'=>$vals['name'], 
-       'company'=>$vals['company']
+       'company'=>$vals['company'],
+       'isactive'=>$vals['isactive'],
+       'iadmin'=>$vals['isadmin'],
+       'idcontainer'=>$vals['idcontainer']
       ]);
     if ($result['error']==true)
       $json = json_encode($result);
@@ -582,6 +587,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $json = $request->getParsedBody();
       $vals = $this->services->initializeCartItem($json['idcontainer'], $json['idproduct'], $json['idphoto'], $args['path']);
       if ($json['idproduct']!=$vals->idproduct) {
+        $json['description'] = $vals->description;
         $json['price'] = $vals->price;
         $json['cropx'] = $vals->cropx;
         $json['cropy'] = $vals->cropy;

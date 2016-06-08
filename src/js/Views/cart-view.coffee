@@ -11,7 +11,7 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['cart-view']
 		this.cropView = new CropView
-		this.containerProductsView = new ContainerProductsView {model: this.model, cart: options.cart}
+		this.containerProductsView = new ContainerProductsView {cart: this.collection}
 		this.orderSummaryView = new OrderSummaryView {collection: this.collection}
 		this.productAttributes = new ProductAttributes
 		this.productAttributes.fetch()
@@ -21,9 +21,10 @@ module.exports = BaseView.extend
 		this.$el.html this.template()
 		this.assign this.cropView, '.crop-view'		
 		this.assign this.orderSummaryView, '.order-summary-view'		
+		this.assign this.containerProductsView, '.container-products-view'
 
 	addOne: (item) ->
-		view = new CartItemView {model: item, cropView: this.cropView, productAttributes: this.productAttributes}
+		view = new CartItemView {model: item, cropView: this.cropView, productAttributes: this.productAttributes, containerProductsView: this.containerProductsView}
 		view.render()
 		this.$('.cart-items').append view.el
 

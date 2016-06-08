@@ -19,8 +19,10 @@ module.exports = BaseView.extend
 		this.template = templates['cartitem-view']
 		this.cropView = options.cropView
 		this.productAttributes = options.productAttributes
+		this.containerProductsView = options.containerProductsView
 		this.listenTo this.model, 'change:togglecrop', this.render
 		this.listenTo this.model, 'change:quantity', this.quantityChanged
+		this.listenTo this.model, 'change:idproduct', this.render
 		this.listenTo this.model, 'destroy', this.remove
 		#this.listenTo this.model.photos, 'reset', this.render
 
@@ -37,7 +39,7 @@ module.exports = BaseView.extend
 
 	changeProduct: (e) ->
 		e.preventDefault()
-		console.log "change product"
+		this.containerProductsView.open this.model.get('idphoto') , this.model.get('idcontainer'), this.model
 
 	cropItem: (e) ->
 		e.preventDefault()
