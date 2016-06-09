@@ -20,11 +20,14 @@ module.exports = BaseView.extend
 		item = cartitem.toJSON()
 		this.$el.foundation 'open'
 		$image = this.$('.crop-photo')
+		console.log item
 		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
 		aspect = item.vsize / item.hsize
 		aspect = 1/aspect if item.height > item.width
 
 		this.$('.dimensions').html('' + item.hsize + ' x ' + item.vsize)
+
+		#minheight = if item.width > item.height then 450*item.hres/item.height else 450*item.vres/item.width
 
 		this.$('.crop-photo').cropper({
 			viewMode: 2
@@ -34,7 +37,7 @@ module.exports = BaseView.extend
 			rotatable: false
 			zoomable: false
 			background: false
-			minCropBoxHeight: 300 
+			#minCropBoxHeight: minheight 
 			###
 			crop: (e) ->
 				console.log(e.x);
@@ -45,9 +48,9 @@ module.exports = BaseView.extend
 			built: (e) ->
 				img = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
-				console.log item
-				console.log img
-				console.log canvas
+				#console.log item
+				#console.log img
+				#console.log canvas
 				data = {}
 				data.width = Math.round(item.cropwidth * img.width / 100)
 				data.height = Math.round(item.cropheight * img.height / 100)
@@ -59,7 +62,7 @@ module.exports = BaseView.extend
 				data.left = 0 
 				data.top = 0
 				###
-				console.log data
+				#console.log data
 				$image.cropper('setCropBoxData' , data)
 		})
 

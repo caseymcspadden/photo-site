@@ -476,10 +476,14 @@ class Services
 
 		$ret->cropx = $ret->cropy = 0;
 		$ret->cropwidth = $ret->cropheight = 100;
-		$result = $this->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize, P.description FROM products P INNER JOIN containers C ON C.id=$idcontainer WHERE P.id=$idproduct");
+		$result = $this->dbh->query("SELECT P.price * (100 + C.markup)/100 AS price, P.hsize, P.vsize, P.hres, P.vres, P.description FROM products P INNER JOIN containers C ON C.id=$idcontainer WHERE P.id=$idproduct");
       	$product = $result->fetchObject();
 		$ret->price = $product->price;
 		$ret->description = $product->description;
+		$ret->hsize = $product->hsize;
+		$ret->vsize = $product->vsize;
+		$ret->hres = $product->hres;
+		$ret->vres = $product->vres;
 	
 	  	$attrs = array();
     	$result = $this->dbh->query("SELECT A.name, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute WHERE PA.idproduct=$idproduct");

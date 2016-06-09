@@ -589,6 +589,10 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       if ($json['idproduct']!=$vals->idproduct) {
         $json['description'] = $vals->description;
         $json['price'] = $vals->price;
+        $json['hsize'] = $vals->hsize;
+        $json['vsize'] = $vals->vsize;
+        $json['hres'] = $vals->hres;
+        $json['vres'] = $vals->vres;
         $json['cropx'] = $vals->cropx;
         $json['cropy'] = $vals->cropy;
         $json['cropwidth'] = $vals->cropwidth;

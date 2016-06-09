@@ -28,6 +28,7 @@ module.exports = BaseView.extend
 
 	render: ->
 		data = this.model.toJSON()
+		console.log data		
 		data.attributes = []
 		attributes = this.productAttributes.where {idproduct: data.idproduct}
 		data.attributes.push attributes[i].toJSON() for i in [0...attributes.length]
