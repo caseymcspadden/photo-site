@@ -18,16 +18,20 @@ module.exports = BaseView.extend
 	open: (cartitem)->
 		this.cartitem = cartitem
 		item = cartitem.toJSON()
+		this.$('.cropper-face').removeClass 'warning'
+		this.$('.error-message').addClass 'hide'
+		this.$('.save-crop').removeClass 'disabled'
+
 		this.$el.foundation 'open'
 		$image = this.$('.crop-photo')
-		console.log item
 		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
 		aspect = item.vsize / item.hsize
 		aspect = 1/aspect if item.height > item.width
+		minheight = 0
+		minwidth = 0
+		self = this
 
 		this.$('.dimensions').html('' + item.hsize + ' x ' + item.vsize)
-
-		#minheight = if item.width > item.height then 450*item.hres/item.height else 450*item.vres/item.width
 
 		this.$('.crop-photo').cropper({
 			viewMode: 2
@@ -37,33 +41,28 @@ module.exports = BaseView.extend
 			rotatable: false
 			zoomable: false
 			background: false
-			#minCropBoxHeight: minheight 
-			###
 			crop: (e) ->
-				console.log(e.x);
-				console.log(e.y);
-				console.log(e.width);	
-				console.log(e.height);
-			###
+				if (e.width<minwidth or e.height<minheight)
+					self.$('.cropper-face').addClass 'warning'
+					self.$('.error-message').removeClass 'hide'
+					self.$('.save-crop').addClass 'disabled'
+				else
+					self.$('.cropper-face').removeClass 'warning'
+					self.$('.error-message').addClass 'hide'
+					self.$('.save-crop').removeClass 'disabled'
 			built: (e) ->
-				img = $image.cropper('getImageData')
+				imageData = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
-				#console.log item
-				#console.log img
-				#console.log canvas
+				minheight = if item.width > item.height then imageData.naturalHeight*item.hres/item.height else imageData.naturalHeight*item.vres/item.height
+				minwidth = if item.width > item.height then imageData.naturalWidth*item.vres/item.width else imageData.naturalWidth*item.hres/item.width
+				minheight *= 1.05
+				minwidth *= 1.05
 				data = {}
-				data.width = Math.round(item.cropwidth * img.width / 100)
-				data.height = Math.round(item.cropheight * img.height / 100)
-				data.left = Math.round(canvas.left + item.cropx * img.width / 100)
-				data.top = Math.round(canvas.top + item.cropy * img.height / 100)
-				###
-				data.width = 449
-				data.height = 337
-				data.left = 0 
-				data.top = 0
-				###
-				#console.log data
-				$image.cropper('setCropBoxData' , data)
+				data.width = Math.round(item.cropwidth * imageData.width / 100)
+				data.height = Math.round(item.cropheight * imageData.height / 100)
+				data.left = Math.round(canvas.left + item.cropx * imageData.width / 100)
+				data.top = Math.round(canvas.top + item.cropy * imageData.height / 100)
+				$image.cropper 'setCropBoxData' , data
 		})
 
 	saveCrop: (e) ->
