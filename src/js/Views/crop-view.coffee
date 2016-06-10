@@ -30,6 +30,7 @@ module.exports = BaseView.extend
 		minheight = 0
 		minwidth = 0
 		self = this
+		sizeok=true
 
 		this.$('.dimensions').html('' + item.hsize + ' x ' + item.vsize)
 
@@ -42,11 +43,13 @@ module.exports = BaseView.extend
 			zoomable: false
 			background: false
 			crop: (e) ->
-				if (e.width<minwidth or e.height<minheight)
+				if ((e.width<minwidth or e.height<minheight) and sizeok)
+					sizeok=false
 					self.$('.cropper-face').addClass 'warning'
 					self.$('.error-message').removeClass 'hide'
 					self.$('.save-crop').addClass 'disabled'
-				else
+				else if ((e.width>=minwidth and e.height>=minheight) and not sizeok)
+					sizeok=true
 					self.$('.cropper-face').removeClass 'warning'
 					self.$('.error-message').addClass 'hide'
 					self.$('.save-crop').removeClass 'disabled'
@@ -55,8 +58,8 @@ module.exports = BaseView.extend
 				canvas = $image.cropper('getCanvasData')
 				minheight = if item.width > item.height then imageData.naturalHeight*item.hres/item.height else imageData.naturalHeight*item.vres/item.height
 				minwidth = if item.width > item.height then imageData.naturalWidth*item.vres/item.width else imageData.naturalWidth*item.hres/item.width
-				minheight *= 1.05
-				minwidth *= 1.05
+				minheight = Math.round(minheight+1)
+				minwidth = Math.round(minwidth+1)
 				data = {}
 				data.width = Math.round(item.cropwidth * imageData.width / 100)
 				data.height = Math.round(item.cropheight * imageData.height / 100)

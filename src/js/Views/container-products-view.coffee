@@ -12,7 +12,8 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['container-products-view']
 		this.cart = options.cart
-		this.currentContainer = 0
+		this.idcontainer = 0
+		this.idphoto = 0
 		this.containerProducts = new ContainerProducts
 		this.listenTo this.containerProducts, 'reset', this.addAll
 
@@ -22,13 +23,14 @@ module.exports = BaseView.extend
 	open: (idphoto, idcontainer, cartitem) ->
 		this.cartitem = cartitem
 		this.idphoto = idphoto
-		this.updateProducts idcontainer
+		this.updateProducts idcontainer, idphoto
 		this.$el.foundation 'open'
 
-	updateProducts: (idcontainer) ->
-		if (idcontainer != this.currentContainer)
-			this.currentContainer = idcontainer
-			this.containerProducts.update idcontainer
+	updateProducts: (idcontainer, idphoto) ->
+		if (idcontainer != this.idcontainer or idphoto != this.idphoto)
+			this.idcontainer = idcontainer
+			this.idphoto = idphoto
+			this.containerProducts.update this.idcontainer, this.idphoto
 
 	selectProduct: (e) ->
 		e.preventDefault()
@@ -38,7 +40,7 @@ module.exports = BaseView.extend
 		else
 			test = this.cart.where {idphoto: this.idphoto}
 			if test.length==0
-				this.cart.create {idcontainer: this.currentContainer, idphoto: this.idphoto, idproduct: idproduct}
+				this.cart.create {idcontainer: this.idcontainer, idphoto: this.idphoto, idproduct: idproduct}
 		this.$el.foundation 'close'
 
 	addOne: (product) ->

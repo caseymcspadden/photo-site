@@ -376,6 +376,21 @@ $app->get('/bamenda/containers/{id:[0-9]+}/products', function($request, $respon
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->get('/bamenda/containers/{idcontainer:[0-9]+}/photos/{idphoto:[0-9]+}/products', function($request, $response, $args) {
+  $arr = array();
+
+  $result = $this->services->dbh->query("SELECT P.id, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, PH.width, PH.height, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[idcontainer] INNER JOIN photos PH ON PH.id=$args[idphoto] WHERE P.active=1");
+  
+  while ($row = $result->fetchObject())
+    if ($row->hres <= min($row->width,$row->height) && $row->vres <= max($row->width,$row->height))
+      array_push($arr,$row);
+
+  $json = json_encode($arr,JSON_NUMERIC_CHECK);
+ 
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 $app->get('/bamenda/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
 

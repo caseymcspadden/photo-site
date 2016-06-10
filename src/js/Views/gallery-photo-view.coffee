@@ -17,7 +17,6 @@ module.exports = BaseView.extend
 		'keyup' : 'keyUp'
 
 	initialize: (options) ->
-		console.log 'initializing gallery photo view'
 		this.cart = options.cart
 		this.template = templates['gallery-photo-view']
 		this.containerProductsView = new ContainerProductsView {cart: options.cart}
@@ -37,9 +36,11 @@ module.exports = BaseView.extend
 		this.assign this.downloadGalleryView, '.download-gallery-view'
 		this
 
+	###
 	updateProducts: (m) ->
 		this.containerProductsView.updateProducts m.id
-
+	###
+	
 	updateAccess: (m) ->
 		this.$('.download-gallery').removeClass('hide') if m.get('downloadgallery')
 		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
