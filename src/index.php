@@ -94,6 +94,13 @@ $app->get('/cart', function ($request, $response, $args) {
     ]);
 });
 
+$app->get('/checkout', function ($request, $response, $args) {
+    return $this->view->render($response, 'checkout.html' , [
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
+    ]);
+});
+
 $app->get($paths->adminpath, function ($request, $response, $args) {
     if (!$this->services->isAdmin())
       return $response->withRedirect($this->get('router')->pathFor('home'));

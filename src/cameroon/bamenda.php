@@ -91,6 +91,13 @@ $app->put('/bamenda/catalog', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 }); 
 
+$app->get('/bamenda/shipping', function($request, $response, $args) {
+  $json = $this->services->fetchJSON("SELECT * FROM shipping");
+
+  $response->getBody()->write($json);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 $app->get('/bamenda/products', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, api, idapi, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, active FROM products ORDER BY type, id");
 

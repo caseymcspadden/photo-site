@@ -1,0 +1,26 @@
+<h2>Checkout</h2>
+
+<div class="row">
+	<div class="large-8 columns">
+		<div class="large-4 columns"><h4>Items:</h4></div>
+		<div class="large-8 columns text-right"><h4><%= count %></h4></div>
+		<div class="large-4 columns"><h4>Subtotal:</h4></div>
+		<div class="large-8 columns text-right"><h4>$<%= (subtotal/100).toFixed(2) %></h4></div>
+		<div class="large-4 columns"><h4>Shipping:</h4></div>
+		<div class="large-8 columns ">
+			<select id="shipping">
+				<%
+					for (i=0;i<shipping.length;i++) {
+						s = shipping[i];
+						if (s.shippingtype==shippingtype)
+							print('<option value="' + s.id + '">' + s.description + ' - $' + s.price.toFixed(2) + '</option>');
+					}
+				%>
+			</select>
+		</div>
+		<div class="large-4 columns"><h4>Total:</h4></div>
+		<div class="large-8 columns text-right"><h4 class="total-container">$<span class="total"></span></h4></div>
+	</div>
+	<div class="large-4 columns">
+	</div>
+</div>

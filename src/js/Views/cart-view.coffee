@@ -18,7 +18,7 @@ module.exports = BaseView.extend
 		this.listenTo this.collection, 'reset', this.addAll
 
 	render: ->
-		this.$el.html this.template()
+		this.$el.html this.template {urlBase: config.urlBase}
 		this.assign this.cropView, '.crop-view'		
 		this.assign this.orderSummaryView, '.order-summary-view'		
 		this.assign this.containerProductsView, '.container-products-view'

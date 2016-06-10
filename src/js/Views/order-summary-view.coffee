@@ -6,7 +6,6 @@ module.exports = Backbone.View.extend
 	initialize: (options) ->
 		this.template = templates['order-summary-view']
 		this.listenTo this.collection, 'add change remove reset', this.render
-		this.render()
 
 	render: ->
 		data = {count: 0, subtotal: 0}
