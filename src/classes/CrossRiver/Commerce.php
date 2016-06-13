@@ -4,7 +4,7 @@ namespace CrossRiver;
 class Commerce {
 	
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $live = TRUE;
+	private $live = FALSE;
 
 	public function __construct() 
 	{	
@@ -125,6 +125,83 @@ class Commerce {
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return $results;		
+	}
+
+	public function getOrders($id)
+	{
+		$pwinty = $this->get_pwinty_properties();
+ 		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders' . ($id ? "/$id" : ''));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		$results = curl_exec($ch);
+		curl_close($ch);
+	 	return $results;				
+	}
+
+	public function addItemToOrder($id, $guid, $item)
+	{
+		$pwinty = $this->get_pwinty_properties();
+
+		$data = array(
+			'id'=>$id,
+			'type'=>$item->idapi,
+			'url'=>'https://www.test.com/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
+			'copies'=>$item->quantity,
+			'sizing'=>'Crop'
+			//'attributes'=>str_replace('"' , '', $item->attrs)
+		);
+ 		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders/' . $id . '/Photos');
+		curl_setopt($ch, CURLOPT_POST, TRUE);		
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		$results = curl_exec($ch);
+		curl_close($ch);
+	 	return $results;				
+	}
+
+	public function addItemsToOrder($idpwinty, $guid, $items)
+	{
+		$pwinty = $this->get_pwinty_properties();
+
+		$data = array();
+
+		foreach ($items as $item) {
+			$payload = array(
+				'id'=>$idpwinty,
+				'type'=>$item->idapi,
+				'url'=>'https://www/test.com/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
+				'copies'=>$item->quantity,
+				'sizing'=>'Crop'
+				//'attributes'=>$item->attrs
+			);
+			//array_push($data,$payload);
+		}
+ 		
+ 		//error_log(http_build_query($data));
+
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders/' . $idpwinty . '/Photos/Batch');
+		curl_setopt($ch, CURLOPT_POST, TRUE);		
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query(array('items'=>$data)));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		$results = curl_exec($ch);
+		curl_close($ch);
+	 	return $results;				
 	}
 
 	public function getProductCatalog($country, $quality)

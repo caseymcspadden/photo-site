@@ -489,6 +489,7 @@ class Services
     	$result = $this->dbh->query("SELECT A.name, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute WHERE PA.idproduct=$idproduct");
       	while ($pa=$result->fetchObject())
       		$attrs[$pa->name] = $pa->defaultvalue;
+		
 		$ret->attrs = json_encode($attrs,JSON_FORCE_OBJECT);      
 
 		$prodaspect = $product->vsize / $product->hsize;

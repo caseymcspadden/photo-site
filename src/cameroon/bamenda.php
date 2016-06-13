@@ -60,6 +60,13 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) {
+  $str = $this->commerce->getOrders(isset($args['id']) ? $args['id'] : NULL);
+
+  $response->getBody()->write($str);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 $app->post('/bamenda/orders', function($request, $response, $args) {
   $r = $request->getParsedBody();
 
@@ -72,23 +79,26 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
   $json = json_decode($str);
 
   if ($json->errorMessage==null) {
-    $guid = $this->services->getRandomKey();
-    $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$json->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
- 
-    $idorder = $this->services->dbh->lastInsertId();
- 
-    $cartitems = array();
+      $guid = $this->services->getRandomKey();
+      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$json->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
 
-    $result = $this->services->dbh->query("SELECT * FROM cartitems where idcart='$r[cart]'");
+      $idorder = $this->services->dbh->lastInsertId();
 
-    while ($obj = $result->fetchObject()) 
-      array_push($cartitems, $obj);
-        
+      $cartitems = array();
+
+      $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
+
+      while ($item = $result->fetchObject()) {
+        $rslt = $this->commerce->addItemToOrder($json->id, $guid, $item);
+        error_log($rslt);
+      }
+   }
+
+    /*
     foreach ($cartitems as $i) {
-      error_log("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
       $this->services->dbh->query("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
     }
-  }
+    */
 
   $response->getBody()->write($str);
   return $response->withHeader('Content-Type','application/json');
