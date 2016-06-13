@@ -93,12 +93,46 @@ class Commerce {
 		return $results;
 	}
 
+	public function createOrder($name, $address1, $address2, $city, $state, $zip, $tracked)
+	{
+		$pwinty = $this->get_pwinty_properties();
+
+		$data = array(
+			'countryCode'=>'US',
+			'destinationCountryCode'=>'US',
+			'qualityLevel'=>'Pro',
+			'recipientName'=>$name,
+			'address1'=>$address1,
+			'address2'=>$address2,
+			'addressTownOrCity'=>$city,
+			'stateOrCounty'=>$state,			
+			'postalOrZipCode'=>$zip,
+			'useTrackedShipping'=>($tracked ? true : false),
+			'payment'=>'InvoiceMe'
+		);
+
+		error_log(json_encode($data));
+		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders');
+		curl_setopt($ch, CURLOPT_POST, TRUE);		
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		$results = curl_exec($ch);
+		curl_close($ch);
+	 	return $results;		
+	}
+
 	public function getProductCatalog($country, $quality)
 	{
 		$pwinty = $this->get_pwinty_properties();
 		
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint ."/Catalogue/$country/$quality");
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . "/Catalogue/$country/$quality");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));

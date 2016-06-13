@@ -21,8 +21,6 @@ checkoutView = new CheckoutView {el: '.checkout-view', collection: cartItems}
 
 $('body').append loginView.render().el
 
-checkoutView.render()
-
 $ ->
 	session.fetch()
 	cartItems.fetch {reset: true}

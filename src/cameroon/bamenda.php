@@ -60,6 +60,40 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->post('/bamenda/orders', function($request, $response, $args) {
+  $r = $request->getParsedBody();
+
+  $result = $this->services->dbh->query("SELECT tracked FROM shipping WHERE id=$r[shipping]");
+  $arr = $result->fetch(PDO::FETCH_NUM);
+  $tracked = $arr ? $arr[0] : 0;
+
+  $str = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+
+  $json = json_decode($str);
+
+  if ($json->errorMessage==null) {
+    $guid = $this->services->getRandomKey();
+    $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$json->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+ 
+    $idorder = $this->services->dbh->lastInsertId();
+ 
+    $cartitems = array();
+
+    $result = $this->services->dbh->query("SELECT * FROM cartitems where idcart='$r[cart]'");
+
+    while ($obj = $result->fetchObject()) 
+      array_push($cartitems, $obj);
+        
+    foreach ($cartitems as $i) {
+      error_log("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
+      $this->services->dbh->query("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
+    }
+  }
+
+  $response->getBody()->write($str);
+  return $response->withHeader('Content-Type','application/json');
+});
+
 $app->get('/bamenda/catalog', function($request, $response, $args) {
   $str = $this->commerce->getProductCatalog('US','Pro');
 
@@ -586,7 +620,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT CI.id, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idcart, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $cropx = $cropy = 0;
