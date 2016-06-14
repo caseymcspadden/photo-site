@@ -70,17 +70,17 @@ $app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) 
 $app->post('/bamenda/orders', function($request, $response, $args) {
   $r = $request->getParsedBody();
 
+  $error = FALSE;
+
   $result = $this->services->dbh->query("SELECT tracked FROM shipping WHERE id=$r[shipping]");
   $arr = $result->fetch(PDO::FETCH_NUM);
   $tracked = $arr ? $arr[0] : 0;
 
-  $str = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+  $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
 
-  $json = json_decode($str);
-
-  if ($json->errorMessage==null) {
+  if ($order->errorMessage==null) {
       $guid = $this->services->getRandomKey();
-      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$json->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
 
       $idorder = $this->services->dbh->lastInsertId();
 
@@ -88,19 +88,27 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
 
       $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
 
-      while ($item = $result->fetchObject()) {
-        $rslt = $this->commerce->addItemToOrder($json->id, $guid, $item);
-        error_log($rslt);
+      while ($item = $result->fetchObject())
+        array_push($cartitems, $item);
+
+      foreach ($cartitems as $item) {
+        $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+        if ($photo->errorMessage==null)
+           $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
+        else {
+          error_log("PWINTY Order create photo error: " . $photo->errorMessage);
+          $error = TRUE;
+        }
       }
    }
+   else {
+      error_log("PWINTY Order error: " . $order->errorMessage);
+      $error = TRUE;
+   }
+   if (!$error && $this->commerce->isOrderValid($order->id))
+     $this->commerce->submitOrder($order->id);
 
-    /*
-    foreach ($cartitems as $i) {
-      $this->services->dbh->query("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
-    }
-    */
-
-  $response->getBody()->write($str);
+  $response->getBody()->write(json_encode($order));
   return $response->withHeader('Content-Type','application/json');
 });
 

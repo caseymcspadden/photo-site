@@ -45,7 +45,7 @@ module.exports = BaseView.extend
 		shipping = parseInt(this.$('#shipping').val())
 		for item in this.shipping
 			if (item.id==shipping)
-				this.$('.total').html (this.subtotal/100 + item.price).toFixed(2)
+				this.$('.total').html ((this.subtotal+item.price)/100).toFixed(2)
 
 	render: ->
 		console.log "rendering checkout-view"
