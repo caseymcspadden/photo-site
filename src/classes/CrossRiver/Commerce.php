@@ -49,7 +49,7 @@ class Commerce {
 	private function get_pwinty_properties()
 	{
 		$ret = new \stdClass();
-		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);
+		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
 		$ret->merchantId = $this->config->pwinty_merchantId;
 		$ret->apiKey = $this->config->pwinty_apiKey;
 
@@ -93,16 +93,15 @@ class Commerce {
 		return $results;
 	}
 
-	private function initialize_pwinty($endpoint)
+	private function initialize_pwinty($call)
 	{
 		$pwinty = $this->get_pwinty_properties();
 
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . $endpoint);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . $call);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
 		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
 
 		return $ch;
@@ -124,9 +123,11 @@ class Commerce {
 			'payment'=>'InvoiceMe'
 		);
 
+		error_log(json_encode($data));
+
 		$ch = $this->initialize_pwinty('/Orders');
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
-		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return json_decode($results);		
@@ -174,14 +175,16 @@ class Commerce {
 			//'url'=>$remoteUrlBase . '/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
 			'url'=>$remoteUrlBase . '/orders/' . $guid . '/photos/test.jpg',
 			'copies'=>$item->quantity,
-			'sizing'=>'Crop'
-			//'attributes'=>str_replace('"' , '', $item->attrs)
+			'sizing'=>'Crop',
+			'attributes'=>$item->attrs
 		);
+
+		//error_log(json_encode($data));
  		
 		$ch = $this->initialize_pwinty('/Orders/' . $id . '/Photos');		
 
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
-		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return json_decode($results);				
