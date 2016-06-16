@@ -25,12 +25,15 @@ $container['view'] = function ($container) {
     ));
     return $view;
 };
+
 $container['services'] = function($container) {
     return new CrossRiver\Services();
 };
+
 $container['commerce'] = function($container) {
     return new CrossRiver\Commerce();
 };
+
 $app->get('/bamenda/test', function($request, $response, $args) {
   $json = $this->commerce->makePayment(
     100, 
@@ -49,42 +52,54 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) {
   $str = $this->commerce->getOrders(isset($args['id']) ? $args['id'] : NULL);
   $response->getBody()->write($str);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->post('/bamenda/orders', function($request, $response, $args) {
   $r = $request->getParsedBody();
+  $error = FALSE;
   $result = $this->services->dbh->query("SELECT tracked FROM shipping WHERE id=$r[shipping]");
   $arr = $result->fetch(PDO::FETCH_NUM);
   $tracked = $arr ? $arr[0] : 0;
-  $str = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
-  $json = json_decode($str);
-  if ($json->errorMessage==null) {
+  $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+  if ($order->errorMessage==null) {
       $guid = $this->services->getRandomKey();
-      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$json->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
       $idorder = $this->services->dbh->lastInsertId();
       $cartitems = array();
       $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
-      while ($item = $result->fetchObject()) {
-        $rslt = $this->commerce->addItemToOrder($json->id, $guid, $item);
-        error_log($rslt);
+      while ($item = $result->fetchObject())
+        array_push($cartitems, $item);
+      foreach ($cartitems as $item) {
+        $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+        if ($photo->errorMessage==null)
+           $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
+        else {
+          error_log("PWINTY Order create photo error: " . $photo->errorMessage);
+          $error = TRUE;
+        }
       }
    }
-    /*
-    foreach ($cartitems as $i) {
-      $this->services->dbh->query("INSERT INTO orderdetails (idorder, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$i->idcontainer}, {$i->idphoto}, {$i->idproduct}, {$i->price}, {$i->quantity}, '{$i->attrs}', {$i->cropx}, {$i->cropy}, {$i->cropwidth}, {$i->cropheight})");
-    }
-    */
-  $response->getBody()->write($str);
+   else {
+      error_log("PWINTY Order error: " . $order->errorMessage);
+      $error = TRUE;
+   }
+   if (!$error && $this->commerce->isOrderValid($order->id))
+     $this->commerce->submitOrder($order->id);
+  $response->getBody()->write(json_encode($order));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/catalog', function($request, $response, $args) {
   $str = $this->commerce->getProductCatalog('US','Pro');
   $response->getBody()->write($str);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/catalog', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
@@ -104,17 +119,20 @@ $app->put('/bamenda/catalog', function($request, $response, $args) {
   }
   $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
-}); 
+});
+
 $app->get('/bamenda/shipping', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM shipping");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/products', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, api, idapi, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, active FROM products ORDER BY type, id");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) {
    $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) 
@@ -122,16 +140,19 @@ $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) 
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/productattributes', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT PA.idproduct, PA.idattribute , A.name, A.title, A.validvalues, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute ORDER BY idproduct, idattribute");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/test2[/{path:.*}]', function($request, $response, $args) {
   $json = $this->commerce->getPayments(isset($args['path']) ? $args['path'] : NULL);
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
@@ -140,6 +161,7 @@ $app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) 
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) 
@@ -147,6 +169,7 @@ $app->put('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) 
   $response->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/users', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
@@ -155,6 +178,7 @@ $app->get('/bamenda/users', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if (!$this->services->isAdmin())
@@ -174,6 +198,7 @@ $app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->post('/bamenda/users', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if (!$this->services->isAdmin())
@@ -194,11 +219,13 @@ $app->post('/bamenda/users', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/session', function($request, $response, $args) {
   $user = $this->services->getSessionUser();
   
   $response->withHeader('Content-Type','application/json')->getBody()->write(json_encode($user,JSON_NUMERIC_CHECK));
 });
+
 $app->put('/bamenda/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
   if ($ret)
@@ -208,6 +235,7 @@ $app->put('/bamenda/session', function($request, $response, $args) {
   $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->post('/bamenda/session', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
@@ -221,6 +249,7 @@ $app->post('/bamenda/session', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/photos', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
@@ -229,6 +258,7 @@ $app->get('/bamenda/photos', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->delete('/bamenda/photos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -245,6 +275,7 @@ $app->delete('/bamenda/photos', function($request, $response, $args) {
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) 
@@ -252,6 +283,7 @@ $app->put('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
@@ -260,11 +292,13 @@ $app->get('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/featuredphotos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN settings S ON S.featuredgallery=CP.idcontainer WHERE S.iduser=1 ORDER BY CP.position");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containerfrompath/[{path:.*}]', function($request, $response, $args) {
     $container = $this->services->getContainer($args['path']);
     if (!$container)
@@ -272,16 +306,19 @@ $app->get('/bamenda/containerfrompath/[{path:.*}]', function($request, $response
     $response->getBody()->write(json_encode($container,JSON_NUMERIC_CHECK));
     return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/pathfromcontainer/{id:[0-9]+}', function($request, $response, $args) {
     $path = $this->services->getContainerPath($args['id']);
     $response->getBody()->write(json_encode(array('path'=>$path)));
     return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers ORDER BY idparent, position");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
 });
+
 $app->post('/bamenda/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -295,6 +332,7 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
   $response->getBody()->write(json_encode($vals));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/containers', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -303,6 +341,7 @@ $app->put('/bamenda/containers', function($request, $response, $args) {
   $response->getBody()->write(json_encode($vals));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -311,6 +350,7 @@ $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $response->getBody()->write(json_encode($vals));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -329,11 +369,13 @@ $app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers/{id:[0-9]+}/products', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id] WHERE P.active=1");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers/{idcontainer:[0-9]+}/photos/{idphoto:[0-9]+}/products', function($request, $response, $args) {
   $arr = array();
   $result = $this->services->dbh->query("SELECT P.id, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, PH.width, PH.height, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[idcontainer] INNER JOIN photos PH ON PH.id=$args[idphoto] WHERE P.active=1");
@@ -346,16 +388,19 @@ $app->get('/bamenda/containers/{idcontainer:[0-9]+}/photos/{idphoto:[0-9]+}/prod
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
   $arr = array();
@@ -364,6 +409,7 @@ $app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, 
   $response->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->post('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   
@@ -380,6 +426,7 @@ $app->post('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request,
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
@@ -393,6 +440,7 @@ $app->put('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, 
   $response->getBody()->write(json_encode($parsedBody,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->delete('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody(); 
   if ($this->services->isAdmin()) {
@@ -411,6 +459,7 @@ $app->delete('/bamenda/containers/{id:[0-9]+}/containerphotos', function($reques
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $response, $args) {
   $sizemap = array(1=>'S', 2=>'M', 3=>'L', 4=>'X');
   $ret = new stdClass();
@@ -459,6 +508,7 @@ $app->post('/bamenda/containers/{id:[0-9]+}/archive', function($request, $respon
   $response->getBody()->write(json_encode($ret));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request, $response, $args) {
   $sizemap = array(1=>'S', 2=>'M', 3=>'L', 4=>'X');  
   $ret = new stdClass();
@@ -488,6 +538,7 @@ $app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request
   $response->getBody()->write(json_encode($ret));
   return $response->withHeader('Content-Type','application/json');
 });
+
 $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   session_name('cart');
   session_start();
@@ -548,6 +599,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
 });
+
 $app->post('/bamenda/upload', function($request, $response, $args) {
     if (!$this->services->isAdmin())
       return;
@@ -708,4 +760,4 @@ $app->post('/bamenda/upload', function($request, $response, $args) {
 });
 // Run app
 $app->run();
-?>
+?>  

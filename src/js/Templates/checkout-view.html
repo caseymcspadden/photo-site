@@ -18,7 +18,7 @@
 					for (i=0;i<shipping.length;i++) {
 						s = shipping[i];
 						if (s.shippingtype==shippingtype)
-							print('<option value="' + s.id + '">Shipping: ' + s.description + ' - $' + s.price.toFixed(2) + '</option>');
+							print('<option value="' + s.id + '">Shipping: ' + s.description + ' - $' + (s.price/100).toFixed(2) + '</option>');
 					}
 				%>
 			</select>

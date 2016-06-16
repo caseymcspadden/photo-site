@@ -25,7 +25,7 @@ class Commerce {
 		$secret = ($this->live ? $this->config->secret_live : $this->config->secret_sandbox);
 
 		$ret = new \stdClass();
-		$ret->endpoint = ($this->live ? $this->config->endpoint_live : $this->config->endpoint_sandbox);
+		$ret->endpoint = ($this->live ? $this->config->endpoint_paypal_live : $this->config->endpoint_paypal_sandbox);
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/oauth2/token"); 
@@ -49,7 +49,7 @@ class Commerce {
 	private function get_pwinty_properties()
 	{
 		$ret = new \stdClass();
-		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);
+		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
 		$ret->merchantId = $this->config->pwinty_merchantId;
 		$ret->apiKey = $this->config->pwinty_apiKey;
 
@@ -93,10 +93,22 @@ class Commerce {
 		return $results;
 	}
 
-	public function createOrder($name, $address1, $address2, $city, $state, $zip, $tracked)
+	private function initialize_pwinty($call)
 	{
 		$pwinty = $this->get_pwinty_properties();
 
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . $call);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+
+		return $ch;
+	}
+
+	public function createOrder($name, $address1, $address2, $city, $state, $zip, $tracked)
+	{	
 		$data = array(
 			'countryCode'=>'US',
 			'destinationCountryCode'=>'US',
@@ -112,107 +124,73 @@ class Commerce {
 		);
 
 		error_log(json_encode($data));
-		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders');
+
+		$ch = $this->initialize_pwinty('/Orders');
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
 		$results = curl_exec($ch);
 		curl_close($ch);
-	 	return $results;		
+	 	return json_decode($results);		
 	}
 
 	public function getOrders($id)
 	{
-		$pwinty = $this->get_pwinty_properties();
+		$ch = $this->initialize_pwinty('/Orders' . ($id ? "/$id" : ''));		
  		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders' . ($id ? "/$id" : ''));
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return $results;				
 	}
 
-	public function addItemToOrder($id, $guid, $item)
+	public function isOrderValid($id)
 	{
-		$pwinty = $this->get_pwinty_properties();
-
-		$data = array(
-			'id'=>$id,
-			'type'=>$item->idapi,
-			'url'=>'https://www.test.com/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
-			'copies'=>$item->quantity,
-			'sizing'=>'Crop'
-			//'attributes'=>str_replace('"' , '', $item->attrs)
-		);
+		$ch = $this->initialize_pwinty('/Orders/' . $id . '/SubmissionStatus');		
  		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders/' . $id . '/Photos');
-		curl_setopt($ch, CURLOPT_POST, TRUE);		
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query($data));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
 		$results = curl_exec($ch);
 		curl_close($ch);
-	 	return $results;				
+
+		$json = json_decode($results);
+	 	return $json->isValid;				
 	}
 
-	public function addItemsToOrder($idpwinty, $guid, $items)
+	public function submitOrder($id)
 	{
-		$pwinty = $this->get_pwinty_properties();
-
-		$data = array();
-
-		foreach ($items as $item) {
-			$payload = array(
-				'id'=>$idpwinty,
-				'type'=>$item->idapi,
-				'url'=>'https://www/test.com/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
-				'copies'=>$item->quantity,
-				'sizing'=>'Crop'
-				//'attributes'=>$item->attrs
-			);
-			//array_push($data,$payload);
-		}
+		$ch = $this->initialize_pwinty('/Orders/' . $id . '/Status');		
  		
- 		//error_log(http_build_query($data));
-
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . '/Orders/' . $idpwinty . '/Photos/Batch');
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		//curl_setopt($ch, CURLOPT_SAFE_UPLOAD, FALSE);	
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_POSTFIELDS,  http_build_query(array('items'=>$data)));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  '{"status":"Submitted"}');
+
+		$results = curl_exec($ch);
+
+		curl_close($ch);
+
+		return $results;
+	}
+
+	public function addItemToOrder($id, $guid, $remoteUrlBase, $item)
+	{
+		$data = new \stdClass;
+		$data->type=$item->idapi;
+			//'url'=>$remoteUrlBase . '/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
+		$data->url=$remoteUrlBase . '/orders/' . $guid . '/photos/test.jpg';
+		$data->copies=$item->quantity;
+		$data->sizing='Crop';
+		$data->attributes=json_decode($item->attrs);
+
+		error_log(json_encode($data));
+ 		
+		$ch = $this->initialize_pwinty('/Orders/' . $id . '/Photos');		
+
+		curl_setopt($ch, CURLOPT_POST, TRUE);		
+		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
 		$results = curl_exec($ch);
 		curl_close($ch);
-	 	return $results;				
+	 	return json_decode($results);				
 	}
 
 	public function getProductCatalog($country, $quality)
-	{
-		$pwinty = $this->get_pwinty_properties();
-		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . "/Catalogue/$country/$quality");
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+	{		
+		$ch = $this->initialize_pwinty('/Catalogue/$country/$quality');	
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return $results;		
