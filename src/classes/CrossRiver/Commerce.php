@@ -46,6 +46,40 @@ class Commerce {
 		return $ret;
 	}
 
+	private function initialize_paypal($call)
+	{
+		$clientId = ($this->live ? $this->config->clientId_live : $this->config->clientId_sandbox);
+		$secret = ($this->live ? $this->config->secret_live : $this->config->secret_sandbox);
+
+		$ret = new \stdClass();
+		$endpoint = ($this->live ? $this->config->endpoint_paypal_live : $this->config->endpoint_paypal_sandbox);
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $endpoint . "/oauth2/token"); 
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Accept-Language: en_US'));
+		curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $secret);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=client_credentials");
+     
+		$results = curl_exec($ch);
+		curl_close($ch);   
+		$access = json_decode($results,TRUE);
+	
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $endpoint . $call);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $access['access_token']));
+
+		return $ch;
+	}
+
 	private function get_pwinty_properties()
 	{
 		$ret = new \stdClass();
@@ -58,20 +92,27 @@ class Commerce {
 
 	public function getPayments($id=NULL)
 	{
-		$paypal = $this->get_paypal_properties();
-		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint ."/payments/payment" . ($id ? "/$id" : ""));
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
+		$ch = $this->initialize_paypal('/payments/payment' . ($id ? "/$id" : ""));
 		$results = curl_exec($ch);
 		curl_close($ch);
 	 	return $results;			
 	}
 
-	public function makePayment($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip)
+	public function makePayment($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1=NULL, $address2=NULL, $city=NULL, $state=NULL, $zip=NULL)
+	{
+		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
+					
+		$ch = $this->initialize_paypal('/payments/payment');
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+			
+		$results = curl_exec($ch);
+		curl_close($ch);
+  
+		return $results;
+	}
+
+	public function makePayment2($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip)
 	{
 		$paypal = $this->get_paypal_properties();
 
@@ -223,12 +264,11 @@ class Commerce {
 		// ADDRESS
 
 		$address = new \stdClass();	
-		$address->line1 = $address1;
-		if ($address2)
-			$address->line2 = $address2;
-		$address->city = $city;
-		$address->state = $state;
-		$address->postal_code = $zip;
+		if ($address1) $address->line1 = $address1;
+		if ($address2) $address->line2 = $address2;
+		if ($city) $address->city = $city;
+		if ($state) $address->state = $state;
+		if ($zip) $address->postal_code = $zip;
 		$address->country_code = 'US';
 
 		// CARD
@@ -243,7 +283,7 @@ class Commerce {
 		$card->expire_month = $expires[0];
 		$card->expire_year = $expires[1];
 		$card->cvv2 = $cvv2;
-		$card->billing_address = $address;
+		if ($address1) $card->billing_address = $address;
 
 		// TRANSACTIONS
 

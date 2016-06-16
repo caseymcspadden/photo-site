@@ -2,6 +2,7 @@
 	<span aria-hidden="true">&times;</span>
 </button>
 <h2>Download Gallery</h2>
+<% if (downloadgallery==2 || (downloadgallery==1 && paymentreceived)) { %>
 <p>Select an image resolution and click the "Create Archive" button below to create an archive file containing all of the photos in the gallery. This may take some time, depending on the image resolution and the size of the gallery. Please don't leave this page while the archive is being created or you will end up with an incomplete archive. When the archive is complete, a link will appear below that you can click on to download your archive. We will also send you an email with this link.</p>
 <div class="small-12 large-5 columns">
 	<select id="imagesize">
@@ -25,4 +26,74 @@
 	  </span>
 	</div>
 </div>
+
 <div class="archive-notify hide"></div>
+
+<% } else if (downloadgallery==1 && !paymentreceived) { %>
+
+<p>After we receive your payment of $<%= downloadfee.toFixed(2) %>, you will have immediate and unlimited digital access to all of the images in this gallery.</p>
+<form>
+	<div class="large-12 columns">
+		<label>Email Address*
+			<input type="email" name="email">
+		</label>
+	</div>
+	<div class="large-12 columns">
+		<label>Name on Card*
+			<input type="text" name="card-name">
+		</label>
+	</div>
+	<div class="large-12 columns">
+		<label>Card Type*
+			<select name="card-type">
+				<option value="visa">Visa</option>
+				<option value="mastercard">MasterCard</option>
+				<option value="discover">Discover</option>
+				<option value="amex">American Express</option>
+			</select>
+		</label>
+	</div>
+	<div class="large-12 columns">
+		<label>Card Number*
+			<input type="text" name="card-number">
+		</label>
+	</div>
+	<div class="large-4 columns">
+		<label>Expires Month*
+			<select name="expire-month">
+				<option value="1">1 - Jan</option>
+				<option value="2">2 - Feb</option>
+				<option value="3">3 - Mar</option>
+				<option value="4">4 - Apr</option>
+				<option value="5">5 - May</option>
+				<option value="6">6 - Jun</option>
+				<option value="7">7 - Jul</option>
+				<option value="8">8 - Aug</option>
+				<option value="9">9 - Sep</option>
+				<option value="10">10 - Oct</option>
+				<option value="11">11 - Nov</option>
+				<option value="12">12 - Dec</option>
+			</select>
+		</label>
+	</div>
+	<div class="large-4 columns">
+		<label>Expires Year*
+			<select name="expire-year">
+			<%
+				startyear = (new Date()).getFullYear();
+				for (year=startyear;year<=startyear+10;year++)
+					print('<option value="' + year + '">' + year + '</option>');
+			%>
+			</select>
+		</label>
+	</div>
+	<div class="large-4 columns">
+		<label>Security Code*
+			<input type="text" name="cvv2">
+		</label>
+	</div>
+	<div class="large-12 columns text-right">
+		<input type="submit" class="button" value="Submit">
+	</div>
+</form>
+<% } %>

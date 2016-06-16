@@ -5,6 +5,7 @@ config = require './config'
 module.exports = BaseView.extend
 
 	events:
+		'submit form' : 'submitPaymentForm'
 		'click .create-archive' : 'createArchive'
 		'click .cancel-archive' : 'cancelArchive'
 
@@ -12,16 +13,38 @@ module.exports = BaseView.extend
 		this.template = templates['download-gallery-view']
 		this.listenTo this.model, 'change:error', this.notifyError
 		this.listenTo this.model, 'change:archiveProgress', this.archiveProgress
-		this.listenTo this.model, 'change:maxdownloadsize', this.render
+		this.listenTo this.model, 'change:maxdownloadsize change:paymentreceived', this.render
 		this.listenTo this.model.photos, 'reset', this.initializeProgress
 
 	render: ->
-		this.$el.html this.template {waitsrc: config.urlBase+'/images/wait-circle.gif', maxdownloadsize: parseInt(this.model.get('maxdownloadsize'))}
+		console.log "Rendering download-gallery-view"
+		data = this.model.toJSON()
+		data.waitsrc = config.urlBase+'/images/wait-circle.gif'
+		this.$el.html this.template(data)
 
 	open: ->
 		this.$('.archive-wait').addClass 'hide'
 		this.$('.archive-notify').addClass 'hide'
 		this.$el.foundation 'open'
+
+	submitPaymentForm: (e) ->
+		e.preventDefault();
+		arr = $(e.target).serializeArray()
+		data = {}
+		for elem in arr
+			data[elem.name]=elem.value
+		console.log data
+		this.model.save {paymentreceived: 1} , {wait: true}
+		###
+		$.ajax(
+			url: config.servicesBase +  '/orders'
+			type: 'POST'
+			context: this
+			data: data
+			success: (json) ->
+				console.log json
+		)
+		###
 
 	initializeProgress: ->
 		this.$('.progress').attr 'aria-valuenow', 0

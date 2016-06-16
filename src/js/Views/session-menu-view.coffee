@@ -14,8 +14,6 @@ module.exports = Backbone.View.extend
 		this.render this.model
 
 	render: (m) ->
-		console.log "rendering"
-		console.log m
 		data = 
 			uid: m.id
 			config: config

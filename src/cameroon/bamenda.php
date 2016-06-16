@@ -43,11 +43,16 @@ $app->get('/bamenda/test', function($request, $response, $args) {
     '373284099616004',
     '07/2019',
     '8888',
-    '123 Main St',
     NULL,
-    'Leawood',
-    'KS',
-    '66206'
+    NULL,
+    NULL,
+    NULL,
+    NULL
+    //'123 Main St',
+    //NULL,
+    //'Leawood',
+    //'KS',
+    //'66206'
   );
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
@@ -344,10 +349,11 @@ $app->put('/bamenda/containers', function($request, $response, $args) {
 
 $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
-  if ($this->services->isAdmin()) {
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], paymentreceived=$vals[paymentreceived], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
-  }
-  $response->getBody()->write(json_encode($vals));
+  //if ($this->services->isAdmin()) {
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], paymentreceived=$vals[paymentreceived], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
+  //}
+  $json = $this->services->fetchJSON("SELECT type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers WHERE id=$args[id]");
+  $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
 

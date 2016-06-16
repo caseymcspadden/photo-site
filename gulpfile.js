@@ -51,12 +51,11 @@ gulp.task('fileroot', function() {
   mkdirp('fileroot/photos', '0777', function (err, made) {
     if (made) {
       console.log("Made " + made);
-      gulp.src('src/app.cfg')
-      .pipe(gulp.dest('fileroot'));
     }
   });
   mkdirp('fileroot/downloads', '0777');
-});
+  gulp.src('src/app.cfg').pipe(gulp.dest('fileroot'));
+ });
 
 gulp.task('jst', function() {
 
