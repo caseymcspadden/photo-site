@@ -13,6 +13,7 @@ module.exports = Backbone.Model.extend
 		access: 0
 		maxdownloadsize: 0
 		downloadgallery: 0
+		idpayment: null
 		buyprints: 0
 		cancelArchive: false
 

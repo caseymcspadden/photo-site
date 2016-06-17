@@ -36,11 +36,11 @@ $container['commerce'] = function($container) {
 
 $app->get('/bamenda/test', function($request, $response, $args) {
   $json = $this->commerce->makePayment(
-    100, 
+    230.20, 
     'Test Transaction',
     'Casey McSpadden',
     'amex',
-    '373284099616004',
+    '371384099616004',
     '07/2019',
     '8888',
     NULL,
@@ -54,7 +54,7 @@ $app->get('/bamenda/test', function($request, $response, $args) {
     //'KS',
     //'66206'
   );
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_UNESCAPED_SLASHES|JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -67,35 +67,68 @@ $app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) 
 $app->post('/bamenda/orders', function($request, $response, $args) {
   $r = $request->getParsedBody();
   $error = FALSE;
-  $result = $this->services->dbh->query("SELECT tracked FROM shipping WHERE id=$r[shipping]");
-  $arr = $result->fetch(PDO::FETCH_NUM);
-  $tracked = $arr ? $arr[0] : 0;
-  $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
-  if ($order->errorMessage==null) {
-      $guid = $this->services->getRandomKey();
-      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
-      $idorder = $this->services->dbh->lastInsertId();
-      $cartitems = array();
-      $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
-      while ($item = $result->fetchObject())
-        array_push($cartitems, $item);
-      foreach ($cartitems as $item) {
-        $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
-        if ($photo->errorMessage==null)
-           $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
-        else {
-          error_log("PWINTY Order create photo error: " . $photo->errorMessage);
-          $error = TRUE;
+  $result = $this->services->dbh->query("SELECT tracked, price FROM shipping WHERE id=$r[shipping]");
+  $shipping = $result->fetchObject();
+  $tracked = $shipping ? $shipping->tracked : 0;
+
+  $result = $this->services->dbh->query("SELECT price, quantity FROM cartitems WHERE idcart='$r[cart]'");
+
+  $amount = 0;
+
+  while ($item = $result->fetchObject())
+    $amount += $item->price * $item->quantity;
+
+  $amount = ($amount + $shipping->price)/100;
+
+  $payment = $this->commerce->makePayment(
+    $amount,
+    'Pwinty order',
+    $r['card-name'],
+    $r['card-type'],
+    $r['card-number'],
+    $r['expire-month'] . '/' . $r['expire-year'],
+    $r['cvv2']
+  );
+
+  $order = null;
+
+  if ($payment->responseCode<300) {
+    $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amount)");
+    $idpayment = $this->services->dbh->lastInsertId();
+
+    $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+    if ($order->responseCode<300) {
+        $guid = $this->services->getRandomKey();
+        $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, idpayment, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, $idpayment, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+        $idorder = $this->services->dbh->lastInsertId();
+        $cartitems = array();
+        $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
+        while ($item = $result->fetchObject())
+          array_push($cartitems, $item);
+        foreach ($cartitems as $item) {
+          $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+          if ($photo->responseCode<300)
+             $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
+          else {
+            error_log("PWINTY Order create photo error: " . $photo->errorMessage);
+            $error = TRUE;
+          }
         }
-      }
-   }
-   else {
-      error_log("PWINTY Order error: " . $order->errorMessage);
-      $error = TRUE;
-   }
-   if (!$error && $this->commerce->isOrderValid($order->id))
-     $this->commerce->submitOrder($order->id);
-  $response->getBody()->write(json_encode($order));
+     }
+     else {
+        error_log("PWINTY Order error: " . $order->errorMessage);
+        $error = TRUE;
+     }
+  }
+  else {
+    error_log("Paypal error: " . $payment->responseCode);
+    $error = TRUE;
+  }
+  
+  if (!$error && $this->commerce->isOrderValid($order->id))
+    $this->commerce->submitOrder($order->id);
+  
+  $response->getBody()->write('{error:' . ($error ? '1' : '0') . '}');
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -319,7 +352,7 @@ $app->get('/bamenda/pathfromcontainer/{id:[0-9]+}', function($request, $response
 });
 
 $app->get('/bamenda/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers ORDER BY idparent, position");
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers ORDER BY idparent, position");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');    
 });
@@ -331,7 +364,7 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
     $row = $result->fetch();
     $position = $row ? 1 + $row[0] : 1;
     $vals['urlsuffix'] = $this->services->getRandomKey(6);
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access], $vals[maxdownloadsize], $vals[downloadgallery], $vals[downloadfee], $vals[paymentreceived], $vals[buyprints], $vals[markup])");
+    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, buyprints, markup) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access], $vals[maxdownloadsize], $vals[downloadgallery], $vals[downloadfee], $vals[buyprints], $vals[markup])");
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
   $response->getBody()->write(json_encode($vals));
@@ -349,10 +382,10 @@ $app->put('/bamenda/containers', function($request, $response, $args) {
 
 $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
-  //if ($this->services->isAdmin()) {
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], paymentreceived=$vals[paymentreceived], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
-  //}
-  $json = $this->services->fetchJSON("SELECT type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers WHERE id=$args[id]");
+  if ($this->services->isAdmin()) {
+    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
+  }
+  $json = $this->services->fetchJSON("SELECT type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers WHERE id=$args[id]");
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
@@ -544,6 +577,37 @@ $app->put('/bamenda/containers/{id:[0-9]+}/archive/{archive}', function($request
   $response->getBody()->write(json_encode($ret));
   return $response->withHeader('Content-Type','application/json');
 });
+
+$app->post('/bamenda/containers/{id:[0-9]+}/payment', function($request, $response, $args) {
+  $r = $request->getParsedBody();
+ 
+  $result = $this->services->dbh->query("SELECT downloadfee FROM containers WHERE id=$args[id]");
+
+  $amt = $result->fetch(PDO::FETCH_NUM);
+
+  $payment = $this->commerce->makePayment(
+    $amt[0],
+    'Photoshoot Fee',
+    $r['card-name'],
+    $r['card-type'],
+    $r['card-number'],
+    $r['expire-month'] . '/' . $r['expire-year'],
+    $r['cvv2']
+  );
+
+  if ($payment->responseCode<300) {
+    $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amt[0])");
+    $idpayment = $this->services->dbh->lastInsertId();
+    $this->services->dbh->query("UPDATE containers SET idpayment=$idpayment WHERE id=$args[id]");
+    $payment->idpayment = $idpayment;
+  }
+  else
+    $payment->idpayment=0;
+
+  $response->getBody()->write(json_encode($payment));
+  return $response->withHeader('Content-Type','application/json');
+});
+
 
 $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   session_name('cart');

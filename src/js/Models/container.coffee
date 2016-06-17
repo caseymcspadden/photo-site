@@ -21,7 +21,7 @@ module.exports = Backbone.Model.extend
 		maxdownloadsize: 0
 		downloadgallery: 0
 		downloadfee: 0
-		paymentreceived: 0
+		idpayment: 0
 		buyprints: 0
 		markup: 100
 	

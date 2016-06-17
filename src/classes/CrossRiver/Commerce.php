@@ -19,33 +19,6 @@ class Commerce {
     	$this->config = (object)$config;
 	}
 
-	private function get_paypal_properties()
-	{
-		$clientId = ($this->live ? $this->config->clientId_live : $this->config->clientId_sandbox);
-		$secret = ($this->live ? $this->config->secret_live : $this->config->secret_sandbox);
-
-		$ret = new \stdClass();
-		$ret->endpoint = ($this->live ? $this->config->endpoint_paypal_live : $this->config->endpoint_paypal_sandbox);
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $ret->endpoint . "/oauth2/token"); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_HEADER, FALSE);
-		curl_setopt($ch, CURLOPT_POST, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Accept-Language: en_US'));
-		curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $secret);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=client_credentials");
-     
-		$results = curl_exec($ch);
-		curl_close($ch);   
-		$arr = json_decode($results,TRUE);
-		$ret->access_token = $arr['access_token'];
-		
-		return $ret;
-	}
-
 	private function initialize_paypal($call)
 	{
 		$clientId = ($this->live ? $this->config->clientId_live : $this->config->clientId_sandbox);
@@ -80,15 +53,21 @@ class Commerce {
 		return $ch;
 	}
 
-	private function get_pwinty_properties()
+	private function execute_curl($ch)
 	{
-		$ret = new \stdClass();
-		$ret->endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
-		$ret->merchantId = $this->config->pwinty_merchantId;
-		$ret->apiKey = $this->config->pwinty_apiKey;
+		$results = curl_exec($ch);
 
-		return $ret;
+		$rcode = curl_getinfo($ch,CURLINFO_RESPONSE_CODE);
+
+		curl_close($ch);
+
+		$json = json_decode($results);
+
+		$json->responseCode = $rcode; 
+
+		return $json;
 	}
+
 
 	public function getPayments($id=NULL)
 	{
@@ -106,41 +85,20 @@ class Commerce {
 		curl_setopt($ch, CURLOPT_POST, TRUE);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 			
-		$results = curl_exec($ch);
-		curl_close($ch);
-  
-		return $results;
-	}
+		$results = $this->execute_curl($ch);
 
-	public function makePayment2($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip)
-	{
-		$paypal = $this->get_paypal_properties();
-
-		$payload = $this->create_paypal_payload($amount, $description, $card_name, $card_type, $card_number, $card_expires, $cvv2, $address1, $address2, $city, $state, $zip);
-					
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $paypal->endpoint . "/payments/payment"); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_HEADER, FALSE);
-		curl_setopt($ch, CURLOPT_POST, TRUE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Authorization:Bearer " . $paypal->access_token));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-			
-		$results = curl_exec($ch);
-		curl_close($ch);
-  
 		return $results;
 	}
 
 	private function initialize_pwinty($call)
 	{
-		$pwinty = $this->get_pwinty_properties();
+		$endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
+		$merchantId = $this->config->pwinty_merchantId;
+		$apiKey = $this->config->pwinty_apiKey;
 
 		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $pwinty->endpoint . $call);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Accept: application/json", "X-Pwinty-MerchantId: " . $pwinty->merchantId, "X-Pwinty-REST-API-Key: " . $pwinty->apiKey));
+		curl_setopt($ch, CURLOPT_URL, $endpoint . $call);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Accept: application/json", "X-Pwinty-MerchantId: " . $merchantId, "X-Pwinty-REST-API-Key: " . $apiKey));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);		      
@@ -164,14 +122,10 @@ class Commerce {
 			'payment'=>'InvoiceMe'
 		);
 
-		error_log(json_encode($data));
-
 		$ch = $this->initialize_pwinty('/Orders');
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
 		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
-		$results = curl_exec($ch);
-		curl_close($ch);
-	 	return json_decode($results);		
+	 	return $this->execute_curl($ch);		
 	}
 
 	public function getOrders($id)
@@ -201,11 +155,7 @@ class Commerce {
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
 		curl_setopt($ch, CURLOPT_POSTFIELDS,  '{"status":"Submitted"}');
 
-		$results = curl_exec($ch);
-
-		curl_close($ch);
-
-		return $results;
+	 	return $this->execute_curl($ch);		
 	}
 
 	public function addItemToOrder($id, $guid, $remoteUrlBase, $item)
@@ -224,9 +174,7 @@ class Commerce {
 
 		curl_setopt($ch, CURLOPT_POST, TRUE);		
 		curl_setopt($ch, CURLOPT_POSTFIELDS,  json_encode($data));
-		$results = curl_exec($ch);
-		curl_close($ch);
-	 	return json_decode($results);				
+	 	return $this->execute_curl($ch);		
 	}
 
 	public function getProductCatalog($country, $quality)

@@ -22,7 +22,7 @@ module.exports = BaseView.extend
 		this.containerProductsView = options.containerProductsView
 		this.listenTo this.model, 'change:togglecrop', this.render
 		this.listenTo this.model, 'change:quantity', this.quantityChanged
-		this.listenTo this.model, 'change:idproduct', this.render
+		this.listenTo this.model, 'change:idproduct', this.productChanged
 		this.listenTo this.model, 'destroy', this.remove
 		#this.listenTo this.model.photos, 'reset', this.render
 
@@ -54,22 +54,26 @@ module.exports = BaseView.extend
 		e.preventDefault();
 		quantity = this.model.get 'quantity'
 		if quantity > 1	
-			this.model.set 'quantity' , quantity - 1
-			this.model.save()
+			#this.model.set 'quantity' , quantity - 1
+			this.model.save {quantity: quantity-1}
 
 	increaseQuantity: (e) ->
 		e.preventDefault();
 		quantity = this.model.get 'quantity'	
-		this.model.set 'quantity' , quantity + 1	
-		this.model.save()
+		#this.model.set 'quantity' , quantity + 1	
+		this.model.save {quantity: quantity+1}
 
-	changeAttribute: (e) ->
+	changeAttribute: ->
 		attributes = {}
 		this.$('select').each (index) ->
 			attributes[$(this).attr 'name'] = $(this).val()
-		this.model.set 'attrs' , JSON.stringify(attributes)
-		this.model.save()
+		#this.model.set 'attrs' , JSON.stringify(attributes)
+		this.model.save {attrs: JSON.stringify(attributes)}
 
+	productChanged: ->
+		this.render()
+		this.changeAttribute()
+		
 	quantityChanged: ->
 		price = this.model.get 'price'
 		quantity = this.model.get 'quantity'

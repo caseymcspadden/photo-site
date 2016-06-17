@@ -13,12 +13,13 @@ module.exports = BaseView.extend
 		this.template = templates['download-gallery-view']
 		this.listenTo this.model, 'change:error', this.notifyError
 		this.listenTo this.model, 'change:archiveProgress', this.archiveProgress
-		this.listenTo this.model, 'change:maxdownloadsize change:paymentreceived', this.render
+		this.listenTo this.model, 'change:maxdownloadsize change:idpayment', this.render
 		this.listenTo this.model.photos, 'reset', this.initializeProgress
 
 	render: ->
 		console.log "Rendering download-gallery-view"
 		data = this.model.toJSON()
+		console.log data
 		data.waitsrc = config.urlBase+'/images/wait-circle.gif'
 		this.$el.html this.template(data)
 
@@ -34,17 +35,15 @@ module.exports = BaseView.extend
 		for elem in arr
 			data[elem.name]=elem.value
 		console.log data
-		this.model.save {paymentreceived: 1} , {wait: true}
-		###
 		$.ajax(
-			url: config.servicesBase +  '/orders'
+			url: config.servicesBase +  '/containers/' + this.model.id + '/payment'
 			type: 'POST'
 			context: this
 			data: data
 			success: (json) ->
 				console.log json
+				this.model.set {idpayment: json.idpayment}
 		)
-		###
 
 	initializeProgress: ->
 		this.$('.progress').attr 'aria-valuenow', 0

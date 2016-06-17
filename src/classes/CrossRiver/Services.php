@@ -438,9 +438,9 @@ class Services
     	$user = $this->getSessionUser();
     	$onUserBranch = FALSE;
 
-    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0, 'downloadfee'=>0, 'paymentreceived'=>0, 'buyprints'=>0, 'markup'=>0];
+    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0, 'downloadfee'=>0, 'idpayment'=>0, 'buyprints'=>0, 'markup'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, type, idparent, position, name, description, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery, downloadfee, paymentreceived, buyprints, markup FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
+    		$result = $this->dbh->query("SELECT id, type, idparent, position, name, description, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
     		$currentContainer = $result->fetchObject();
 
     		if (!$currentContainer)
