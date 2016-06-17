@@ -1,0 +1,12 @@
+.choose-photos-view {
+	margin-bottom: rem-calc(5);
+
+	.choose-photo {
+		height: 35px;
+		margin: 1px;
+ 		border: 1px solid $body-background;	
+		&.chosen {
+	 		border: 1px solid $white;	
+		}
+ 	}
+}

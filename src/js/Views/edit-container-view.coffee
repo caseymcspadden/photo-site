@@ -130,5 +130,4 @@ module.exports = BaseView.extend
 		###
 
 	render: ->
-		console.log "rendering edit container view"
 		this.$el.html this.template {urlBase: config.urlBase + '/galleries/'}

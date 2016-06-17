@@ -10,7 +10,7 @@ module.exports = BaseView.extend
 	events:
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
-		'click img' : 'viewImage'
+		'click img.selected-photo' : 'viewImage'
 		'click .download-gallery' : 'downloadGallery'
 		'click .download-photo' : 'downloadPhoto'
 		'click .buy-product' : 'buyProduct'
@@ -19,7 +19,7 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.cart = options.cart
 		this.template = templates['gallery-photo-view']
-		this.containerProductsView = new ContainerProductsView {cart: options.cart}
+		this.containerProductsView = new ContainerProductsView {model: this.model, cart: options.cart}
 		this.photoView = new PhotoView {model: this.model}
 		this.downloadGalleryView = new DownloadGalleryView {model: this.model}
 		this.listenTo this.model, 'change:buyprints', this.updateProducts

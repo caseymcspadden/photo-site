@@ -5,6 +5,7 @@ module.exports = Backbone.Model.extend
 	urlBase: config.servicesBase + '/photos'
 	defaults :
 		selected: false
+		chosen: false
 		fileName: ""
 		title: ""
 		description: ""

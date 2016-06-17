@@ -4,7 +4,8 @@ namespace CrossRiver;
 class Commerce {
 	
 	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	private $live = FALSE;
+	private $paypalLive = FALSE;
+	private $pwintyLive = FALSE;
 
 	public function __construct() 
 	{	
@@ -21,11 +22,11 @@ class Commerce {
 
 	private function initialize_paypal($call)
 	{
-		$clientId = ($this->live ? $this->config->clientId_live : $this->config->clientId_sandbox);
-		$secret = ($this->live ? $this->config->secret_live : $this->config->secret_sandbox);
+		$clientId = ($this->paypalLive ? $this->config->clientId_live : $this->config->clientId_sandbox);
+		$secret = ($this->paypalLive ? $this->config->secret_live : $this->config->secret_sandbox);
 
 		$ret = new \stdClass();
-		$endpoint = ($this->live ? $this->config->endpoint_paypal_live : $this->config->endpoint_paypal_sandbox);
+		$endpoint = ($this->paypalLive ? $this->config->endpoint_paypal_live : $this->config->endpoint_paypal_sandbox);
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $endpoint . "/oauth2/token"); 
@@ -92,7 +93,7 @@ class Commerce {
 
 	private function initialize_pwinty($call)
 	{
-		$endpoint = ($this->live ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
+		$endpoint = ($this->pwintyLive ? $this->config->endpoint_pwinty_live : $this->config->endpoint_pwinty_sandbox);		
 		$merchantId = $this->config->pwinty_merchantId;
 		$apiKey = $this->config->pwinty_apiKey;
 
