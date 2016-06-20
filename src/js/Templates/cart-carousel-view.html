@@ -1,0 +1,10 @@
+<span class="prev">&laquo;</span><span class="next">&raquo;</span>
+<% 
+	var index = 0;
+	collection.each(function(item) {
+		print('<div class="preview" id="item-' + index + '"><img src="' + urlBase + '/photos/S/' + item.get('idphoto') + '.jpg"></div>');
+		index++;
+	});
+%>
+<div class="crop-rect"></div>
+<div class="item-description">Description</div>

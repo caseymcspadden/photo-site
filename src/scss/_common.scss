@@ -2,23 +2,8 @@ a {
   outline: none;
 }
 
-.photo-thumbnail {
-  position: relative;
-  width: 104px;
-  height: 104px;
-  overflow: hidden;
-  float: left;
-  margin: 4px;
-  padding: 0;
-  a {outline: none;}
-  img {
-    border: 2px solid $body-background;
-    padding: 0;
-    margin: 0;
-    &.selected {
-      border: 2px solid $white;
-    }
-  }
+.error {
+  color: $alert-color;
 }
 
 .reveal.form {

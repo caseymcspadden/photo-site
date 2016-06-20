@@ -79,55 +79,62 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
     $amount += $item->price * $item->quantity;
 
   $amount = ($amount + $shipping->price)/100;
+  $idpayment = 0;
+  $idorder = 0;
 
-  $payment = $this->commerce->makePayment(
-    $amount,
-    'Pwinty order',
-    $r['card-name'],
-    $r['card-type'],
-    $r['card-number'],
-    $r['expire-month'] . '/' . $r['expire-year'],
-    $r['cvv2']
-  );
-
-  $order = null;
-
-  if ($payment->responseCode<300) {
-    $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amount)");
-    $idpayment = $this->services->dbh->lastInsertId();
-
-    $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
-    if ($order->responseCode<300) {
-        $guid = $this->services->getRandomKey();
-        $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, idpayment, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, $idpayment, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
-        $idorder = $this->services->dbh->lastInsertId();
-        $cartitems = array();
-        $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
-        while ($item = $result->fetchObject())
-          array_push($cartitems, $item);
-        foreach ($cartitems as $item) {
-          $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
-          if ($photo->responseCode<300)
-             $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
-          else {
-            error_log("PWINTY Order create photo error: " . $photo->errorMessage);
-            $error = TRUE;
-          }
+  $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+  if ($order->responseCode<300) {
+      $guid = $this->services->getRandomKey();
+      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+      $idorder = $this->services->dbh->lastInsertId();
+      $cartitems = array();
+      $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
+      while ($item = $result->fetchObject())
+        array_push($cartitems, $item);
+      foreach ($cartitems as $item) {
+        $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+        if ($photo->responseCode<300) {
+           $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
         }
-     }
-     else {
-        error_log("PWINTY Order error: " . $order->errorMessage);
+        else {
+          error_log("PWINTY Order create photo error: " . $photo->errorMessage);
+          $error = TRUE;
+        }
+      }
+   }
+   else {
+      error_log("PWINTY Order error: " . $order->errorMessage);
+      $error = TRUE;
+   }
+
+   if ($error==FALSE) {
+     $payment = $this->commerce->makePayment(
+        $amount,
+        'Pwinty order',
+        $r['card-name'],
+        $r['card-type'],
+        $r['card-number'],
+        $r['expire-month'] . '/' . $r['expire-year'],
+        $r['cvv2']
+      );
+      if ($payment->responseCode<300) {
+        $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amount)");
+        $idpayment = $this->services->dbh->lastInsertId();
+        $this->services->dbh->query("UPDATE orders SET idpayment=$idpayment WHERE id=$idorder");
+      }
+      else {
+        error_log("Paypal error");
+        error_log(json_encode($payment));
         $error = TRUE;
-     }
-  }
-  else {
-    error_log("Paypal error: " . $payment->responseCode);
-    $error = TRUE;
-  }
-  
-  if (!$error && $this->commerce->isOrderValid($order->id))
+      }
+   }
+
+  if (!$error && $this->commerce->isOrderValid($order->id)) {
     $this->commerce->submitOrder($order->id);
-  
+    $success = mail('casey@crossriver.com','TEST','Test Message');
+    error_log($success ? "Mail sent successfully" : "Problem sending mail");
+  }
+
   $response->getBody()->write('{error:' . ($error ? '1' : '0') . '}');
   return $response->withHeader('Content-Type','application/json');
 });

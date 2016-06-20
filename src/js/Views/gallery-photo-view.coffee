@@ -42,8 +42,10 @@ module.exports = BaseView.extend
 	###
 	
 	updateAccess: (m) ->
-		this.$('.download-gallery').removeClass('hide') if m.get('downloadgallery')
-		this.$('.download-photo').removeClass('hide') if m.get('maxdownloadsize')>0
+		data = this.model.toJSON()
+		if (data.downloadgallery==2 || (data.downloadgallery==1 && (data.downloadfee==0 || data.idpayment!=0)))
+			this.$('.download-photo').removeClass('hide')
+		this.$('.download-gallery').removeClass('hide') if data.downloadgallery
 		this.$('.buy-product').removeClass('hide') if m.get('buyprints')
 	
 	viewImage: (e) ->

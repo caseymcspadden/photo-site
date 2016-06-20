@@ -3,13 +3,13 @@
 
 <div class="large-12 columns">
 	<h2>Checkout</h2>
-	<div class="large-6 columns checkout-header">
-		<% 
-			if (collection.length>0)
-				print('<img class="featured-photo" src="' + urlBase + '/photos/S/' + collection.at(0).get('idphoto') + '.jpg">');
-		%>
+	<div class="large-6 columns">
+		<div class="cart-carousel-view">
+		</div>
 	</div>
 	<div class="large-6 columns">
+		<div class="float-left"><p>Items:</p></div>
+		<div class="right-column text-right"><p><%= count %></p></div>
 		<div class="float-left"><p>Subtotal:</p></div>
 		<div class="right-column text-right"><p>$<%= (subtotal/100).toFixed(2) %></p></div>
 		<div>
@@ -30,17 +30,12 @@
 
 <div class="large-6 small-12 columns">
 	<h4>Ship to</h4>
-	<div class="large-12 columns">
+	<div id="form-name" class="large-12 columns">
 		<label>Name*
 			<input type="text" name="name">
 		</label>
 	</div>
-	<div class="large-12 columns">
-		<label>Email Address*
-			<input type="email" name="email">
-		</label>
-	</div>
-	<div class="large-12 columns">
+	<div id="form-address" class="large-12 columns">
 		<label>Address*
 			<input type="text" name="address">
 		</label>
@@ -121,6 +116,11 @@
 
 <div class="large-6 small-12 columns">
 	<h4>Payment</h4>
+	<div class="large-12 columns">
+		<label>Email Address*
+			<input type="email" name="email">
+		</label>
+	</div>
 	<div class="large-12 columns">
 		<label>Name on Card*
 			<input type="text" name="card-name">

@@ -69,7 +69,6 @@ class Commerce {
 		return $json;
 	}
 
-
 	public function getPayments($id=NULL)
 	{
 		$ch = $this->initialize_paypal('/payments/payment' . ($id ? "/$id" : ""));

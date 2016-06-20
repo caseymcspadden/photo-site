@@ -1,23 +1,37 @@
 BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
+CartCarouselView = require './cart-carousel-view'
 
 module.exports = BaseView.extend
 	events:
 		'submit form' : 'submitForm'
 		"change #shipping" : "shippingChanged"
-		"click .featured-photo" : "updateFeaturedPhoto"
 
 	initialize: (options) ->
 		this.template = templates['checkout-view']
 		this.listenTo this.collection, 'reset', this.render
 		this.shipping = []
 		this.subtotal = 0
+		this.cartCarouselView = new CartCarouselView {collection: this.collection}
 		self = this
-		this.photoIndex = 0
 		$.get(config.servicesBase + '/shipping', (json) ->
 			self.shipping = json
 		)
+
+	validateCreditCard: (value) ->
+		return false if /[^0-9-\s]+/.test(value)
+		nCheck=0
+		nDigit=0
+		bEven=false
+		value = value.replace /\D/g, ''
+		for n in [value.length-1..0]
+			nDigit = parseInt(value.charAt(n),10)
+			if bEven
+				nDigit-=9 if (nDigit*=2)>9
+			nCheck += nDigit
+			bEven = !bEven
+		return (nCheck%10)==0
 
 	submitForm: (e) ->
 		e.preventDefault();
@@ -25,6 +39,8 @@ module.exports = BaseView.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
+		console.log this.validateCreditCard(data['card-number'])
+		###
 		$.ajax(
 			url: config.servicesBase +  '/orders'
 			type: 'POST'
@@ -33,13 +49,7 @@ module.exports = BaseView.extend
 			success: (json) ->
 				console.log json
 		)
-
-	updateFeaturedPhoto: (e) ->
-		this.photoIndex += 1
-		if (this.photoIndex>=this.collection.length)
-			this.photoIndex = 0
-		idphoto= this.collection.at(this.photoIndex).get('idphoto')
-		this.$('.featured-photo').attr 'src' , config.urlBase + '/photos/S/' + idphoto + '.jpg'
+		###
 
 	shippingChanged: ->
 		shipping = parseInt(this.$('#shipping').val())
@@ -48,8 +58,8 @@ module.exports = BaseView.extend
 				this.$('.total').html ((this.subtotal+item.price)/100).toFixed(2)
 
 	render: ->
-		console.log "rendering checkout-view"
-		data = 
+		data =
+			count: 0
 			subtotal: 0
 			shipping: this.shipping
 			shippingtype: 1
@@ -68,5 +78,7 @@ module.exports = BaseView.extend
 
 		this.subtotal = data.subtotal
 		this.$el.html this.template(data)
+		this.assign this.cartCarouselView, '.cart-carousel-view'
 		this.shippingChanged()
+
 		this

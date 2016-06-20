@@ -23,7 +23,7 @@ module.exports = BaseView.extend
 		maxdownloadsize: 0
 		downloadgallery: 0
 		downloadfee: 0
-		paymentreceived: 0
+		idpayment: 0
 		buyprints: 0
 		markup: 100			
 
@@ -100,6 +100,7 @@ module.exports = BaseView.extend
 		data = this.defaultData
 		if container and newType == null
 			data = container.toJSON()
+			console.log data
 
 		this.$('.title').html if newType==null then 'Edit ' + container.get('type') else 'New ' + newType
 		this.$('input[name="name"]').val data.name
@@ -108,8 +109,8 @@ module.exports = BaseView.extend
 		this.$('select[name="access"]').val data.access
 		this.$('select[name="maxdownloadsize"]').val data.maxdownloadsize
 		this.$('select[name="downloadgallery"]').val data.downloadgallery
-		this.$('download[name="downloadfee"]').val data.downloadfee
-		this.$('checkbox[name="payment.received"]').checked = data.paymentreceived
+		this.$('input[name="downloadfee"]').val data.downloadfee
+		this.$('input[name="idpayment"]').val data.idpayment
 		this.$('select[name="buyprints"]').val data.buyprints
 		this.$('input[name="markup"]').val data.markup
 		this.changeAccess()

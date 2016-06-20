@@ -40,15 +40,15 @@ else if ($downloadtype=='file') {
 	$idgallery = $arr[1];
 	$urlsuffix = $arr[2];
 	$id = $arr[3];
-	$result = $dbh->query("SELECT C.access, C.maxdownloadsize, C.downloadfee, C.paymentreceived, P.title FROM containers C INNER JOIN containerphotos CP ON CP.idcontainer=C.id INNER JOIN photos P ON P.id=CP.idphoto WHERE C.id=$idgallery AND C.urlsuffix='$urlsuffix' AND CP.idphoto=$id");
+	$result = $dbh->query("SELECT C.access, C.maxdownloadsize, C.downloadgallery, C.downloadfee, C.idpayment, P.title FROM containers C INNER JOIN containerphotos CP ON CP.idcontainer=C.id INNER JOIN photos P ON P.id=CP.idphoto WHERE C.id=$idgallery AND C.urlsuffix='$urlsuffix' AND CP.idphoto=$id");
 	if ($result===FALSE)
 		exit ('Not a valid file link');
 	$photo = $result->fetchObject();
 	if (!$photo)
 		exit ('Not a valid file link');
-	$size = $photo->maxdownloadsize;
-	if ($size==0)
+	if ($photo->downloadgallery==0 || ($photo->downloadgallery==1 && $photo->downloadfee>0 && $photo->idpayment=0))
 		exit ('Permission denied');
+	$size = $photo->maxdownloadsize;
 	if ($size==5)
 		$arr = glob($fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
   	else
