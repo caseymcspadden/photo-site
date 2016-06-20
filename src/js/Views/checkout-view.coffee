@@ -33,13 +33,37 @@ module.exports = BaseView.extend
 			bEven = !bEven
 		return (nCheck%10)==0
 
+	validateDate: (month,year) ->
+		return true;
+
+
+	validateForm: (data)->
+		this.$('.field label').removeClass('error')
+		this.$('.field span').addClass('hide')
+		errors = []
+		errors.push "name" if !data['name']
+		errors.push "address" if !data['address'] 
+		errors.push "city" if !data['city']
+		errors.push "card-name" if !data['email']
+		errors.push "cvv2" if !data['cvv2']
+		
+		errors.push "zip" if not /^\d{5}(-\d{4})?$/.test(data['zip'])	
+		errors.push "email" if not /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data['email'])
+		errors.push "card-number" if !this.validateCreditCard(data['card-number'])
+
+		for i in [0...errors.length]
+			this.$('#form-'+errors[i] + ' label').addClass('error')
+			this.$('#form-'+errors[i] + ' span').removeClass('hide')
+
+
 	submitForm: (e) ->
 		e.preventDefault();
 		arr = $(e.target).serializeArray()
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		console.log this.validateCreditCard(data['card-number'])
+		this.validateForm(data)
+		#console.log this.validateCreditCard(data['card-number'])
 		###
 		$.ajax(
 			url: config.servicesBase +  '/orders'
