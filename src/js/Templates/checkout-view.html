@@ -31,12 +31,12 @@
 <div class="large-6 small-12 columns">
 	<h4>Ship to</h4>
 	<div id="form-name" class="large-12 columns field">
-		<label>Name* <span class="hide">(required)</span>
+		<label><span class="field-label">Name* <span class="invalid hide">(required)</span></span>
 			<input type="text" name="name">
 		</label>
 	</div>
 	<div id="form-address" class="large-12 columns field">
-		<label>Address* <span class="hide">(required)</span>
+		<label><span class="field-label">Address* <span class="invalid hide">(required)</span></span>
 			<input type="text" name="address">
 		</label>
 	</div>
@@ -46,12 +46,12 @@
 		</label>
 	</div>
 	<div id="form-city" class="large-12 columns field">
-		<label>City* <span class="hide">(required)</span>
+		<label><span class="field-label">City* <span class="invalid hide">(required)</span></span>
 			<input type="text" name="city">
 		</label>
 	</div>
 	<div class="large-6 columns">
-		<label>State*
+		<label>State
 			<select name="state">
 				<option value="AL">Alabama</option>
 				<option value="AK">Alaska</option>
@@ -108,7 +108,7 @@
 		</label>
 	</div>
 	<div id="form-zip" class="large-6 columns field">
-		<label>Zip* <span class="hide">(missing/invalid)</span>
+		<label><span class="field-label">Zip* <span class="inalid hide">(missing/invalid)</span></span>
 			<input type="text" name="zip">
 		</label>
 	</div>
@@ -117,17 +117,17 @@
 <div class="large-6 small-12 columns">
 	<h4>Payment</h4>
 	<div id="form-email" class="large-12 columns field">
-		<label>Email Address* <span class="hide">(missing/invalid)</span>
+		<label><span class="field-label">Email Address* <span class="infalid hide">(missing/invalid)</span></span>
 			<input type="email" name="email">
 		</label>
 	</div>
 	<div id="form-card-name" class="large-12 columns field">
-		<label>Name on Card* <span class="hide">(required)</span>
+		<label><span class="field-label">Name on Card* <span class="invalid hide">(required)</span></span>
 			<input type="text" name="card-name">
 		</label>
 	</div>
 	<div class="large-12 columns">
-		<label>Card Type*
+		<label><span class="field-label">Card Type</span>
 			<select name="card-type">
 				<option value="visa">Visa</option>
 				<option value="mastercard">MasterCard</option>
@@ -137,12 +137,12 @@
 		</label>
 	</div>
 	<div id="form-card-number" class="large-12 columns field">
-		<label>Card Number* <span class="hide">(missing/invalid)</span>
+		<label><span class="field-label">Card Number* <span class="invalid hide">(missing/invalid)</span></span>
 			<input type="text" name="card-number">
 		</label>
 	</div>
-	<div id ="form-expire-month" class="large-4 columns">
-		<label>Expires Month*
+	<div id ="form-expire-month" class="large-4 columns field">
+		<label><span class="field-label">Expires Month</span>
 			<select name="expire-month">
 				<option value="01">1 - Jan</option>
 				<option value="02">2 - Feb</option>
@@ -160,7 +160,7 @@
 		</label>
 	</div>
 	<div id="form-expire-year" class="large-4 columns">
-		<label>Expires Year*
+		<label>Expires Year
 			<select name="expire-year">
 			<%
 				startyear = (new Date()).getFullYear();
@@ -171,7 +171,7 @@
 		</label>
 	</div>
 	<div id="form-cvv2" class="large-4 columns field">
-		<label>Security Code*
+		<label><span class="field-label">Security Code*</span>
 			<input type="text" name="cvv2">
 		</label>
 	</div>

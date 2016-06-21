@@ -34,26 +34,33 @@ module.exports = BaseView.extend
 		return (nCheck%10)==0
 
 	validateDate: (month,year) ->
-		return true;
+		date = new Date
+		console.log date.getMonth()+1
+		console.log date.getFullYear()
+		if parseInt(year)==date.getFullYear() and parseInt(month) < date.getMonth()+1
+			console.log 'date fails'
 
+		return false if parseInt(year)==date.getFullYear() and parseInt(month) < date.getMonth()+1
+		return true
 
 	validateForm: (data)->
-		this.$('.field label').removeClass('error')
-		this.$('.field span').addClass('hide')
+		this.$('.field-label').removeClass('error')
+		this.$('.invalid').addClass('hide')
 		errors = []
 		errors.push "name" if !data['name']
 		errors.push "address" if !data['address'] 
 		errors.push "city" if !data['city']
-		errors.push "card-name" if !data['email']
+		errors.push "card-name" if !data['card-name']
 		errors.push "cvv2" if !data['cvv2']
 		
 		errors.push "zip" if not /^\d{5}(-\d{4})?$/.test(data['zip'])	
 		errors.push "email" if not /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data['email'])
 		errors.push "card-number" if !this.validateCreditCard(data['card-number'])
+		errors.push "expire-month" if !this.validateDate(data['expire-month'], data['expire-year'])
 
 		for i in [0...errors.length]
-			this.$('#form-'+errors[i] + ' label').addClass('error')
-			this.$('#form-'+errors[i] + ' span').removeClass('hide')
+			this.$('#form-'+errors[i] + ' .field-label').addClass('error')
+			this.$('#form-'+errors[i] + ' .invalid').removeClass('hide')
 
 
 	submitForm: (e) ->
