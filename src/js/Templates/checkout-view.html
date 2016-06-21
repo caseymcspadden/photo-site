@@ -1,5 +1,6 @@
 <form id="checkout-form">
 <input type="hidden" name="cart" value="<%= idcart %>">
+<input type="hidden" name="idorder" value="0">
 
 <div class="large-12 columns">
 	<h2>Checkout</h2>
@@ -117,7 +118,7 @@
 <div class="large-6 small-12 columns">
 	<h4>Payment</h4>
 	<div id="form-email" class="large-12 columns field">
-		<label><span class="field-label">Email Address* <span class="infalid hide">(missing/invalid)</span></span>
+		<label><span class="field-label">Email Address* <span class="invalid hide">(missing/invalid)</span></span>
 			<input type="email" name="email">
 		</label>
 	</div>
@@ -180,3 +181,6 @@
 	</div>
 </div>
 </form>
+
+<div class="reveal form order-confirmation-view" data-reveal>
+</div>

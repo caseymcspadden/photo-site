@@ -35,7 +35,6 @@ module.exports = BaseView.extend
 		this.$el.html this.template(data)
 		this.assign this.croppedView, '.cropped-view'
 
-
 	changeProduct: (e) ->
 		e.preventDefault()
 		this.containerProductsView.open this.model.get('idphoto') , this.model.get('idcontainer'), this.model

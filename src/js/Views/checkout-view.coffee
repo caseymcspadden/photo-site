@@ -14,6 +14,7 @@ module.exports = BaseView.extend
 		this.shipping = []
 		this.subtotal = 0
 		this.cartCarouselView = new CartCarouselView {collection: this.collection}
+
 		self = this
 		$.get(config.servicesBase + '/shipping', (json) ->
 			self.shipping = json
@@ -35,8 +36,6 @@ module.exports = BaseView.extend
 
 	validateDate: (month,year) ->
 		date = new Date
-		console.log date.getMonth()+1
-		console.log date.getFullYear()
 		if parseInt(year)==date.getFullYear() and parseInt(month) < date.getMonth()+1
 			console.log 'date fails'
 
@@ -51,16 +50,18 @@ module.exports = BaseView.extend
 		errors.push "address" if !data['address'] 
 		errors.push "city" if !data['city']
 		errors.push "card-name" if !data['card-name']
-		errors.push "cvv2" if !data['cvv2']
 		
 		errors.push "zip" if not /^\d{5}(-\d{4})?$/.test(data['zip'])	
 		errors.push "email" if not /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data['email'])
-		errors.push "card-number" if !this.validateCreditCard(data['card-number'])
+		#errors.push "card-number" if !this.validateCreditCard(data['card-number'])
 		errors.push "expire-month" if !this.validateDate(data['expire-month'], data['expire-year'])
+		errors.push "cvv2" if not /^\d{3}\d?$/.test(data['cvv2'])	
 
 		for i in [0...errors.length]
 			this.$('#form-'+errors[i] + ' .field-label').addClass('error')
 			this.$('#form-'+errors[i] + ' .invalid').removeClass('hide')
+
+		return errors.length==0
 
 
 	submitForm: (e) ->
@@ -69,18 +70,28 @@ module.exports = BaseView.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		this.validateForm(data)
-		#console.log this.validateCreditCard(data['card-number'])
-		###
+		if this.validateForm(data)
+			$.ajax(
+				url: config.servicesBase +  '/orders'
+				type: 'POST'
+				context: this
+				data: data
+				success: (json) ->
+					if json.errors.length>0
+						console.log json.errors
+						this.$('input[name="idorder"]').val json.id
+					else
+						this.emptyCart()
+			)
+
+	emptyCart: ->
 		$.ajax(
-			url: config.servicesBase +  '/orders'
-			type: 'POST'
+			url: config.servicesBase +  '/cart'
+			type: 'DELETE'
 			context: this
-			data: data
 			success: (json) ->
-				console.log json
+				this.collection.reset()
 		)
-		###
 
 	shippingChanged: ->
 		shipping = parseInt(this.$('#shipping').val())

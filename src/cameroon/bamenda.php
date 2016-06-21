@@ -66,7 +66,8 @@ $app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) 
 
 $app->post('/bamenda/orders', function($request, $response, $args) {
   $r = $request->getParsedBody();
-  $error = FALSE;
+
+  $errors = array();
   $result = $this->services->dbh->query("SELECT tracked, price FROM shipping WHERE id=$r[shipping]");
   $shipping = $result->fetchObject();
   $tracked = $shipping ? $shipping->tracked : 0;
@@ -81,33 +82,42 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
   $amount = ($amount + $shipping->price)/100;
   $idpayment = 0;
   $idorder = 0;
+  $idpwinty=0;
 
-  $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
-  if ($order->responseCode<300) {
-      $guid = $this->services->getRandomKey();
-      $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', {$order->id}, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
-      $idorder = $this->services->dbh->lastInsertId();
-      $cartitems = array();
-      $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
-      while ($item = $result->fetchObject())
-        array_push($cartitems, $item);
-      foreach ($cartitems as $item) {
-        $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
-        if ($photo->responseCode<300) {
-           $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
+  if (!$r['idorder']) {
+    $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
+    if ($order->responseCode<300) {
+        $idpwinty = $order->id;
+        $guid = time() . '-' . $this->services->getRandomKey(6);
+        $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', $idpwinty, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+        $idorder = $this->services->dbh->lastInsertId();
+        $cartitems = array();
+        $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
+        while ($item = $result->fetchObject())
+          array_push($cartitems, $item);
+        foreach ($cartitems as $item) {
+          $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+          if ($photo->responseCode<300) {
+             $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
+          }
+          else {
+            array_push($errors,$photo);
+          }
         }
-        else {
-          error_log("PWINTY Order create photo error: " . $photo->errorMessage);
-          $error = TRUE;
-        }
-      }
+     }
+     else {
+        array_push($errors,$order);
+     }
    }
    else {
-      error_log("PWINTY Order error: " . $order->errorMessage);
-      $error = TRUE;
+      $idorder = $r['idorder'];
+      error_log("Order is is $idorder");
+      $result = $this->services->dbh->query("SELECT idpwinty FROM orders WHERE id=$idorder");
+      $row = $result->fetch();
+      $idpwinty=$row[0];
    }
 
-   if ($error==FALSE) {
+   if (count($errors)==0) {
      $payment = $this->commerce->makePayment(
         $amount,
         'Pwinty order',
@@ -117,25 +127,33 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
         $r['expire-month'] . '/' . $r['expire-year'],
         $r['cvv2']
       );
-      if ($payment->responseCode<300) {
+      error_log("PAYMENT RESULTS");
+      error_log(json_encode($payment));
+      if ($payment->responseCode>=200 && $payment->responseCode<300) {
         $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amount)");
         $idpayment = $this->services->dbh->lastInsertId();
         $this->services->dbh->query("UPDATE orders SET idpayment=$idpayment WHERE id=$idorder");
       }
       else {
-        error_log("Paypal error");
-        error_log(json_encode($payment));
-        $error = TRUE;
+        array_push($errors,$payment);
       }
    }
 
-  if (!$error && $this->commerce->isOrderValid($order->id)) {
-    $this->commerce->submitOrder($order->id);
-    $success = mail('casey@crossriver.com','TEST','Test Message');
-    error_log($success ? "Mail sent successfully" : "Problem sending mail");
+  if (count($errors)==0 && $this->commerce->isOrderValid($idpwinty)) {
+    $this->commerce->submitOrder($idpwinty);
+    //$success = mail('casey@crossriver.com','TEST','Test Message');
+    //error_log($success ? "Mail sent successfully" : "Problem sending mail");
+    $result = $this->services->dbh->query("SELECT O.*, P.idpaypal, P.amount FROM orders O INNER JOIN payments P ON P.id=O.idpayment WHERE O.id=$idorder");
+    $ret = $result->fetchObject();
   }
+  else {
+    $ret = new \stdClass();
+    $ret->id = $idorder;
+  }
+  
+  $ret->errors = $errors;
 
-  $response->getBody()->write('{error:' . ($error ? '1' : '0') . '}');
+  $response->getBody()->write(json_encode($ret,JSON_UNESCAPED_SLASHES|JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -666,7 +684,10 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       break;
     case 'DELETE':
       $json = $request->getParsedBody();
-      $this->services->dbh->query("DELETE FROM cartitems WHERE id=$args[path]");
+      if ($args['path'])
+        $this->services->dbh->query("DELETE FROM cartitems WHERE id=$args[path]");
+      else
+        $this->services->dbh->query("DELETE C.*, CI.* FROM carts C INNER JOIN cartitems CI ON CI.idcart=C.id WHERE C.id='$idcart'");
       $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     default:

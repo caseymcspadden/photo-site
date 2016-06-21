@@ -12,6 +12,7 @@ module.exports = BaseView.extend
 		this.itemIndex = 0
 
 	showItem: ->
+		return if this.collection.length==0
 		item = this.collection.at(this.itemIndex).toJSON()
 		price = item.quantity * item.price
 		this.$('.preview img').removeClass('show')
@@ -36,6 +37,7 @@ module.exports = BaseView.extend
 
 	render: ->
 		this.$el.html this.template {urlBase: config.urlBase, collection: this.collection}
+		return if this.collection.length==0
 		item = this.collection.at this.itemIndex
 		self = this
 		image = new Image()

@@ -62,7 +62,7 @@ class Commerce {
 
 		curl_close($ch);
 
-		$json = json_decode($results);
+		$json = $results ? json_decode($results) : new \stdClass();
 
 		$json->responseCode = $rcode; 
 
