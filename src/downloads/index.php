@@ -33,6 +33,18 @@ if ($downloadtype=='archive') {
 	$dbh->query("UPDATE archives SET downloads=downloads+1 WHERE id='$filename'");
 	$filename .= '.zip';
 	$filepath = $fileroot . '/downloads/' . $filename;
+
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Cache-Control: public");
+	header("Content-Description: File Transfer");
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=\"".$filename."\"");
+	header("Content-Transfer-Encoding: binary");
+	header("Content-Length: ".filesize($filepath));
+	//ob_end_flush();
+	@readfile($filepath);
 }
 else if ($downloadtype=='file') {
 	$sizemap = array(1=>'S', 2=>'M', 3=>'L', 4=>'X');
@@ -58,18 +70,56 @@ else if ($downloadtype=='file') {
 
   	$filename = $photo->title ? $photo->title . '.jpg' : 'image.jpg';
   	$filepath = $arr[0];
-}
 
-// http headers for zip downloads*
-header("Pragma: public");
-header("Expires: 0");
-header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-header("Cache-Control: public");
-header("Content-Description: File Transfer");
-header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=\"".$filename."\"");
-header("Content-Transfer-Encoding: binary");
-header("Content-Length: ".filesize($filepath));
-//ob_end_flush();
-@readfile($filepath);
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Cache-Control: public");
+	header("Content-Description: File Transfer");
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=\"".$filename."\"");
+	header("Content-Transfer-Encoding: binary");
+	header("Content-Length: ".filesize($filepath));
+	//ob_end_flush();
+	@readfile($filepath);  	
+}
+else if ($downloadtype=='orders') {
+	$guid = $arr[1];
+
+	$photo = explode('.',$arr[3]);
+	$idphoto = $photo[0];
+
+	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.guid='$guid' AND idphoto=$idphoto");
+
+	$item = $result->fetchObject();
+
+	if (!$item)
+		exit ('Invalid order # or photo id');
+
+	$arr = glob($fileroot . '/photos/' . sprintf("%02d",$idphoto%100) . '/' . $idphoto . '_*.jpg');
+
+	if (count($arr)!=1)
+		exit ('Photo does not exist on server');
+
+	$size = getimagesize($arr[0]);
+
+	$cropWidth = $size[0] * $item->cropwidth/100;
+	$cropHeight = $size[1] * $item->cropheight/100;
+	$cropX = $size[0] * $item->cropx/100;
+	$cropY = $size[1] * $item->cropy/100;
+
+	$img = imagecreatefromjpeg($arr[0]); //jpeg file
+	$imgCropped = imagecreatetruecolor($cropWidth, $cropHeight);
+
+	imagecopyresampled($imgCropped, $img, 0, 0, $cropX, $cropY, $cropWidth, $cropHeight, $cropWidth, $cropHeight);
+	imagedestroy($img);
+
+	header('Content-Type: image/jpeg');
+
+	// Output the image
+	imagejpeg($imgCropped);
+
+	// Free up memory
+	imagedestroy($imgCropped);
+}
 ?>

@@ -684,7 +684,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       break;
     case 'DELETE':
       $json = $request->getParsedBody();
-      if ($args['path'])
+      if (isset($args['path']))
         $this->services->dbh->query("DELETE FROM cartitems WHERE id=$args[path]");
       else
         $this->services->dbh->query("DELETE C.*, CI.* FROM carts C INNER JOIN cartitems CI ON CI.idcart=C.id WHERE C.id='$idcart'");
