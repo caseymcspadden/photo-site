@@ -2,9 +2,8 @@
 <% 
 	var index = 0;
 	collection.each(function(item) {
-		print('<div class="preview" id="item-' + index + '"><img src="' + urlBase + '/photos/S/' + item.get('idphoto') + '.jpg"></div>');
+		print('<div class="preview" id="item-' + index + '"><img src="' + urlBase + '/downloads/cartphoto/' + item.get('idcart') + '/' + item.get('id') + '.jpg"></div>');
 		index++;
 	});
 %>
-<div class="crop-rect"></div>
 <div class="item-description">Description</div>

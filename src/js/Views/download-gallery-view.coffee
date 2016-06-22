@@ -19,7 +19,6 @@ module.exports = BaseView.extend
 	render: ->
 		console.log "Rendering download-gallery-view"
 		data = this.model.toJSON()
-		console.log data
 		data.waitsrc = config.urlBase+'/images/wait-circle.gif'
 		this.$el.html this.template(data)
 

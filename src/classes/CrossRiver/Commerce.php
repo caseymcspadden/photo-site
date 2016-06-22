@@ -128,7 +128,7 @@ class Commerce {
 	 	return $this->execute_curl($ch);		
 	}
 
-	public function getOrders($id)
+	public function getOrders($id=NULL)
 	{
 		$ch = $this->initialize_pwinty('/Orders' . ($id ? "/$id" : ''));		
  		

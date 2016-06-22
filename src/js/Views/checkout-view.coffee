@@ -53,7 +53,7 @@ module.exports = BaseView.extend
 		
 		errors.push "zip" if not /^\d{5}(-\d{4})?$/.test(data['zip'])	
 		errors.push "email" if not /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data['email'])
-		#errors.push "card-number" if !this.validateCreditCard(data['card-number'])
+		errors.push "card-number" if !this.validateCreditCard(data['card-number'])
 		errors.push "expire-month" if !this.validateDate(data['expire-month'], data['expire-year'])
 		errors.push "cvv2" if not /^\d{3}\d?$/.test(data['cvv2'])	
 

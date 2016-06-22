@@ -4,7 +4,7 @@ $str = preg_replace('/^.*\/downloads\/(.*)$/','$1', $_SERVER['REQUEST_URI']);
 
 $arr = explode('/', $str);
 
-if (count($arr)!=2 && count($arr)!=4)
+if (count($arr)!=2 && count($arr)!=3)
 	exit ('Invalid file url');
 
 $downloadtype = $arr[0];
@@ -83,18 +83,18 @@ else if ($downloadtype=='file') {
 	//ob_end_flush();
 	@readfile($filepath);  	
 }
-else if ($downloadtype=='orders') {
-	$guid = $arr[1];
+else if ($downloadtype=='print') {
+	$printid = $arr[1];
 
-	$photo = explode('.',$arr[3]);
+	$photo = explode('.',$arr[2]);
 	$idphoto = $photo[0];
 
-	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.guid='$guid' AND idphoto=$idphoto");
+	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.printid='$printid' AND idphoto=$idphoto");
 
 	$item = $result->fetchObject();
 
 	if (!$item)
-		exit ('Invalid order # or photo id');
+		exit ('Invalid photo id');
 
 	$arr = glob($fileroot . '/photos/' . sprintf("%02d",$idphoto%100) . '/' . $idphoto . '_*.jpg');
 
@@ -103,15 +103,96 @@ else if ($downloadtype=='orders') {
 
 	$size = getimagesize($arr[0]);
 
-	$cropWidth = $size[0] * $item->cropwidth/100;
-	$cropHeight = $size[1] * $item->cropheight/100;
-	$cropX = $size[0] * $item->cropx/100;
-	$cropY = $size[1] * $item->cropy/100;
+	$cropArray = array( 
+		'x' => $size[0] * $item->cropx/100,
+		'y' => $size[1] * $item->cropy/100,
+		'width' => $size[0] * $item->cropwidth/100,
+		'height' => $size[1] * $item->cropheight/100
+	);
 
 	$img = imagecreatefromjpeg($arr[0]); //jpeg file
-	$imgCropped = imagecreatetruecolor($cropWidth, $cropHeight);
+	$imgCropped = imagecrop($img, $cropArray);
 
-	imagecopyresampled($imgCropped, $img, 0, 0, $cropX, $cropY, $cropWidth, $cropHeight, $cropWidth, $cropHeight);
+	imagedestroy($img);
+
+	header('Content-Type: image/jpeg');
+
+	// Output the image
+	imagejpeg($imgCropped);
+
+	// Free up memory
+	imagedestroy($imgCropped);
+}
+else if ($downloadtype=='orderedphoto') {
+	$orderid = $arr[1];
+
+	$photo = explode('.',$arr[2]);
+	$id = $photo[0];
+
+	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.orderid='$orderid' AND OI.id=$id");
+
+	$item = $result->fetchObject();
+
+	if (!$item)
+		exit ('Invalid photo id');
+
+	$arr = glob($photoroot . '/' . sprintf("%02d",$item->idphoto%100) . '/' . $item->idphoto . '_S.jpg');
+
+	if (count($arr)!=1)
+		exit ('Photo does not exist on server');
+
+	$size = getimagesize($arr[0]);
+
+	$cropArray = array( 
+		'x' => $size[0] * $item->cropx/100,
+		'y' => $size[1] * $item->cropy/100,
+		'width' => $size[0] * $item->cropwidth/100,
+		'height' => $size[1] * $item->cropheight/100
+	);
+
+	$img = imagecreatefromjpeg($arr[0]); //jpeg file
+	$imgCropped = imagecrop($img, $cropArray);
+
+	imagedestroy($img);
+
+	header('Content-Type: image/jpeg');
+
+	// Output the image
+	imagejpeg($imgCropped);
+
+	// Free up memory
+	imagedestroy($imgCropped);
+}
+else if ($downloadtype=='cartphoto') {
+	$idcart = $arr[1];
+
+	$photo = explode('.',$arr[2]);
+	$id = $photo[0];
+
+	$result = $dbh->query("SELECT * FROM cartitems WHERE idcart='$idcart' AND id=$id");
+
+	$item = $result->fetchObject();
+
+	if (!$item)
+		exit ('Invalid photo id');
+
+	$arr = glob($photoroot . '/' . sprintf("%02d",$item->idphoto%100) . '/' . $item->idphoto . '_S.jpg');
+
+	if (count($arr)!=1)
+		exit ('Photo does not exist on server');
+
+	$size = getimagesize($arr[0]);
+
+	$cropArray = array( 
+		'x' => $size[0] * $item->cropx/100,
+		'y' => $size[1] * $item->cropy/100,
+		'width' => $size[0] * $item->cropwidth/100,
+		'height' => $size[1] * $item->cropheight/100
+	);
+
+	$img = imagecreatefromjpeg($arr[0]); //jpeg file
+	$imgCropped = imagecrop($img, $cropArray);
+
 	imagedestroy($img);
 
 	header('Content-Type: image/jpeg');

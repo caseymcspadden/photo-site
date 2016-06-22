@@ -58,9 +58,25 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
-$app->get('/bamenda/orders[/{id:[0-9]*}]', function($request, $response, $args) {
-  $str = $this->commerce->getOrders(isset($args['id']) ? $args['id'] : NULL);
-  $response->getBody()->write($str);
+$app->get('/bamenda/orders/{orderid}', function($request, $response, $args) {
+  //$str = $this->commerce->getOrders(isset($args['id']) ? $args['id'] : NULL);
+  $object = new \stdClass();
+  $result = $this->services->dbh->query("SELECT O.*, P.idpaypal FROM orders O INNER JOIN payments P ON P.id=O.idpayment WHERE O.orderid='$args[orderid]'");
+  $object->local = $result->fetchObject();
+  $object->pwinty = json_decode($this->commerce->getOrders($object->local->idpwinty));
+  $object->paypal = json_decode($this->commerce->getPayments($object->local->idpaypal));
+  $response->getBody()->write(json_encode($object,JSON_NUMERIC_CHECK));
+  return $response->withHeader('Content-Type','application/json');
+});
+
+$app->get('/bamenda/orders/{orderid}/items', function($request, $response, $args) {
+  $arr = array();
+  $result = $this->services->dbh->query("SELECT OI.*, P.description FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder INNER JOIN products P ON P.id=OI.idproduct WHERE O.orderid='$args[orderid]'");
+  while ($obj = $result->fetchObject()) {
+    $obj->attrs = json_decode($obj->attrs);
+    array_push($arr,$obj);
+  }
+  $response->getBody()->write(json_encode($arr,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -69,8 +85,8 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
 
   $errors = array();
   $result = $this->services->dbh->query("SELECT tracked, price FROM shipping WHERE id=$r[shipping]");
-  $shipping = $result->fetchObject();
-  $tracked = $shipping ? $shipping->tracked : 0;
+  $shippingMethod = $result->fetchObject();
+  $tracked = $shippingMethod ? $shippingMethod->tracked : 0;
 
   $result = $this->services->dbh->query("SELECT price, quantity FROM cartitems WHERE idcart='$r[cart]'");
 
@@ -79,7 +95,9 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
   while ($item = $result->fetchObject())
     $amount += $item->price * $item->quantity;
 
-  $amount = ($amount + $shipping->price)/100;
+  $amount/=100;
+  $shipping = $shippingMethod->price/100;
+  $total = $amount+$shipping;
   $idpayment = 0;
   $idorder = 0;
   $idpwinty=0;
@@ -88,15 +106,16 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
     $order = $this->commerce->createOrder($r['name'],$r['address'],$r['address2'],$r['city'],$r['state'],$r['zip'], $tracked);
     if ($order->responseCode<300) {
         $idpwinty = $order->id;
-        $guid = time() . '-' . $this->services->getRandomKey(6);
-        $this->services->dbh->query("INSERT INTO orders (guid, idpwinty, name, email, address, address2, city, state, zip) VALUES ('$guid', $idpwinty, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]')");
+        $orderid = time() . '-' . $this->services->getRandomKey(6);
+        $printid = $this->services->getRandomKey(32);
+        $this->services->dbh->query("INSERT INTO orders (orderid, printid, idpwinty, name, email, address, address2, city, state, zip, amount, shipping) VALUES ('$orderid', '$printid', $idpwinty, '$r[name]', '$r[email]', '$r[address]', '$r[address2]', '$r[city]', '$r[state]', '$r[zip]', $amount, $shipping)");
         $idorder = $this->services->dbh->lastInsertId();
         $cartitems = array();
         $result = $this->services->dbh->query("SELECT CI.*, P.idapi FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct where idcart='$r[cart]'");
         while ($item = $result->fetchObject())
           array_push($cartitems, $item);
         foreach ($cartitems as $item) {
-          $photo = $this->commerce->addItemToOrder($order->id, $guid, $this->services->remoteUrlBase, $item);
+          $photo = $this->commerce->addItemToOrder($order->id, $printid, $this->services->remoteUrlBase, $item);
           if ($photo->responseCode<300) {
              $this->services->dbh->query("INSERT INTO orderitems (idorder, idpwinty, idcontainer, idphoto, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ($idorder, {$photo->id}, {$item->idcontainer}, {$item->idphoto}, {$item->idproduct}, {$item->price}, {$item->quantity}, '{$item->attrs}', {$item->cropx}, {$item->cropy}, {$item->cropwidth}, {$item->cropheight})");
           }
@@ -130,7 +149,7 @@ $app->post('/bamenda/orders', function($request, $response, $args) {
       error_log("PAYMENT RESULTS");
       error_log(json_encode($payment));
       if ($payment->responseCode>=200 && $payment->responseCode<300) {
-        $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amount)");
+        $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$total)");
         $idpayment = $this->services->dbh->lastInsertId();
         $this->services->dbh->query("UPDATE orders SET idpayment=$idpayment WHERE id=$idorder");
       }

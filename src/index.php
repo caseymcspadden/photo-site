@@ -94,7 +94,7 @@ $app->get('/cart', function ($request, $response, $args) {
     ]);
 });
 
-$app->get('/order/{id}', function ($request, $response, $args) {
+$app->get('/orders/{orderid}', function ($request, $response, $args) {
     return $this->view->render($response, 'order.html' , [
         'webroot'=>$this->services->webroot,
         'islogged'=>$this->services->isLogged()

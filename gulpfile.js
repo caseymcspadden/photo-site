@@ -158,8 +158,8 @@ gulp.task('root', ['fileroot'], function() {
   gulp.src(['src/downloads/.htaccess','src/downloads/**/*.*'])
     .pipe(gulp.dest('build/downloads'));
 
-  gulp.src(['src/orders/.htaccess','src/orders/**/*.*'])
-    .pipe(gulp.dest('build/orders'));
+  //gulp.src(['src/orders/.htaccess','src/orders/**/*.*'])
+  //  .pipe(gulp.dest('build/orders'));
 
   gulp.src(['src/cameroon/**/*.*'])
     .pipe(gulp.dest('build/cameroon'));

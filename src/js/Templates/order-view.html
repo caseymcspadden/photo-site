@@ -1,0 +1,36 @@
+<div class="large-12 columns">
+<h2>Summary</h2>
+<table>
+	<tbody>
+		<tr><td>Order number</td><td><%= local.orderid %></td></tr>
+		<tr><td>Order date</td><td><%= local.dt %></td></tr>
+		<tr><td>Ship to</td><td><%= local.name %><br><%= local.address %> <%= local.address2 ? '<br>'+local.address2 : '' %><br><%= local.city %>, <%= local.state %> <%= local.zip %></td></tr>
+		<tr><td>Amount</td><td>$<%= local.amount.toFixed(2) %></td></tr>
+		<tr><td>Shipping</td><td>$<%= local.shipping.toFixed(2) %></td></tr>
+		<tr><td>Total</td><td>$<%= (local.amount+local.shipping).toFixed(2) %></td></tr>
+		<tr><td>Status</td><td><%= pwinty.status %></td></tr>
+	</tbody>
+</table>
+
+<h2>Shipments</h2>
+<table>
+	<thead>
+		<tr><th>Id</th><th>Tracked?</th><th>Tracking URL</th><th>Arriving By</th><th>Shipped On</th></tr>
+	</thead>
+	<tbody>
+		<% for (var i=0;i<pwinty.shippingInfo.shipments.length;i++) { shipment=pwinty.shippingInfo.shipments[i]; %>
+			<tr><td><%= shipment.shipmentId %></td>
+				<td><%= shipment.isTracked ? 'Yes' : 'No' %></td>
+				<td><%= shipment.trackingUrl %></td>
+				<td><%= shipment.latestEstimatedArrivalDate %></td>
+				<td><%= shipment.shippedOn %></td></tr>
+		<% } %>
+	</tbody>
+</table>
+
+<h2>Order</h2>
+<table>
+	<tbody class="order-items">
+	</tbody>
+</table>
+</div>
