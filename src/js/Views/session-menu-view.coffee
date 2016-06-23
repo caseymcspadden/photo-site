@@ -22,10 +22,12 @@ module.exports = Backbone.View.extend
 		if m.id==0
 			this.$el.html this.template(data)
 		else
-			self = this
-			$.get(config.servicesBase + '/pathfromcontainer/' + m.get('idcontainer'), (json) ->
-				data.galleryPath = json.path
-				self.$el.html self.template(data)
+			$.ajax(
+				url: config.servicesBase + '/pathfromcontainer/' + m.get('idcontainer')
+				context: this
+				success: (json) ->
+					data.galleryPath = json.path
+					this.$el.html this.template(data)
 			)
 		this
 

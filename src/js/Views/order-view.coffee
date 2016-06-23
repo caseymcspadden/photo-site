@@ -11,6 +11,7 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		data = this.model.toJSON()
+		console.log data
 		this.$el.html this.template(data)
 	
 	addOne: (model) ->

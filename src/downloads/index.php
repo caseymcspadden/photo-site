@@ -9,8 +9,6 @@ if (count($arr)!=2 && count($arr)!=3)
 
 $downloadtype = $arr[0];
 
-error_log("download type = $downloadtype");
-
 $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
 

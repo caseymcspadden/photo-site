@@ -7,8 +7,7 @@ config = require './config'
 module.exports = BaseView.extend
 	tagName: 'div'
 
-	attributes:
-		class: 'large-12 columns'
+	className: 'orderitem'
 
 	###
 	events:

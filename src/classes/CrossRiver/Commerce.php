@@ -167,8 +167,6 @@ class Commerce {
 		$data->copies=$item->quantity;
 		$data->sizing='Crop';
 		$data->attributes=json_decode($item->attrs);
-
-		error_log(json_encode($data));
  		
 		$ch = $this->initialize_pwinty('/Orders/' . $id . '/Photos');		
 

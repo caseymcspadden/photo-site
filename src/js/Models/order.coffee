@@ -2,13 +2,6 @@ Backbone = require 'backbone'
 config = require './config'
 
 module.exports = Backbone.Model.extend
-	defaults:
-		dt: ''
-		orderid: ''
-		printid: ''
-		idpwinty: 0
-		idpayment: 0
-		name: ''
 
 	initialize: (options) ->
 		this.orderid = options.orderid
