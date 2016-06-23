@@ -1,7 +1,16 @@
 .order-view {
 
-	td {
-		vertical-align: top;
+	h1, h2, h3, h4, h5 {
+		color: white;
+	}
+
+	.summary {
+		margin-bottom: 0.5rem;
+		line-height: 1.2rem;
+		color: white;
+		&.name {
+			color: $light-gray;
+		}
 	}
 
 	.order-items {

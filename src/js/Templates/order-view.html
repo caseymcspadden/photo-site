@@ -1,36 +1,68 @@
 <div class="large-12 columns">
 <h2>Summary</h2>
-<table>
-	<tbody>
-		<tr><td>Order number</td><td><%= local.orderid %></td></tr>
-		<tr><td>Order date</td><td><%= local.dt %></td></tr>
-		<tr><td>Ship to</td><td><%= local.name %><br><%= local.address %> <%= local.address2 ? '<br>'+local.address2 : '' %><br><%= local.city %>, <%= local.state %> <%= local.zip %></td></tr>
-		<tr><td>Amount</td><td>$<%= local.amount.toFixed(2) %></td></tr>
-		<tr><td>Shipping</td><td>$<%= local.shipping.toFixed(2) %></td></tr>
-		<tr><td>Total</td><td>$<%= (local.amount+local.shipping).toFixed(2) %></td></tr>
-		<tr><td>Status</td><td><%= pwinty.status %></td></tr>
-	</tbody>
-</table>
+<div class="large-4 columns summary name">
+	Order Number
+</div>
+<div class="large-8 columns summary">
+	<%= local.orderid %>
+</div>
+<div class="large-4 columns summary name">
+Order Date
+</div>
+<div class="large-8 columns summary">
+<%= (new Date(local.dt)).toLocaleDateString() %>
+</div>
+<div class="large-4 columns summary name">
+Ship To
+</div>
+<div class="large-8 columns summary">
+<%= local.name %><br/>
+<%= local.address %><br/>
+<% if (local.address2) { %>
+<%= local.address2 %><br/>
+<% } %>
+<%= local.city %>, <%= local.state %> <%= local.zip %>
+</div>
+<div class="large-4 columns summary name">
+Amount
+</div>
+<div class="large-8 columns summary">
+$<%= local.amount.toFixed(2) %>
+</div>
+<div class="large-4 columns summary name">
+Shipping
+</div>
+<div class="large-8 columns summary">
+$<%= local.shipping.toFixed(2) %>
+</div>
+<div class="large-4 columns summary name">
+Total
+</div>
+<div class="large-8 columns summary">
+<%= (local.amount+local.shipping).toFixed(2) %>
+</div>
+<div class="large-4 columns summary name">
+Status
+</div>
+<div class="large-8 columns summary">
+<%= pwinty.status %>
+</div>
 
 <h2>Shipments</h2>
-<table>
-	<thead>
-		<tr><th>Id</th><th>Tracked?</th><th>Tracking URL</th><th>Arriving By</th><th>Shipped On</th></tr>
-	</thead>
-	<tbody>
-		<% for (var i=0;i<pwinty.shippingInfo.shipments.length;i++) { shipment=pwinty.shippingInfo.shipments[i]; %>
-			<tr><td><%= shipment.shipmentId %></td>
-				<td><%= shipment.isTracked ? 'Yes' : 'No' %></td>
-				<td><%= shipment.trackingUrl %></td>
-				<td><%= shipment.latestEstimatedArrivalDate %></td>
-				<td><%= shipment.shippedOn %></td></tr>
+<% for (var i=0;i<pwinty.shippingInfo.shipments.length;i++) { shipment=pwinty.shippingInfo.shipments[i]; %>
+	<div class="large-4 columns summary name">
+		Shipment <%= i+1 %>
+	</div>
+	<div class="large-8 columns summary">
+		Estimated Arrival: <%= (new Date(shipment.latestEstimatedArrivalDate)).toLocaleDateString() %><br/>
+		<% if (shipment.trackingUrl) { %>
+		<%= shipment.trackingUrl %><br/>
 		<% } %>
-	</tbody>
-</table>
+		<%= shipment.shippedOn ? 'Shipped: ' + shipment.shippedOn : 'Not yet shipped' %>
+	</div>
+<% } %>
 
 <h2>Order</h2>
-<table>
-	<tbody class="order-items">
-	</tbody>
-</table>
+<div class="order-items">
+</div>
 </div>

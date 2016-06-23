@@ -5,8 +5,10 @@ config = require './config'
 #Model: orderitem
 
 module.exports = BaseView.extend
+	tagName: 'div'
+
 	attributes:
-		class: 'tr'
+		class: 'large-12 columns'
 
 	###
 	events:
