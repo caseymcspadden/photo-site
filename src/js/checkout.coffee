@@ -17,9 +17,11 @@ loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 cartItems = new CartItems
 cartSummaryView = new CartSummaryView {el: '.cart-summary-view', collection: cartItems}
-checkoutView = new CheckoutView {el: '.checkout-view', collection: cartItems}
 
 $('body').append loginView.render().el
+
+checkoutView = new CheckoutView {el: '.checkout-view', collection: cartItems}
+checkoutView.render()
 
 $ ->
 	session.fetch()

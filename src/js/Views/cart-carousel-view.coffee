@@ -10,7 +10,8 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['cart-carousel-view']
 		this.itemIndex = 0
-
+		this.listenTo this.collection, 'reset', this.render
+		
 	showItem: ->
 		return if this.collection.length==0
 		item = this.collection.at(this.itemIndex).toJSON()

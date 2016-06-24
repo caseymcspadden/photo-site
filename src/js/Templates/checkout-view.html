@@ -1,5 +1,5 @@
 <form id="checkout-form">
-<input type="hidden" name="cart" value="<%= idcart %>">
+<input type="hidden" name="cart" value="">
 <input type="hidden" name="idorder" value="0">
 
 <div class="large-12 columns">
@@ -8,24 +8,7 @@
 		<div class="cart-carousel-view">
 		</div>
 	</div>
-	<div class="large-6 columns">
-		<div class="float-left"><p>Items:</p></div>
-		<div class="right-column text-right"><p><%= count %></p></div>
-		<div class="float-left"><p>Subtotal:</p></div>
-		<div class="right-column text-right"><p>$<%= (subtotal/100).toFixed(2) %></p></div>
-		<div>
-			<select id="shipping" name="shipping">
-				<%
-					for (i=0;i<shipping.length;i++) {
-						s = shipping[i];
-						if (s.shippingtype==shippingtype)
-							print('<option value="' + s.id + '">Shipping: ' + s.description + ' - $' + (s.price/100).toFixed(2) + '</option>');
-					}
-				%>
-			</select>
-		</div>
-		<div class="float-left"><p>Total:</p></div>
-		<div class="right-column text-right"><p class="total-container">$<span class="total"></span></p></div>
+	<div class="large-6 columns checkout-shipping-view">
 	</div>
 </div>
 
@@ -182,5 +165,5 @@
 </div>
 </form>
 
-<div class="reveal form order-confirmation-view" data-reveal>
+<div class="reveal form order-submit-view" data-reveal>
 </div>

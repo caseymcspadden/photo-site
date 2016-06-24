@@ -34,30 +34,6 @@ $container['commerce'] = function($container) {
     return new CrossRiver\Commerce();
 };
 
-$app->get('/bamenda/test', function($request, $response, $args) {
-  $json = $this->commerce->makePayment(
-    230.20, 
-    'Test Transaction',
-    'Casey McSpadden',
-    'amex',
-    '371384099616004',
-    '07/2019',
-    '8888',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-    //'123 Main St',
-    //NULL,
-    //'Leawood',
-    //'KS',
-    //'66206'
-  );
-  $response->getBody()->write(json_encode($json,JSON_UNESCAPED_SLASHES|JSON_NUMERIC_CHECK));
-  return $response->withHeader('Content-Type','application/json');
-});
-
 $app->get('/bamenda/orders/{orderid}', function($request, $response, $args) {
   //$str = $this->commerce->getOrders(isset($args['id']) ? $args['id'] : NULL);
   $stmt = $this->services->dbh->prepare("SELECT O.*, P.idpaypal, P.cardtype, P.cardnumber FROM orders O INNER JOIN payments P ON P.id=O.idpayment WHERE O.orderid=:orderid");
@@ -308,12 +284,6 @@ $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) 
 
 $app->get('/bamenda/productattributes', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT PA.idproduct, PA.idattribute , A.name, A.title, A.validvalues, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute ORDER BY idproduct, idattribute");
-  $response->getBody()->write($json);
-  return $response->withHeader('Content-Type','application/json');
-});
-
-$app->get('/bamenda/test2[/{path:.*}]', function($request, $response, $args) {
-  $json = $this->commerce->getPayments(isset($args['path']) ? $args['path'] : NULL);
   $response->getBody()->write($json);
   return $response->withHeader('Content-Type','application/json');
 });
