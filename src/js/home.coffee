@@ -24,9 +24,12 @@ slideshowView = new SlideshowView({el: '.slideshow', collection: featuredPhotos,
 $('body').append loginView.render().el
 
 feed = new Instafeed(
-	get: 'tagged',
-	tagName: 'awesome',
-	clientId: '6a15ce40c2534c94b16a6c75b58795af'
+	get: 'user',
+	userId: '727575',
+	accessToken: '727575.6a15ce4.e9e018e14ae64aa1b2d7a48e9b580416'
+	sortBy: 'most-recent'
+	limit: 12
+	template: '<div class="insta-container"><a href="{{link}}"><img src="{{image}}" /></a></div>'
 )
 feed.run()
 

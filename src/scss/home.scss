@@ -43,3 +43,24 @@
 @include foundation-top-bar;
 
 @import "../../node_modules/font-awesome/scss/font-awesome.scss";
+
+#instafeed {
+	margin-top: 2rem;
+	//border-top: 2px solid $primary-color;
+	//padding-top: 1rem;
+
+	.insta-container {
+		float: left;
+		overflow: hidden;
+		position: relative;
+		.info {
+			position: absolute;
+			top: 20px;
+			left: 10px;
+		}
+	}
+
+	img: {
+		margin: rem-calc(5);
+	}
+}
