@@ -28,7 +28,6 @@ module.exports = Backbone.Model.extend
 			url: this.urlRoot
 			type: 'POST'
 			context: this
-			contentType: "application/json; charset=utf-8"
 			data: data
 			success: (json) ->
 				if json.hasOwnProperty 'error'

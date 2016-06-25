@@ -13,7 +13,8 @@ module.exports = BaseView.extend
 		this.$el.html this.template {urlBase: config.urlBase}
 
 	submit: (data) ->
-		console.log data
+		this.$('.page').addClass 'hide'
+		this.$('.wait').removeClass 'hide'
 		this.$el.foundation 'open'
 		$.ajax(
 			url: config.servicesBase +  '/orders'

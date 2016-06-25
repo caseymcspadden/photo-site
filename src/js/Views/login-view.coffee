@@ -32,6 +32,8 @@ module.exports = Backbone.View.extend
 	openClose: (m) ->
 		this.model.set 'errorMessage', ''
 		if m.get 'loggingIn'
+			this.$('input[name="email"]').val ''
+			this.$('input[name="password"]').val ''
 			this.$el.foundation 'open'
 			m.set 'loggingIn', false
 
