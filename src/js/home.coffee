@@ -29,7 +29,7 @@ feed = new Instafeed(
 	accessToken: '727575.6a15ce4.e9e018e14ae64aa1b2d7a48e9b580416'
 	sortBy: 'most-recent'
 	limit: 12
-	template: '<div class="insta-container"><a href="{{link}}"><img src="{{image}}" /></a></div>'
+	template: '<div class="photo-container"><a href="{{link}}"><img src="{{image}}" /></a><div class="info">{{caption}}</div></div>'
 )
 feed.run()
 

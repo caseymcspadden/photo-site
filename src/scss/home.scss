@@ -44,23 +44,32 @@
 
 @import "../../node_modules/font-awesome/scss/font-awesome.scss";
 
-#instafeed {
-	margin-top: 2rem;
-	//border-top: 2px solid $primary-color;
-	//padding-top: 1rem;
-
-	.insta-container {
-		float: left;
-		overflow: hidden;
-		position: relative;
-		.info {
-			position: absolute;
-			top: 20px;
-			left: 10px;
+.insta-container {
+	margin-top: 1rem;
+	text-align: center;
+	#instafeed {
+		//border-top: 2px solid $primary-color;
+		//padding-top: 1rem;
+		.photo-container {
+			opacity: 0.7;
+			float: left;
+			overflow: hidden;
+			position: relative;
+			img: {
+			}
+			&:hover {
+				opacity: 1.0;
+			}
+			.info {
+				position: absolute;
+				padding: 5px;
+				top: 110px;
+				left: 10px;
+				color: $light-gray;
+				background-color: rgba(0, 0, 0, 0.5);
+				font-size: 80%;
+				font-weight: bold;
+			}
 		}
-	}
-
-	img: {
-		margin: rem-calc(5);
 	}
 }

@@ -37,7 +37,7 @@
 		}
 
 		.content {
-			width: rem-calc(336);
+			//width: rem-calc(336);
 			@include breakpoint(medium up) {
 			 	min-height: rem-calc(450);
 			}
