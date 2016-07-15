@@ -5,8 +5,9 @@ module.exports = Backbone.Model.extend
 	urlRoot: config.servicesBase + '/session'
 
 	defaults :
-		isadmin: 0		
-		errorMessage: ''
+		isadmin: 0
+		success: false	
+		message: ''
 		loggingIn: false
 		email: ''
 		name: ''
@@ -15,7 +16,6 @@ module.exports = Backbone.Model.extend
 
 	initialize: (attributes, options) ->
 		console.log 'initializing session'
-		self = this
 		###
 		$.get(this.urlRoot, (result) ->
 			json = $.parseJSON(result)
@@ -30,20 +30,20 @@ module.exports = Backbone.Model.extend
 			context: this
 			data: data
 			success: (json) ->
-				if json.hasOwnProperty 'error'
-					this.set 'errorMessage' , json.message
-				else
-					location.reload();
+				this.set json
+				this.set 'success' , true
+			error: (json) ->
+				this.set 'message' , json.responseJSON.message
 		)
 
-	logout: ->
+	logout: (successUrl) ->
 		$.ajax(
 			url: this.urlRoot
 			type: 'PUT'
 			context: this
 			success: (json) ->
-				#location.reload();
 				this.set 'uid', 0
+				document.location = successUrl
 		)
 
 

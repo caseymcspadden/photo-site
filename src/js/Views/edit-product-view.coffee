@@ -5,18 +5,29 @@ User = require './user'
 module.exports = BaseView.extend
 	events:
 		'submit form' : 'doSubmit'
+		'change #hsize' : 'hsizeChanged'
+		'change #vsize' : 'vsizeChanged'
 
 	defaultData:
 		id: 0
-		name: ''
-		email: ''
-		company: ''
-		idcontainer: 0
-		isactive: 1
-		isadmin: 0
+		api: 'pwinty'
+		idapi: ''
+		type: 'Print'
+		description: ''
+		hsize: ''
+		vsize: ''
+		hsizeprod: ''
+		vsizeprod: ''
+		hres: ''
+		vres: ''
+		price: ''
+		shippingtype: '0'
+		active: '1'
+
+	defaultPPI: 150
 
 	initialize: (options) ->
-		this.template= templates['edit-user-view']
+		this.template= templates['edit-product-view']
 
 	open: (collection, model) ->
 		this.collection=collection
@@ -24,14 +35,26 @@ module.exports = BaseView.extend
 		this.render()
 		this.$el.foundation 'open'
 
-	doSubmit: (e) ->
-		e.preventDefault()		
-		arr = $(e.target).serializeArray()
+	serialize: (form) ->
+		arr = $(form).serializeArray()
 		data = {}
-		self = this
 		for elem in arr
 			data[elem.name]=elem.value
+		data
+
+	hsizeChanged: (e) ->
+		this.$('input[name="hres"]').val e.target.value * this.defaultPPI
+
+	vsizeChanged: (e) ->
+		this.$('input[name="vres"]').val e.target.value * this.defaultPPI
+
+	doSubmit: (e) ->
+		e.preventDefault()		
+		data = this.serialize e.target
+		self = this
 		if this.model
+			console.log "model exists"
+			console.log this.model
 			this.model.save(
 				data
 				error: (model, response, options) ->

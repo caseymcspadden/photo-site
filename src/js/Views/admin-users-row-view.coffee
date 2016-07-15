@@ -30,7 +30,7 @@ module.exports = BaseView.extend
 		this.model.save {idcontainer: e.target.item(e.target.selectedIndex).value}
 
 	editUser: (e) ->
-		this.editUserView.open(this.model)
+		this.editUserView.open(this.model.collection, this.model)
 		e.preventDefault()
 
 	render: ->

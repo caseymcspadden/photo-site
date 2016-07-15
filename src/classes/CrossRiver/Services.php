@@ -228,15 +228,15 @@ class Services
 	/***
 	* Changes a user's password
 	* @param int $uid
-	* @param string $currpass
+	* @param string $currpass Casey 6/29/2016 allow changing password without entering current password
 	* @param string $newpass
     * @param string $repeatnewpass
     * @param string $captcha = NULL
 	* @return array $return
 	*/
-    public function changePassword($uid, $currpass, $newpass, $repeatnewpass, $captcha = NULL)
+    public function changePassword($uid, $newpass, $repeatnewpass, $captcha = NULL)
 	{
-		return $this->auth->changePassword($uid, $currpass, $newpass, $repeatnewpass, $captcha);
+		return $this->auth->changePassword($uid, NULL, $newpass, $repeatnewpass, $captcha);
 	}
 
 	/***

@@ -274,6 +274,46 @@ $app->get('/bamenda/products', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->post('/bamenda/products', function($request, $response, $args) {
+  $vals = $request->getParsedBody();
+  $result = array('error'=>false);
+
+  if (!$this->services->isAdmin()) {
+    $result['error']=true;
+    $result['message']='Unauthorized';
+  }
+  else {
+    $stmt = $this->services->dbh->prepare("INSERT INTO products (api, idapi, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, active) VALUES (:api, :idapi, :type, :description, :hsize, :vsize, :hsizeprod, :vsizeprod, :hres, :vres, :price, :shippingtype, :active)");
+    $arr = array(
+      'api'=>$vals['api'], 
+      'idapi'=>$vals['idapi'], 
+      'type'=>$vals['type'], 
+      'description'=>$vals['description'], 
+      'hsize'=>$vals['hsize'], 
+      'vsize'=>$vals['vsize'], 
+      'hsizeprod'=>$vals['hsizeprod'], 
+      'vsizeprod'=>$vals['vsizeprod'], 
+      'hres'=>$vals['hres'], 
+      'vres'=>$vals['vres'], 
+      'price'=>$vals['price'], 
+      'shippingtype'=>$vals['shippingtype'], 
+      'active'=>$vals['active']
+    );
+    if ($stmt->execute($arr)) { 
+      $id = $this->services->dbh->lastInsertId();
+      $stmt = $this->services->dbh->prepare("SELECT * FROM products WHERE id=?");
+      $stmt->execute(array($id));
+      $result = $stmt->fetch();
+    }
+    else {
+      $result['error']=true;
+      $result['message']='Unable to create resource';
+    }
+  }
+  $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
+  return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
+});
+
 $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) {
    $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) 
@@ -316,26 +356,28 @@ $app->get('/bamenda/users', function($request, $response, $args) {
 
 $app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
+  $result = array('error'=>false);
+
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else {
-    //if (isset($vals['password']) && isset($vals['repeat-password']))
-      //$result = $this->services->changePassword($args['id'],  $vals['email'], $vals['password'], $vals['repeat-password'], 
-    //else {
-      $rslt = $this->services->dbh->query("UPDATE users SET name='$vals[name]', company='$vals[company]', email='$vals[email]', idcontainer=$vals[idcontainer], isadmin=$vals[isadmin], isactive=$vals[isactive] WHERE id=$args[id]");
-      $result = array('error'=>false);
-    //}
-   if ($result['error']==true)
-      $json = json_encode($result);
-    else
+    if (isset($vals['password']) && isset($vals['repeat-password']) && strlen($vals['password'])>0)
+      $result = $this->services->changePassword($args['id'], $vals['password'], $vals['repeat-password']); 
+    if ($result['error']==false) {
+      $this->services->dbh->query("UPDATE users SET name='$vals[name]', company='$vals[company]', email='$vals[email]', idcontainer=$vals[idcontainer], isadmin=$vals[isadmin], isactive=$vals[isactive] WHERE id=$args[id]");
       $json = $this->services->fetchJSON("SELECT * FROM users WHERE id=$args[id]",true);
-  }
+    }
+    else
+      $json = json_encode($result);
+  } 
   $response->getBody()->write($json);
-  return $response->withHeader('Content-Type','application/json');
+  return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
 $app->post('/bamenda/users', function($request, $response, $args) {
   $vals = $request->getParsedBody();
+  $result = array('error'=>false);
+
   if (!$this->services->isAdmin())
     $json = $this->services->unauthorizedJSON;
   else {
@@ -343,16 +385,16 @@ $app->post('/bamenda/users', function($request, $response, $args) {
       ['name'=>$vals['name'], 
        'company'=>$vals['company'],
        'isactive'=>$vals['isactive'],
-       'iadmin'=>$vals['isadmin'],
+       'isadmin'=>$vals['isadmin'],
        'idcontainer'=>$vals['idcontainer']
-      ]);
+      ],NULL,true);
     if ($result['error']==true)
       $json = json_encode($result);
     else
       $json = $this->services->fetchJSON("SELECT * FROM users WHERE email='$vals[email]'",true);
   }
   $response->getBody()->write($json);
-  return $response->withHeader('Content-Type','application/json');
+  return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
 $app->get('/bamenda/session', function($request, $response, $args) {
@@ -363,8 +405,13 @@ $app->get('/bamenda/session', function($request, $response, $args) {
 
 $app->put('/bamenda/session', function($request, $response, $args) {
   $ret = $this->services->logout($this->services->getSessionHash());
-  if ($ret)
+  if ($ret) {
     setcookie($this->services->cookie_name, '', time()-3600, $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
+    session_name('cart');
+    session_start();
+    $stmt = $this->services->dbh->prepare("DELETE C.*, CI.* FROM carts C INNER JOIN cartitems CI ON CI.idcart=C.id WHERE C.id=?");
+    $stmt->execute(array(session_id()));
+  }
   $result=array();
   $result['error'] = !$ret;
   $response->getBody()->write(json_encode($result,JSON_NUMERIC_CHECK));
@@ -373,16 +420,20 @@ $app->put('/bamenda/session', function($request, $response, $args) {
 
 $app->post('/bamenda/session', function($request, $response, $args) {
   $vals = $request->getParsedBody();
-  $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
-  if ($result['error']==true)
-    $json = json_encode($result);
-  else {
+  if ($vals['forgot'])
+    $result = $this->services->requestReset($vals['email']);
+  else
+    $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
+  
+  $json = json_encode($result);
+
+  if (!$result['error'] && !$vals['forgot']) {
     setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
     $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM {$this->services->table_sessions} S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
   }
   
   $response->getBody()->write($json);
-  return $response->withHeader('Content-Type','application/json');
+  return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
 $app->get('/bamenda/photos', function($request, $response, $args) {
@@ -684,7 +735,7 @@ $app->post('/bamenda/containers/{id:[0-9]+}/payment', function($request, $respon
 
   $payment = $this->commerce->makePayment(
     $amt[0],
-    'Photoshoot Fee',
+    $r['name'],
     $r['card-name'],
     $r['card-type'],
     $r['card-number'],
@@ -693,7 +744,7 @@ $app->post('/bamenda/containers/{id:[0-9]+}/payment', function($request, $respon
   );
 
   if ($payment->responseCode<300) {
-    $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,amount) VALUES ('{$payment->id}',$amt[0])");
+    $result = $this->services->dbh->query("INSERT INTO payments (idpaypal,description,amount) VALUES ('{$payment->id}','$r[name]',$amt[0])");
     $idpayment = $this->services->dbh->lastInsertId();
     $this->services->dbh->query("UPDATE containers SET idpayment=$idpayment WHERE id=$args[id]");
     $payment->idpayment = $idpayment;
@@ -704,7 +755,6 @@ $app->post('/bamenda/containers/{id:[0-9]+}/payment', function($request, $respon
   $response->getBody()->write(json_encode($payment));
   return $response->withHeader('Content-Type','application/json');
 });
-
 
 $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   session_name('cart');
@@ -718,7 +768,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
   $this->services->dbh->query("INSERT IGNORE INTO carts (id) VALUES ('$idcart')");
   switch ($request->getMethod()) {
     case 'GET':
-      $json = $this->services->fetchJSON("SELECT CI.id, CI.idcart, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, p.shippingtype FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
+      $json = $this->services->fetchJSON("SELECT CI.id, CI.idcart, CI.idphoto, CI.idcontainer, CI.idproduct, PH.width, PH.height, CI.price, CI.quantity, CI.attrs, CI.cropx, CI.cropy, CI.cropwidth, CI.cropheight, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hsizeprod, P.vsizeprod, P.hres, P.vres, P.shippingtype FROM cartitems CI INNER JOIN products P ON P.id=CI.idproduct INNER JOIN photos PH ON PH.id=CI.idphoto WHERE CI.idcart='$idcart'");
       break;
     case 'POST':
       $cropx = $cropy = 0;

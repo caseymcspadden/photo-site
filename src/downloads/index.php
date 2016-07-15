@@ -4,8 +4,8 @@ $str = preg_replace('/^.*\/downloads\/(.*)$/','$1', $_SERVER['REQUEST_URI']);
 
 $arr = explode('/', $str);
 
-if (count($arr)!=2 && count($arr)!=3)
-	exit ('Invalid file url');
+//if (count($arr)!=2 && count($arr)!=3)
+//	exit ('Invalid file url');
 
 $downloadtype = $arr[0];
 

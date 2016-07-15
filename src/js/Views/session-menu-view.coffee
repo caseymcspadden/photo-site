@@ -15,11 +15,11 @@ module.exports = Backbone.View.extend
 
 	render: (m) ->
 		data = 
-			uid: m.id
+			uid: if m.id then m.id else 0
 			config: config
 			isadmin: m.get('isadmin')
 
-		if m.id==0
+		if not m.id
 			this.$el.html this.template(data)
 		else
 			$.ajax(
@@ -35,5 +35,4 @@ module.exports = Backbone.View.extend
 		this.model.set 'loggingIn', true
 
 	logout: (e) ->
-		this.model.logout()
-		document.location = config.urlBase
+		this.model.logout config.urlBase

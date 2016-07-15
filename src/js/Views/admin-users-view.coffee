@@ -19,7 +19,8 @@ module.exports = BaseView.extend
 		this.containers.fetch {reset: true}
 
 	addUser: (e) ->
-		this.editUserView.open(null)
+		e.preventDefault()
+		this.editUserView.open this.collection , null
 	
 	render: ->
 		this.$el.html this.template()

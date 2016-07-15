@@ -17,6 +17,7 @@ a {
   a {
     color: $light-gray;
     outline: none;
+    &:hover {color: $white;}
   }
   input[type="submit"] {
     background-color: lighten($black,10%);
@@ -34,6 +35,12 @@ a {
     color: $body-font-color;
     &:visited {color: $body-font-color;}   
     &:hover {color: $white;}
+  }
+}
+
+.login-view {
+  .forgot-container {
+    margin-bottom: 1rem;
   }
 }
 
@@ -68,7 +75,7 @@ a {
     }
   }
   .show-cart {
-    overflow: hidden;
+    //overflow: hidden;
     text-align: right;
   }
 }

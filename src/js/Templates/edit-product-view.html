@@ -1,0 +1,66 @@
+<button type="button" class="close-button" data-close aria-label="Close">
+	<span aria-hidden="true">&times;</span>
+</button>
+<h2><%= id ? 'Edit' : 'Add' %> Product</h2>
+<form method="POST">
+	<input type="hidden" name="active" value="<%= active %>">
+	<label>Description
+		<input type="text" name="description" value="<%= description %>">
+	</label>
+	<label>Type
+		<select name="type">
+			<option value="Print"<%= type=='Print' ? ' selected' : ''%>>Print</option> 
+			<option value="Canvas"<%= type=='Canvas' ? ' selected' : ''%>>Canvas</option> 
+			<option value="FramedPoster"<%= type=='FramedPoster' ? ' selected' : ''%>>Framed Poster</option> 
+			<option value="Magnet"<%= type=='Magnet' ? ' selected' : ''%>>Magnet</option> 
+			<option value="PhoneCase"<%= type=='PhoneCase' ? ' selected' : ''%>>Phone Case</option> 
+			<option value="Keyring"<%= type=='Keyring' ? ' selected' : ''%>>Key Ring</option> 
+			<option value="Mug"<%= type=='Mug' ? ' selected' : ''%>>Mug</option> 
+			<option value="Poster"<%= type=='Poster' ? ' selected' : ''%>>Poster</option> 
+		</select>
+	</label>
+	<label>API
+		<select name="api">
+			<option value="pwinty" selected>Pwinty</option> 
+		</select>
+	</label>
+	<label>API ID
+		<input type="text" name="idapi" value="<%= idapi %>">
+	</label>
+	<label>Price (cents)
+		<input type="text" name="price" value="<%= price %>">
+	</label>
+	<label>Shipping Category
+		<select name="shippingtype">
+			<option value="1"<%= shippingtype==1 ? ' selected' : ''%>>Prints</option> 
+			<option value="2"<%= shippingtype==2 ? ' selected' : ''%>>Large Print</option> 
+			<option value="3"<%= shippingtype==3 ? ' selected' : ''%>>Canvas</option> 
+			<option value="4"<%= shippingtype==4 ? ' selected' : ''%>>Framed Print</option> 
+			<option value="5"<%= shippingtype==5 ? ' selected' : ''%>>Merchandise</option> 
+		</select>
+	</label>
+	<div class="large-6 columns">
+		<label>Horizontal Print Size (in)
+			<input type="text" id="hsize" name="hsize" value="<%= hsize %>">
+		</label>
+		<label>Horizontal Product Size (in)
+			<input type="text" name="hsizeprod" value="<%= hsizeprod %>">
+		</label>
+		<label>Min Horizontal Resolution (px)
+			<input type="text" name="hres" value="<%= hres %>">
+		</label>
+	</div>
+	<div class="large-6 columns">
+		<label>Vertical Print Size (in)
+			<input type="text" id="vsize" name="vsize" value="<%= vsize %>">
+		</label>
+		<label>Vertical Product Size (in)
+			<input type="text" name="vsizeprod" value="<%= vsizeprod %>">
+		</label>
+		<label>Min Vertical Resolution (px)
+			<input type="text" name="vres" value="<%= vres %>">
+		</label>
+	</div>
+	<input type="submit" class="button" value="Submit">
+</form>
+<div class="error-message hide"></div>

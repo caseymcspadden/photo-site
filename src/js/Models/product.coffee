@@ -3,7 +3,6 @@ config = require './config'
 
 module.exports = Backbone.Model.extend
 	defaults :
-		id: 0
 		api: ''
 		idapi: ''
 		type: ''

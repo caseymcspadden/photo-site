@@ -158,6 +158,9 @@ gulp.task('root', ['fileroot'], function() {
   gulp.src(['src/downloads/.htaccess','src/downloads/**/*.*'])
     .pipe(gulp.dest('build/downloads'));
 
+  gulp.src(['src/test/.htaccess','src/test/**/*.*'])
+    .pipe(gulp.dest('build/test'));
+
   //gulp.src(['src/orders/.htaccess','src/orders/**/*.*'])
   //  .pipe(gulp.dest('build/orders'));
 

@@ -30,7 +30,7 @@ module.exports = BaseView.extend
 	submitPaymentForm: (e) ->
 		e.preventDefault();
 		arr = $(e.target).serializeArray()
-		data = {}
+		data = this.model.toJSON()
 		for elem in arr
 			data[elem.name]=elem.value
 		console.log data

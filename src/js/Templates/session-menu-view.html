@@ -2,7 +2,7 @@
 <li><a href="#">CONTACT</a></li>
 <% if (uid==0) { %> 
 	<li><a href="#" class="login-item">CLIENT LOGIN</a></li>
-<% } else { %>
+<% } else { console.log("uid=" + uid); %>
 	<li><a href="#">PROFILE</a></li>
 	<li><a href="<%= config.urlBase %>/galleries/<%= galleryPath %>">MY GALLERIES</a></li>
 	<% if (isadmin) { %> 

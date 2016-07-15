@@ -2,35 +2,47 @@ Backbone = require 'backbone'
 templates = require './jst'
 
 module.exports = Backbone.View.extend
-	className: 'reveal form'
+	className: 'reveal form login-view'
 
 	attributes:
 		'data-reveal': ''
 
 	events:
 		'submit form' : 'login'
+		'click .forgot-password' : 'forgotPassword'
 		#'submit #fv-addGallery form' : 'addGallery'
 		#'click .featured-thumbnail' : 'selectContainer'
 
 	initialize: (options) ->
 		this.template = templates['login-view']
 		this.listenTo this.model, 'change:loggingIn' , this.openClose
-		this.listenTo this.model, 'change:errorMessage' , this.loginError
-		this.listenTo this.model, 'change:id' , this.loginSuccess
+		this.listenTo this.model, 'change:message' , this.loginError
+		this.listenTo this.model, 'change:success' , this.loginSuccess
 
 	loginError: (m) ->
-		msg = m.get 'errorMessage'
+		msg = m.get 'message'
 		if msg.length==0
-			this.$('.error-message').addClass 'hidden'
+			this.$('.error-message').addClass 'hide'
 		else
-			this.$('.error-message').html(msg).removeClass 'hidden'
+			this.$('.error-message').html(msg).removeClass 'hide'
 
 	loginSuccess: (m) ->
-		this.$('error-message').addClass 'hidden'
-		this.$el.foundation 'close'
+		if m.get 'success'
+			this.$el.foundation 'close'
+			document.location.reload() if m.get('id')!=0
+
+	forgotPassword: (e) ->
+		e.preventDefault()
+		this.$('.enter-container').addClass 'hide'
+		this.$('.forgot-container').removeClass 'hide'
+		this.$('input[name="forgot"]').val '1'
 
 	openClose: (m) ->
-		this.model.set 'errorMessage', ''
+		this.model.set 'message' , ''
+		this.model.set 'success' , false
+		this.$('.enter-container').removeClass 'hide'
+		this.$('.forgot-container').addClass 'hide'
+		this.$('input[name="forgot"]').val '0'
 		if m.get 'loggingIn'
 			this.$('input[name="email"]').val ''
 			this.$('input[name="password"]').val ''

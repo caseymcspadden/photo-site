@@ -53,12 +53,11 @@ $container['services'] = function($container) {
 // Define app routes
 
 $app->get('/', function ($request, $response, $args) {
-    return $this->view->render($response, 'home.html' , [
+   return $this->view->render($response, 'home.html' , [
         'webroot'=>$this->services->webroot,
         'islogged'=>$this->services->isLogged()
   ]);
 })->setName('home');
-
 
 $app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
     $container = $this->services->getContainer($args['path']);

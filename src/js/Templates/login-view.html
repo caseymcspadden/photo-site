@@ -4,14 +4,20 @@
 
 <h1>Client Login</h1>
 <form>
+  <input type="hidden" name="forgot" value="0">
   <label>Email
     <input type="text" name="email">
   </label>
-  <label>Password
-    <input type="password" name="password">
-  </label>
-  <input type="checkbox" id="remember" name="remember"><label for="remember">Remember me</label>
-  <p><a href="#" class="forgot-password">forgot password</a></p>
+  <div class="enter-container">
+    <label>Password
+      <input type="password" name="password">
+    </label>
+    <input type="checkbox" id="remember" name="remember"><label for="remember">Remember me</label>
+    <a href="#" class="forgot-password">forgot password?</a>
+  </div>
+  <div class="forgot-container hide">
+    Enter your account email address and we will email you a link that you can use to create a new password.
+  </div>
   <input type="submit" class="button" value="Submit">
 </form>
-<div class="error-message hidden"></div> 
+<div class="error-message hide"></div> 

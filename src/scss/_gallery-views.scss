@@ -6,10 +6,10 @@
 		position: relative;
 		padding-left: rem-calc(20);
 		padding-right: rem-calc(20);
-		.next, .prev {
+		.prev, .next {
 			position: absolute;
 			z-index: 1;
-			top: rem-calc(222);
+			top: rem-calc(223);
 			font-size: rem-calc(30);
 			color: $white;
 			opacity: 0.7;
@@ -37,10 +37,11 @@
 		}
 
 		.content {
-			//width: rem-calc(336);
-			@include breakpoint(medium up) {
-			 	min-height: rem-calc(450);
-			}
+			width: rem-calc(336);
+			min-height: rem-calc(450);
+			//@include breakpoint(medium up) {
+			 //	min-height: rem-calc(450);
+			//}
 		}
 		
 		.photo-thumbnail {
