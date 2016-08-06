@@ -1,5 +1,5 @@
 $ = require 'jquery'
-foundation = require 'foundation'
+require 'foundation'
 #Products = require('../../require/products')
 #AdminProductsView = require('../../require/admin-products-view')
 AdminStoreView = require('../../require/admin-store-view')

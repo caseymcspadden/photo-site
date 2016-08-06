@@ -11,6 +11,8 @@ $downloadtype = $arr[0];
 
 $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
 $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
+//$fileroot = '/fileroot';
+//$photoroot = '/var/www/html/photos';
 
 $contents = file($fileroot . '/app.cfg');
 $config = array();
@@ -56,10 +58,10 @@ else if ($downloadtype=='file') {
 	$photo = $result->fetchObject();
 	if (!$photo)
 		exit ('Not a valid file link');
-	if ($photo->downloadgallery==0 || ($photo->downloadgallery==1 && $photo->downloadfee>0 && $photo->idpayment=0))
+	if ($photo->downloadgallery==0 || $photo->maxdownloadsize==0 || ($photo->downloadgallery==2 && $photo->downloadfee>0 && $photo->idpayment=0))
 		exit ('Permission denied');
 	$size = $photo->maxdownloadsize;
-	if ($size==5)
+	if ($size==5) 
 		$arr = glob($fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
   	else
   		$arr = glob($photoroot . '/' . sprintf("%02d",$id%100) . '/' . $id . '_' . $sizemap[$size] . '.jpg');

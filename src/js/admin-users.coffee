@@ -1,5 +1,5 @@
 $ = require 'jquery'
-foundation = require 'foundation'
+require 'foundation'
 UsersCollection = require('../../require/users')
 AdminUsersView = require('../../require/admin-users-view')
 

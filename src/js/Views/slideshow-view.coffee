@@ -1,14 +1,15 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 Hammer = require 'hammerjs'
 templates = require './jst'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	events:
 		'mouseover' : 'mouseOver'
 		'mouseout' : 'mouseOut'
 		'click .prev' : 'previous'
 		'click .next' : 'next'
+		#'click' : 'slideshowClicked'
 		#'click input:radio[name=view-size]' : 'changeImageSize'
 		#'keydown' : 'keyDown'
 
@@ -24,6 +25,14 @@ module.exports = Backbone.View.extend
 
 	#render: ->
 	#	this.$el.html this.template()
+
+	slideshowClicked: (e) ->
+		idgallery = this.collection.at(0).get 'featuredgallery'
+		$.ajax(
+			url: config.servicesBase + '/pathfromcontainer/' + idgallery
+			success: (json) ->
+				document.location = config.urlBase + '/galleries/' + json.path
+		)
 
 	mouseOver: (e) ->
 		if this.pauseOnHover

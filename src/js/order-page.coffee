@@ -1,7 +1,6 @@
 $ = require 'jquery'
 require 'foundation'
-_ = require 'underscore'
-Backbone = require 'backbone'
+#Backbone = require 'backbone'
 Session = require('../../require/session')
 LoginView = require('../../require/login-view')
 SessionMenuView = require('../../require/session-menu-view')
@@ -20,12 +19,12 @@ $('body').append loginView.render().el
 
 orderid = document.location.pathname.replace(/^.*\/orders\//,'')
 
-order = new Order {orderid : orderid}
+order = new Order
 orderView = new OrderView {model: order, el: '.order-view'}
 
 $ ->
 	session.fetch()
 	cartItems.fetch {reset: true}
-	order.retrieve()
+	order.retrieve(orderid)
 
 $(document).foundation()

@@ -12,6 +12,16 @@
 		text-align: center;
 	}
 
+	.orientation {
+		margin-bottom: 0.5rem;
+		img {
+			opacity: 0.7;
+			&:hover {
+				opacity: 1.0;
+			}
+		}
+	}
+
 	.warning {
 		background-color: #f00;
 		opacity: 0.4;

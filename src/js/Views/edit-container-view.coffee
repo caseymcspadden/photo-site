@@ -20,7 +20,7 @@ module.exports = BaseView.extend
 		urlsuffix: ''
 		access: 0
 		accesslink: ''
-		maxdownloadsize: 0
+		maxdownloadsize: 1
 		downloadgallery: 0
 		downloadfee: 0
 		idpayment: 0
@@ -74,14 +74,14 @@ module.exports = BaseView.extend
 
 	changeAccess: ->
 		val = this.$('select[name="access"]').val()
-		if val=='1'
+		if val=='2'
 			this.$('.access-link').removeClass 'hide'
 		else
 			this.$('.access-link').addClass 'hide'
 
 	changeDownloadGallery: ->
 		val = this.$('select[name="downloadgallery"]').val()
-		if val=='1'
+		if val=='2'
 			this.$('.download-payment').removeClass 'hide'
 		else
 			this.$('.download-payment').addClass 'hide'
@@ -91,7 +91,8 @@ module.exports = BaseView.extend
 		container = vm.get 'selectedContainer'
 		return if !container
 		$.get(config.servicesBase + '/pathfromcontainer/' + container.id, (json) ->
-			self.$('.access-path').html json.path + '/' + container.get('urlsuffix')
+			container.set 'path' , json.path
+			#self.$('.access-path').html json.path + '/' + container.get('urlsuffix')
 		)
 
 	setFormValues: ->
@@ -100,8 +101,8 @@ module.exports = BaseView.extend
 		data = this.defaultData
 		if container and newType == null
 			data = container.toJSON()
-			console.log data
 
+		console.log data.path
 		this.$('.title').html if newType==null then 'Edit ' + container.get('type') else 'New ' + newType
 		this.$('input[name="name"]').val data.name
 		this.$('input[name="description"]').val data.description
@@ -113,6 +114,7 @@ module.exports = BaseView.extend
 		this.$('input[name="idpayment"]').val data.idpayment
 		this.$('select[name="buyprints"]').val data.buyprints
 		this.$('input[name="markup"]').val data.markup
+		this.$('.access-path').html if newType==null then data.path + '/' + data.urlsuffix else ''
 		this.changeAccess()
 		this.changeDownloadGallery()
 		

@@ -15,7 +15,6 @@ module.exports = BaseView.extend
 		#this.listenTo this.model.photos, 'reset', this.render
 
 	open: ->
-		console.log this.el
 		this.changePhoto this.model
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.$el.foundation 'open'

@@ -1,11 +1,11 @@
 #admin-photos-view manages all images in the database
 
-Backbone = require 'backbone'
+BaseView = require './base-view'
 ThumbnailView = require './thumbnail-view'
 templates = require './jst'
 Photos = require './photos'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	photoViews: {}
 
 	events:

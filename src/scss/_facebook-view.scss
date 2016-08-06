@@ -1,0 +1,24 @@
+.facebook-view {
+	@include breakpoint(medium down) {
+		display: none;
+	}	
+	.header {
+		a {
+			color: $body-font-color;
+			&:visited {color: $body-font-color;}   
+			&:hover {
+		  		color: $secondary-color;
+		  		text-decoration: none;
+		  	}
+	  	}
+	}
+	.container {
+		opacity: 0;
+		.fb-page {
+			opacity: 0.7;
+			&:hover {
+				opacity: 1.0;
+			}
+		}
+	}
+}

@@ -8,6 +8,7 @@ a {
 
 .reveal.form {
   color: $white;
+  min-height: rem-calc(55);
   &:focus {
     outline: none;
   }

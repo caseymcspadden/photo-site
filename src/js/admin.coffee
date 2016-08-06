@@ -1,5 +1,5 @@
 $ = require 'jquery'
-foundation = require 'foundation'
-Backbone = require('backbone')
+require 'foundation'
+#Backbone = require('backbone')
 
 $(document).foundation()

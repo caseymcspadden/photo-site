@@ -26,6 +26,7 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
 		this.listenTo this.cart, 'add' , this.cartItemAdded
+		this.speed = 3000
 
 	render: ->
 		data = this.model.toJSON()
@@ -43,14 +44,22 @@ module.exports = BaseView.extend
 	
 	updateAccess: (m) ->
 		data = this.model.toJSON()
-		if (data.downloadgallery==2 || (data.downloadgallery==1 && (data.downloadfee==0 || data.idpayment!=0)))
+		if (data.downloadgallery==1 || data.downloadgallery==3 || (data.downloadgallery==2 && (data.downloadfee==0 || data.idpayment!=0)))
 			this.$('.download-photo').removeClass('hide')
-		this.$('.download-gallery').removeClass('hide') if data.downloadgallery
+		this.$('.download-gallery').removeClass('hide') if data.downloadgallery>1
 		this.$('.buy-product').removeClass('hide') if m.get('buyprints')
 	
 	viewImage: (e) ->
 		e.preventDefault()
-		this.photoView.open()
+		this.model.set 'showGrid' , !this.model.get('showGrid')
+		if this.model.get('showGrid')
+			window.clearInterval this.interval
+		else
+			self = this
+			this.interval = window.setInterval( ->
+				self.model.offsetCurrentPhoto(1)
+			, this.speed)
+		#this.photoView.open()
 
 	downloadGallery: (e) ->
 		e.preventDefault()
@@ -100,6 +109,7 @@ module.exports = BaseView.extend
 
 	changePhoto: (m) ->
 		photo = m.get 'currentPhoto'
+		console.log m
 		this.$('.content img').attr 'src' , config.urlBase + '/photos/M/' + photo.id + '.jpg'
 		test = this.cart.where {idphoto: photo.id}
 		if test.length==0

@@ -3,13 +3,14 @@ namespace CrossRiver;
 
 class Commerce {
 	
-	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
+	public $fileroot;
 	private $paypalLive = FALSE;
 	private $pwintyLive = FALSE;
 
-	public function __construct() 
+	public function __construct($fileroot) 
 	{	
-		$contents = file($this->fileroot . '/app.cfg');
+		$this->fileroot = $fileroot;
+		$contents = file($fileroot . '/app.cfg');
 		$config = array();
 
 		foreach ($contents as $line) {
@@ -162,8 +163,8 @@ class Commerce {
 	{
 		$data = new \stdClass;
 		$data->type=$item->idapi;
-			//'url'=>$remoteUrlBase . '/orders/' . $guid . '/photos/' . $item->idphoto . '.jpg',
-		$data->url=$remoteUrlBase . '/orders/' . $guid . '/photos/test.jpg';
+		$data->url=$remoteUrlBase . '/downloads/print/' . $guid . '/' . $item->idphoto . '.jpg';
+		//$data->url=$remoteUrlBase . '/orders/' . $guid . '/photos/test.jpg';
 		$data->copies=$item->quantity;
 		$data->sizing='Crop';
 		$data->attributes=json_decode($item->attrs);

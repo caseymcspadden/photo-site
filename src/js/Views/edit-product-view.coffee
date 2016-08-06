@@ -53,8 +53,6 @@ module.exports = BaseView.extend
 		data = this.serialize e.target
 		self = this
 		if this.model
-			console.log "model exists"
-			console.log this.model
 			this.model.save(
 				data
 				error: (model, response, options) ->

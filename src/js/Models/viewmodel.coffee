@@ -100,7 +100,6 @@ module.exports = Backbone.Model.extend
 
 	toggleValue: (property) ->
 		this.set property, !this.get(property)
-		console.log (property + " = " + this.get(property))
 
 	createContainer: (data) ->
 		selectedContainer = this.get 'selectedContainer'
@@ -109,7 +108,6 @@ module.exports = Backbone.Model.extend
 		#c.master = this.photos
 
 	deleteContainer: (container) ->
-		console.log 'deleting container ' + container.get('name')
 		this.containers.remove container
 		this.set {selectedContainer: null}
 		container.destroy()

@@ -16,6 +16,7 @@ module.exports = Backbone.Model.extend
 		idpayment: null
 		buyprints: 0
 		cancelArchive: false
+		showGrid: true
 
 	urlRoot: config.servicesBase + '/containers'
 
@@ -38,7 +39,9 @@ module.exports = Backbone.Model.extend
 		photo = this.get "currentPhoto"
 		return if !photo
 		index = offset + this.photos.indexOf photo
-		return if index<0 or index>=this.photos.length
+		index = 0 if index >= this.photos.length
+		index = this.photos.length-1 if index < 0
+		#return if index<0 or index>=this.photos.length
 		photo = this.photos.at index
 		this.set 'currentPhoto', photo		
 		photo.set 'selected', true
@@ -58,14 +61,11 @@ module.exports = Backbone.Model.extend
 			context: this
 			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-'), imagesize: this.get('imagesize')}
 			success: (json) ->
-				console.log json
 				this.set 'archiveProgress' , json.count + this.get('archiveProgress')
 				this.addPhotosToArchive(startindex+count, count)
 		)
 
 	createArchive: (imagesize) ->
-		console.log 'creating archive'
-
 		this.set 'archive', null
 		this.set 'archiveProgress', 0
 		this.set 'cancelArchive', false
@@ -78,7 +78,6 @@ module.exports = Backbone.Model.extend
 			context: this
 			data: {ids: add.join(','), name: this.get('name').replace(/ /g,'-'), imagesize: imagesize}
 			success: (json) ->
-				console.log json
 				if (!json.error)
 					this.set 'archive' , json.archive
 					this.set 'imagesize' , json.imagesize

@@ -1,9 +1,9 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
 OrderItemView = require './orderitem-view'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['order-view']
 		this.listenTo this.model, 'change', this.render
@@ -11,12 +11,12 @@ module.exports = Backbone.View.extend
 
 	render: ->
 		data = this.model.toJSON()
-		console.log data
 		this.$el.html this.template(data)
 	
-	addOne: (model) ->
-		orderItemView = new OrderItemView {model: model, orderid: this.model.orderid}
+	addOne: (item) ->
+		orderItemView = new OrderItemView {model: item, orderid: this.model.get 'orderid'}
 		this.$('.order-items').append orderItemView.render().el
 
 	addAll: (collection) ->
+		this.$('.order-items').html ''
 		this.model.items.each this.addOne, this		

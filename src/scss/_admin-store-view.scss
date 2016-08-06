@@ -1,0 +1,10 @@
+.admin-catalog-view , .admin-orders-view, .admin-downloads-view {
+	table a {
+		color: $body-font-color;
+		&:visited {color: $body-font-color;}   
+		&:hover {
+		  color: $white;
+		  text-decoration: underline;
+		}
+	}
+}

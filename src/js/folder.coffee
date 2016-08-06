@@ -1,7 +1,6 @@
 $ = require 'jquery'
 require 'foundation'
-_ = require 'underscore'
-Backbone = require 'backbone'
+#Backbone = require 'backbone'
 Session = require('../../require/session')
 LoginView = require('../../require/login-view')
 SessionMenuView = require('../../require/session-menu-view')

@@ -1,15 +1,16 @@
 $ = require 'jquery'
 require 'foundation'
-_ = require 'underscore'
-Backbone = require 'backbone'
+#Backbone = require 'backbone'
 Session = require('../../require/session')
 LoginView = require('../../require/login-view')
 FeaturedPhotos = require('../../require/featuredphotos')
 SessionMenuView = require('../../require/session-menu-view')
 SlideshowView = require('../../require/slideshow-view')
+#FacebookView = require('../../require/facebook-view')
+#InstagramView = require('../../require/instagram-view')
 CartSummaryView = require('../../require/cart-summary-view')
 CartItems = require('../../require/cartitems')
-Instafeed = require 'instafeed.js'
+#Instafeed = require 'instafeed.js'
 
 session = new Session
 loginView = new LoginView {model: session}
@@ -20,18 +21,13 @@ cartSummaryView = new CartSummaryView {el: '.cart-summary-view', collection: car
 featuredPhotos = new FeaturedPhotos
 
 slideshowView = new SlideshowView({el: '.slideshow', collection: featuredPhotos, speed: 4000, pauseOnHover: true, showControls: false})
+#facebookView = new FacebookView {el: '.facebook-view'}
+#instagramView = new InstagramView {el: '.instagram-view'}
 
 $('body').append loginView.render().el
 
-feed = new Instafeed(
-	get: 'user',
-	userId: '727575',
-	accessToken: '727575.6a15ce4.e9e018e14ae64aa1b2d7a48e9b580416'
-	sortBy: 'most-recent'
-	limit: 9
-	template: '<div class="photo-container"><a href="{{link}}"><img src="{{image}}" /></a><div class="info">{{caption}}</div></div>'
-)
-feed.run()
+#facebookView.render()
+#instagramView.render()
 
 $ ->
 	session.fetch()

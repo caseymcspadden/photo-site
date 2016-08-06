@@ -25,7 +25,6 @@ module.exports = Backbone.View.extend
 				Watermark: '0'
 			init: ->
 				this.on("successmultiple", (files,responses) ->
-					console.log responses
 					for file in files
 						self.dropzone.removeFile file
 					#self.model.addPhotos $.parseJSON(responses) , true

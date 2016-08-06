@@ -7,6 +7,7 @@ module.exports = BaseView.extend
 	events:
 		'closed.zf.reveal' : 'closed'
 		'click .save-crop' : 'saveCrop'
+		'click .rotate' : 'toggleOrientation'
 
 	initialize: (options) ->
 		this.template = templates['crop-view']
@@ -15,9 +16,14 @@ module.exports = BaseView.extend
 	render: ->
 		this.$el.html this.template {urlBase: config.urlBase}
 
+	toggleOrientation: ->
+		this.aspect = 1/this.aspect;
+		this.$('.crop-photo').cropper 'setAspectRatio' , this.aspect
+
 	open: (cartitem)->
 		this.cartitem = cartitem
 		item = cartitem.toJSON()
+		console.log item
 		this.$('.cropper-face').removeClass 'warning'
 		this.$('.error-message').addClass 'hide'
 		this.$('.save-crop').removeClass 'disabled'
@@ -25,8 +31,12 @@ module.exports = BaseView.extend
 		this.$el.foundation 'open'
 		$image = this.$('.crop-photo')
 		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
-		aspect = item.vsize / item.hsize
-		aspect = 1/aspect if item.height > item.width
+		cropheight = item.cropheight * item.height / 100
+		cropwidth = item.cropwidth * item.width / 100
+		aspect = cropwidth / cropheight
+		#aspect = item.vsize / item.hsize
+		#aspect = 1/aspect if item.height > item.width
+		this.aspect = aspect
 		minheight = 0
 		minwidth = 0
 		self = this
@@ -54,6 +64,7 @@ module.exports = BaseView.extend
 					self.$('.error-message').addClass 'hide'
 					self.$('.save-crop').removeClass 'disabled'
 			built: (e) ->
+				console.log this
 				imageData = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
 				minheight = if item.width > item.height then imageData.naturalHeight*item.hres/item.height else imageData.naturalHeight*item.vres/item.height

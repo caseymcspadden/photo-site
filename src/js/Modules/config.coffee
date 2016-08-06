@@ -12,7 +12,7 @@ Config.prototype.adminBase = 'https://192.168.7.66:8890/mamfe'
 ###
 Config.prototype.urlBase = 'https://www.caseymcspadden.com'
 Config.prototype.servicesBase = 'https://www.caseymcspadden.com/bamenda'
-Config.prototype.adminBase = '<https></https>://www.caseymcspadden.com/mamfe'
+Config.prototype.adminBase = 'https://www.caseymcspadden.com/mamfe'
 ###
 module.exports = new Config
  

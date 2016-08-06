@@ -86,8 +86,8 @@ module.exports = Backbone.Model.extend
 			type: 'DELETE'
 			context: this
 			data: {ids: ids.join(',')}
-			success: (result) ->
-				console.log result
+			#success: (result) ->
+			#	console.log result
 		)
 
 	rearrangePhotos: (ids) ->

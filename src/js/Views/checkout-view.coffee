@@ -25,7 +25,6 @@ module.exports = BaseView.extend
 
 	collectionLoaded: ->
 		this.idcart = this.collection.at(0).get('idcart') if this.collection.length > 0
-		console.log this.idcart
 		this.$('input[name="cart"]').val this.idcart
 
 	validateCreditCard: (value) ->
@@ -85,7 +84,6 @@ module.exports = BaseView.extend
 		if (model.get 'error')
 			this.$('input[name="idorder"]').val model.get('idorder')
 		else
-			console.log model.get('orderid')
 			this.emptyCart()
 
 	emptyCart: ->

@@ -1,8 +1,8 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['order-summary-view']
 		this.listenTo this.collection, 'add change remove reset', this.render

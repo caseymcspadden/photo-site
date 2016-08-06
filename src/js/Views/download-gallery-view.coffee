@@ -17,31 +17,41 @@ module.exports = BaseView.extend
 		this.listenTo this.model.photos, 'reset', this.initializeProgress
 
 	render: ->
-		console.log "Rendering download-gallery-view"
 		data = this.model.toJSON()
 		data.waitsrc = config.urlBase+'/images/wait-circle.gif'
+		data.waitpaymentsrc = config.urlBase+'/images/ajax-loader.gif'
+		data.cancelsrc = config.urlBase+'/images/cancel.png'
 		this.$el.html this.template(data)
 
 	open: ->
 		this.$('.archive-wait').addClass 'hide'
 		this.$('.archive-notify').addClass 'hide'
+		$('.payment-wait').addClass 'hide'
+		$('.payment-error').addClass 'hide'
+		$('.payment-form').removeClass 'hide'
 		this.$el.foundation 'open'
 
 	submitPaymentForm: (e) ->
 		e.preventDefault();
 		arr = $(e.target).serializeArray()
-		data = this.model.toJSON()
+		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
-		console.log data
+		data.name = this.model.get 'name'
+		$('.payment-form').addClass 'hide'
+		$('.payment-wait').removeClass 'hide'
 		$.ajax(
 			url: config.servicesBase +  '/containers/' + this.model.id + '/payment'
 			type: 'POST'
 			context: this
 			data: data
 			success: (json) ->
-				console.log json
-				this.model.set {idpayment: json.idpayment}
+				$('.payment-wait').addClass 'hide'
+				if json.errors.length>0
+					this.$('textarea[name="error-text"]').val JSON.stringify(json.errors)
+					this.$('.payment-error').removeClass 'hide'
+				else
+					this.model.set {idpayment: json.idpayment}
 		)
 
 	initializeProgress: ->
@@ -58,14 +68,12 @@ module.exports = BaseView.extend
 		this.model.set 'cancelArchive', true
 
 	notifyError: ->
-		console.log 'notifyError'
 		this.$('.archive-wait').addClass 'hide'
 		this.$('.archive-notify').html('Problem creating archive: ' + this.model.get 'error')
 		this.$('.archive-notify').removeClass 'hide'
 
 	archiveProgress: (m) ->
 		progress = m.get('archiveProgress') 
-		console.log progress
 		pct = Math.round (100*progress)/m.photos.length
 		this.$('.progress').attr 'aria-valuenow' , pct
 		this.$('.progress-meter').css 'width' , '' + pct + '%'

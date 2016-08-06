@@ -1,12 +1,13 @@
 <li><a href="<%= config.urlBase %>/about">ABOUT</a></li>
-<li><a href="#">CONTACT</a></li>
+<li><a href="<%= config.urlBase %>/contact">CONTACT</a></li>
 <% if (uid==0) { %> 
 	<li><a href="#" class="login-item">CLIENT LOGIN</a></li>
 <% } else { console.log("uid=" + uid); %>
-	<li><a href="#">PROFILE</a></li>
+	<li><a href="<%= config.urlBase %>/profile">PROFILE</a></li>
 	<li><a href="<%= config.urlBase %>/galleries/<%= galleryPath %>">MY GALLERIES</a></li>
 	<% if (isadmin) { %> 
 		<li><a href="<%= config.adminBase + '/organize' %>">ADMIN</a></li>
 	<% } %> 
 	<li><a href="#" class="logout-item">LOGOUT</a></li>
-<% } %> 
+<% } %>
+

@@ -2,26 +2,6 @@
 require './vendor/autoload.php';
 require './classes/CrossRiver/Services.php';
 
-// Get admin and services paths
-
-/*
-error_log("IN INDEX.PHP");
-foreach ($_SERVER as $key => $value) {
-  error_log("$key = $value");
-}
-error_log("\n\n");
-*/
-
-$contents = file('/Users/caseymcspadden/sites/photo-site/fileroot/paths.cfg');
-$paths = array();
-
-foreach ($contents as $line) {
-  $kv = explode('=', $line);
-  $paths[trim($kv[0])] = trim($kv[1]);
-}
-
-$paths = (object)$paths;
-
 // Get container
 $container = new \Slim\Container;
 $app = new \Slim\App($container);
@@ -47,7 +27,8 @@ $container['notFoundHandler'] = function ($container) {
 };
 
 $container['services'] = function($container) {
-    return new CrossRiver\Services();
+    return new CrossRiver\Services('/Users/caseymcspadden/sites/photo-site/fileroot','/Users/caseymcspadden/sites/photo-site/build/photos');
+    //return new CrossRiver\Services('/fileroot','/var/www/html/photos');
 };
 
 // Define app routes
@@ -86,6 +67,20 @@ $app->get('/about', function ($request, $response, $args) {
     ]);
 });
 
+$app->get('/contact', function ($request, $response, $args) {
+    return $this->view->render($response, 'contact.html' , [
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
+    ]);
+});
+
+$app->get('/profile', function ($request, $response, $args) {
+    return $this->view->render($response, 'profile.html' , [
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
+    ]);
+});
+
 $app->get('/cart', function ($request, $response, $args) {
     return $this->view->render($response, 'cart.html' , [
         'webroot'=>$this->services->webroot,
@@ -107,7 +102,7 @@ $app->get('/checkout', function ($request, $response, $args) {
     ]);
 });
 
-$app->get($paths->adminpath, function ($request, $response, $args) {
+$app->get('/mamfe', function ($request, $response, $args) {
     if (!$this->services->isAdmin())
       return $response->withRedirect($this->get('router')->pathFor('home'));
 
@@ -118,7 +113,7 @@ $app->get($paths->adminpath, function ($request, $response, $args) {
     ]);
 });
 
-$app->get($paths->adminpath . '/{task}', function ($request, $response, $args) {
+$app->get('/mamfe/{task}', function ($request, $response, $args) {
     if (!$this->services->isAdmin())
      return $response->withRedirect($this->get('router')->pathFor('home'));
 

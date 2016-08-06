@@ -14,14 +14,7 @@ module.exports = Backbone.Model.extend
 		company: ''
 		idcontainer: 0
 
-	initialize: (attributes, options) ->
-		console.log 'initializing session'
-		###
-		$.get(this.urlRoot, (result) ->
-			json = $.parseJSON(result)
-			self.set json
-		)
-		###
+	#initialize: (attributes, options) ->
 		
 	login: (data) ->
 		$.ajax(

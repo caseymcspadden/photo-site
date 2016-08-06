@@ -1,9 +1,10 @@
 Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 Photo = require './photo'
 ThumbnailView = require './thumbnail-view'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	events:
 		'click .add-selected' : 'addSelected'
 		'keydown .thumbnails' : 'keyDown'

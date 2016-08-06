@@ -2,7 +2,7 @@
 	<span aria-hidden="true">&times;</span>
 </button>
 <h2>Download Gallery</h2>
-<% if (downloadgallery==2 || (downloadgallery==1 && (downloadfee==0 || idpayment!=0))) { %>
+<% if (downloadgallery==3 || (downloadgallery==2 && (downloadfee==0 || idpayment!=0))) { %>
 <p>Select an image resolution and click the "Create Archive" button below to create an archive file containing all of the photos in the gallery. This may take some time, depending on the image resolution and the size of the gallery. Please don't leave this page while the archive is being created or you will end up with an incomplete archive. When the archive is complete, a link will appear below that you can click on to download your archive. We will also send you an email with this link.</p>
 <div class="small-12 large-5 columns">
 	<select id="imagesize">
@@ -16,7 +16,6 @@
 <div class="small-12 large-7 columns button-group">
 	<a class="button create-archive">Create Archive</a>
 	<a class="button secondary separate cancel-archive">Cancel</a>
-	<a class="button secondary" data-close>Close</a>
 </div>
 <div class="archive-wait hide">
 	<img src="<%= waitsrc %>" alt="wait"/>
@@ -29,66 +28,76 @@
 
 <div class="archive-notify hide"></div>
 
-<% } else if (downloadgallery==1 && idpayment==0) { %>
+<% } else if (downloadgallery==2 && idpayment==0) { %>
+<div class="payment-wait hide">
+	<img src="<%= waitpaymentsrc %>">
+</div>
 
-<p>After we receive your payment of $<%= downloadfee.toFixed(2) %>, you will have immediate and unlimited digital access to all of the images in this gallery.</p>
-<form>
-	<div class="large-12 columns">
-		<label>Name on Card*
-			<input type="text" name="card-name">
-		</label>
-	</div>
-	<div class="large-12 columns">
-		<label>Card Type*
-			<select name="card-type">
-				<option value="visa">Visa</option>
-				<option value="mastercard">MasterCard</option>
-				<option value="discover">Discover</option>
-				<option value="amex">American Express</option>
-			</select>
-		</label>
-	</div>
-	<div class="large-12 columns">
-		<label>Card Number*
-			<input type="text" name="card-number">
-		</label>
-	</div>
-	<div class="large-4 columns">
-		<label>Expires Month*
-			<select name="expire-month">
-				<option value="01">1 - Jan</option>
-				<option value="02">2 - Feb</option>
-				<option value="03">3 - Mar</option>
-				<option value="04">4 - Apr</option>
-				<option value="05">5 - May</option>
-				<option value="06">6 - Jun</option>
-				<option value="07">7 - Jul</option>
-				<option value="08">8 - Aug</option>
-				<option value="09">9 - Sep</option>
-				<option value="10">10 - Oct</option>
-				<option value="11">11 - Nov</option>
-				<option value="12">12 - Dec</option>
-			</select>
-		</label>
-	</div>
-	<div class="large-4 columns">
-		<label>Expires Year*
-			<select name="expire-year">
-			<%
-				startyear = (new Date()).getFullYear();
-				for (year=startyear;year<=startyear+10;year++)
-					print('<option value="' + year + '">' + year + '</option>');
-			%>
-			</select>
-		</label>
-	</div>
-	<div class="large-4 columns">
-		<label>Security Code*
-			<input type="text" name="cvv2">
-		</label>
-	</div>
-	<div class="large-12 columns">
-		<input type="submit" class="button" value="Submit">
-	</div>
-</form>
+<div class="payment-error hide">
+	<p>Your payment could not be processed. Please try again.</p>
+	<textarea name='error-text' rows="10"></textarea>
+</div>
+
+<div class="payment-form">
+	<p>After we receive your payment of $<%= downloadfee.toFixed(2) %>, you will have immediate and unlimited digital access to all of the images in this gallery.</p>
+	<form>
+		<div class="large-12 columns">
+			<label>Name on Card*
+				<input type="text" name="card-name">
+			</label>
+		</div>
+		<div class="large-12 columns">
+			<label>Card Type*
+				<select name="card-type">
+					<option value="visa">Visa</option>
+					<option value="mastercard">MasterCard</option>
+					<option value="discover">Discover</option>
+					<option value="amex">American Express</option>
+				</select>
+			</label>
+		</div>
+		<div class="large-12 columns">
+			<label>Card Number*
+				<input type="text" name="card-number">
+			</label>
+		</div>
+		<div class="large-4 columns">
+			<label>Expires Month*
+				<select name="expire-month">
+					<option value="01">1 - Jan</option>
+					<option value="02">2 - Feb</option>
+					<option value="03">3 - Mar</option>
+					<option value="04">4 - Apr</option>
+					<option value="05">5 - May</option>
+					<option value="06">6 - Jun</option>
+					<option value="07">7 - Jul</option>
+					<option value="08">8 - Aug</option>
+					<option value="09">9 - Sep</option>
+					<option value="10">10 - Oct</option>
+					<option value="11">11 - Nov</option>
+					<option value="12">12 - Dec</option>
+				</select>
+			</label>
+		</div>
+		<div class="large-4 columns">
+			<label>Expires Year*
+				<select name="expire-year">
+				<%
+					startyear = (new Date()).getFullYear();
+					for (year=startyear;year<=startyear+10;year++)
+						print('<option value="' + year + '">' + year + '</option>');
+				%>
+				</select>
+			</label>
+		</div>
+		<div class="large-4 columns">
+			<label>Security Code*
+				<input type="text" name="cvv2">
+			</label>
+		</div>
+		<div class="large-12 columns">
+			<input type="submit" class="button" value="Submit">
+		</div>
+	</form>
+</div>
 <% } %>

@@ -2,15 +2,31 @@ Backbone = require 'backbone'
 config = require './config'
 
 module.exports = Backbone.Model.extend
+	defaults:
+		orderid: ''
+		idpwinty: 0
+		idpayment: 0
+		dt: ''
+		name: ''
+		address: ''
+		address2: ''
+		city: ''
+		state: ''
+		zip: ''
+		items: 0
+		amount: 0
+		shipping: 0
+		cardnumber: ''
+		status: ''
+		shipments: []
 
 	initialize: (options) ->
-		this.orderid = options.orderid
 		this.items = new Backbone.Collection
-		this.items.url = config.servicesBase + '/orders/' + this.orderid + '/items'
 
-	retrieve: ->
+	retrieve: (orderid)->
 		self = this
-		$.get(config.servicesBase + '/orders/' + this.orderid, (json) ->
+		this.items.url = config.servicesBase + '/orders/' + orderid + '/items'
+		$.get(config.servicesBase + '/orders/' + orderid, (json) ->
 				self.set json
 				self.items.fetch {reset: true}
 			)		

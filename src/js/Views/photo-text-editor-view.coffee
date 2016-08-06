@@ -1,7 +1,7 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 
 	events:
 		'submit form' : 'saveChanges'

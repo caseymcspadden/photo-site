@@ -1,5 +1,5 @@
 $ = require 'jquery'
-foundation = require 'foundation'
+require 'foundation'
 ViewModel = require('../../require/viewmodel')
 Session = require('../../require/session')
 Settings = require('../../require/settings')

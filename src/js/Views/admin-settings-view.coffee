@@ -1,9 +1,9 @@
-Backbone = require 'backbone'
+BaseView = require './base-view'
 Session = require './session'
 Settings = require './settings'
 templates = require './jst'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	events:
 		'submit form' : 'saveSettings'
 		#'submit #fv-addGallery form' : 'addGallery'
@@ -37,7 +37,6 @@ module.exports = Backbone.View.extend
 
 	saveSettings: (e) ->
 		e.preventDefault()
-		console.log this.model
 		arr = $(e.target).serializeArray()
 		data = {}
 		for elem in arr

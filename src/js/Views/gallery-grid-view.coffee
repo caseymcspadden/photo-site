@@ -17,9 +17,10 @@ module.exports = BaseView.extend
 		this.listenTo this.model.photos, 'reset', this.addAll
 		this.listenTo this.model, 'change:urlsuffix', this.render
 		this.listenTo this.model, 'change:currentPhoto', this.currentPhotoChanged
+		this.listenTo this.model, 'change:showGrid', this.showHide
 
 	render: ->
-		if this.model.get('access')==1
+		if this.model.get('access')==2
 			breadcrumbs = [this.model.get('name')]
 		else
 			breadcrumbs =  document.location.pathname.replace(/^.*\/galleries\//,'').split '/'		
@@ -38,6 +39,12 @@ module.exports = BaseView.extend
 			when 40 then 3
 			else 0
 		this.model.offsetCurrentPhoto offset
+
+	showHide: (model) ->
+		if model.get 'showGrid'
+			this.$el.removeClass 'hide'
+		else 
+			this.$el.addClass('hide')
 
 	currentPhotoChanged: (model) ->
 		photo = model.get "currentPhoto"

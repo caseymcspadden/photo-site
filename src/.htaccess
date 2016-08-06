@@ -1,23 +1,18 @@
 RewriteEngine On
 
-#RewriteCond %{HTTP_REFERER} !^https?://www.crossriver\.com/?.*$ [NC]
-#RewriteCond %{HTTP_REFERER} !^https?://crossriver\.com/?.*$ [NC]
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/(pwinty|cameroon)
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-#RewriteCond %{HTTP_REFERER} !^$  
-#RewriteCond %{HTTP_REFERER} !^https?://192.168.1.171.*$ [NC]
-#RewriteCond %{HTTP_REFERER} !^https?://localhost/?.*$ [NC]
-#RewriteCond %{HTTP_REFERER} !^https?://caseymcspadden/?.*$ [NC]
-#RewriteRule \.(gif|jpe?g|png|bmp)$ - [R=403,NC]
-
-#RewriteCond %{HTTP_REFERER} !^$  
-#RewriteCond %{HTTP_REFERER} !^http://(www.)?crossriver.com/ [NC]  
-#RewriteRule .(gif|jpg|png)$ - [R=403]
+#RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?caseymcspadden.com [NC]
+#RewriteRule \.(jpg|jpeg|png|gif)$ - [NC,F,L]
 
 RewriteRule ^photos/(T|S|M|L|X)/([0-9]+([0-9][0-9])).jpg photos/$3/$2_$1.jpg [NC,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !^/(bamenda|douala|test|downloads)
+RewriteCond %{REQUEST_URI} !^/(bamenda|pwinty|douala|test|downloads)
 RewriteRule .* index.php [QSA,L]
 
 RewriteRule ^bamenda/(.*) cameroon/bamenda.php
+RewriteRule ^pwinty/(.*) cameroon/bamenda.php
 RewriteRule ^douala/(.*) cameroon/douala.php

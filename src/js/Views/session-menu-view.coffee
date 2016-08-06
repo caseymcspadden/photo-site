@@ -1,17 +1,16 @@
-require 'foundation'
-Backbone = require 'backbone'
+BaseView = require './base-view'
 templates = require './jst'
 config = require './config'
 
-module.exports = Backbone.View.extend
+module.exports = BaseView.extend
 	events:
-		'click a.login-item' : 'login'
-		'click a.logout-item' : 'logout'
+		'click .login-item' : 'login'
+		'click .logout-item' : 'logout'
 
 	initialize: (options) ->
 		this.template = templates['session-menu-view']
 		this.listenTo this.model, 'change:id' , this.render
-		this.render this.model
+		#this.render this.model
 
 	render: (m) ->
 		data = 

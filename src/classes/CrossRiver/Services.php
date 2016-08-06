@@ -8,18 +8,20 @@ class Services
 	private $config;
 	private $crid; // SESSION ID
 
-	public $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
-	public $photoroot = '/Users/caseymcspadden/sites/photo-site/build/photos';
+	public $fileroot;
+	public $photoroot;
 	public $adminroot = '/mamfe';
-	public $remoteUrlBase = 'http://www.crossriver.org';
+	public $remoteUrlBase = 'https://www.caseymcspadden.com';
 	public $webroot = '';
 	public $dbh;
 	public $error = false;
 	public $unauthorizedJSON = '{"error": "unauthorized"}';
 
-	public function __construct()
+	public function __construct($fileroot, $photoroot)
 	{
-		$contents = file($this->fileroot . '/app.cfg');
+		$this->fileroot = $fileroot;
+		$this->photoroot = $photoroot;
+		$contents = file($fileroot . '/app.cfg');
 		$config = array();
 
 		foreach ($contents as $line) {
@@ -334,6 +336,48 @@ class Services
     }
 
     /***
+    * Send an email to currently logged-in user
+	*/
+
+    public function sendEmail($address, $subject, $body, $altbody)
+    {
+    	$mail = new \PHPMailer;
+
+    	$return['error']=false;
+ 
+		if($this->config->smtp) {
+			$mail->isSMTP();
+			$mail->Host = $this->config->smtp_host;
+			$mail->SMTPAuth = $this->config->smtp_auth;
+			if(!is_null($this->config->smtp_auth)) {
+            	$mail->Username = $this->config->smtp_username;
+            	$mail->Password = $this->config->smtp_password;
+            }
+			$mail->Port = $this->config->smtp_port;
+
+			if(!is_null($this->config->smtp_security)) {
+				$mail->SMTPSecure = $this->config->smtp_security;
+			}
+		}
+
+		$mail->From = $this->config->site_email;
+		$mail->FromName = $this->config->site_name;
+		$mail->addAddress($address);
+		$mail->isHTML(true);
+
+		$mail->Subject = $subject;
+		$mail->Body = $body;
+		$mail->AltBody = $altbody;
+
+		if(!$mail->send()) {
+			$return['error'] = true;
+			$return['message'] = 'Unable to send email';
+		}
+
+		return $return;
+	}    
+
+    /***
      * Query the database and return an array (or object if fetch count is 1 and $returnSingletonAsObject is true)
      * @param bool $returnSingletonAsObject
      * @return JSON
@@ -454,10 +498,10 @@ class Services
     		$canAccess = $user->isadmin || $onUserBranch;
 
     		if ($i==count($pathArray)-1)
-    			return ($canAccess || $currentContainer->access==0) ? $currentContainer : FALSE;
+    			return ($canAccess || $currentContainer->access==1) ? $currentContainer : FALSE;
 
     		if ($i==count($pathArray)-2 && $pathArray[$i+1]==$currentContainer->urlsuffix)
-				return ($canAccess || $currentContainer->access<=1) ? $currentContainer : FALSE;
+				return ($canAccess || $currentContainer->access==1 || $currentContainer->access==2) ? $currentContainer : FALSE;
     	}
     	return FALSE;
     }

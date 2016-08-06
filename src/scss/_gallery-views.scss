@@ -98,9 +98,9 @@
 		line-height: 2.4375rem;
 		color: $white;
 		.counter {
-			@include breakpoint(medium down) {
-				display: none;
-			}
+			//@include breakpoint(medium down) {
+			//	display: none;
+			//}
 			float: left;
 			text-align: left;
 			margin-left: rem-calc(20);
@@ -121,6 +121,12 @@
 		.tools {
 			overflow: hidden;
 			text-align: right;
+			margin-right: 1rem;
+			.download-gallery {
+					@include breakpoint(medium down) {
+					display: none;
+				}				
+			}
 			.has-tip {
 				cursor: pointer;
 			}
@@ -135,6 +141,10 @@
 }
 
 .download-gallery-view {
+	.payment-wait {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
 	a {
 		color: white;
 		&:hover {text-decoration: underline;}
@@ -143,7 +153,8 @@
 		img {float: left; margin-right: 1rem;}
 		.progress {
 			width: 80%;
-			overflow: hidden;
+			float: left;
+			//overflow: hidden;
 		}
 	}
 	.button.separate {

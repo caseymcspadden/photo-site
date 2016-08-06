@@ -79,7 +79,6 @@ module.exports = BaseView.extend
 		this.model.toggleValue 'editContainerToggle'
 
 	deleteGallery: ->
-		console.log 'delete gallery clicked'
 		this.model.deleteContainer this.currentGallery
 
 	changeGallery: ->
