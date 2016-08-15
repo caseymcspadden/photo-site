@@ -6,8 +6,9 @@ ThumbnailView = require './thumbnail-view'
 templates = require './jst'
 PhotoViewerModel= require './photoviewer'
 Photo = require './photo'
-DropzoneView = require('./dropzone-view')
-BreadcrumbsView = require ('./admin-breadcrumbs-view')
+CopyPhotosView = require './copyphotos-view'
+DropzoneView = require './dropzone-view'
+BreadcrumbsView = require './admin-breadcrumbs-view'
 
 module.exports = BaseView.extend
 	currentGallery: null
@@ -16,7 +17,9 @@ module.exports = BaseView.extend
 
 	events:
 		'click .edit-gallery' : 'editGallery'
+		'click .upload-photos' : 'uploadPhotos'
 		'click .add-photos' : 'addPhotos'
+		'click .copy-photos' : 'copyPhotos'
 		'click .remove-photos' : 'removePhotos'
 		'click .delete-photos' : 'deletePhotos'
 		'click .delete-gallery' : 'deleteGallery'
@@ -32,6 +35,7 @@ module.exports = BaseView.extend
 		this.selectMode = 0
 		this.currentPhoto = null
 
+		this.copyPhotosView = new CopyPhotosView {model: this.model}
 		this.dropzoneView = new  DropzoneView {model: this.model}
 		this.breadcrumbsView = new BreadcrumbsView {model: this.model} 
 
@@ -98,19 +102,29 @@ module.exports = BaseView.extend
 			this.addAll()
 			this.galleryChanged()
 
-	galleryChanged: (e) ->
+	galleryChanged: ->
 		name = this.currentGallery.get 'name'
 		this.$('.title').html name
 
-	selectAll: ->
+	selectAll: (e) ->
+		e.preventDefault()
 		this.selectMode=2
 		this.currentGallery.photos.each (photo) ->
 			photo.set 'selected', true
 		this.selectMode=0
 
-	deselectAll: ->
+	deselectAll: (e) ->
+		e.preventDefault()
 		this.currentGallery.photos.each (photo) ->
 			photo.set 'selected', false
+
+	uploadPhotos: (e) ->
+		e.preventDefault()
+		this.dropzoneView.open()
+
+	copyPhotos: (e) ->
+		this.copyPhotosView.open()
+		e.preventDefault()
 
 	removePhotos: (e) ->
 		this.currentGallery.removeSelectedPhotos(false)
@@ -127,6 +141,7 @@ module.exports = BaseView.extend
 	render: ->
 		this.$el.html this.template {name: 'Default'}
 		
+		this.assign this.copyPhotosView, '.copyphotos-view'
 		this.assign this.dropzoneView, '.dropzone-view'
 		this.assign this.breadcrumbsView, '.breadcrumbs-view'
 

@@ -1,39 +1,15 @@
 $ = require 'jquery'
 require 'foundation'
-#Backbone = require 'backbone'
-Session = require('../../require/session')
-LoginView = require('../../require/login-view')
-SessionMenuView = require('../../require/session-menu-view')
 Gallery = require('../../require/gallery')
 GalleryMainView = require('../../require/gallery-main-view')
-CartSummaryView = require('../../require/cart-summary-view')
-CartItems = require('../../require/cartitems')
-#Catalog = require '../../require/catalog'
+Base = require '../../require/base'
 
-#Galleries = require('../../require/galleries')
-#PortfolioView = require('../../require/portfolio-view')
+Base.initialize '.session-menu', '.cart-summary-view'
 
-session = new Session
-loginView = new LoginView {model: session}
-#catalog = new Catalog
-sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
-cartItems = new CartItems
-cartSummaryView = new CartSummaryView {el: '.cart-summary-view', collection: cartItems}
-
-#galleries = new Galleries
-#portfolioView = new PortfolioView {collection: galleries, el: '.portfolio-view'}
-
-$('body').append loginView.render().el
-
-galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view', cart: cartItems}
+galleryMainView = new GalleryMainView {model: new Gallery, el: '.gallery-main-view', cart: Base.cartItems}
 galleryMainView.render()
 
 $ ->
-	session.fetch()
-	cartItems.fetch {reset: true}
-	#catalog.fetch()
-
-#galleries.fetch {reset: true}
+	Base.onLoad()
 
 $(document).foundation()
-#new Foundation.DropdownMenu($('.dropdown'))

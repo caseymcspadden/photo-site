@@ -12,8 +12,8 @@ module.exports = BaseView.extend
 	initialize: (options) ->
 		this.template = templates['admin-users-view']
 		this.editUserView = new EditUserView {collection: this.collection}
-		this.containers = new Backbone.Collection
-		this.containers.url = config.urlBase + '/bamenda/containers'
+		this.containers = new Backbone.Collection null , {comparator: 'path'}
+		this.containers.url = config.urlBase + '/bamenda/containerpaths'
 		this.listenTo this.collection, 'add', this.addOne
 		this.listenTo this.collection, 'reset', this.addAll
 		this.containers.fetch {reset: true}

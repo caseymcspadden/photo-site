@@ -15,7 +15,7 @@ class Services
 	public $webroot = '';
 	public $dbh;
 	public $error = false;
-	public $unauthorizedJSON = '{"error": "unauthorized"}';
+	public $unauthorizedJSON = ['error'=>'unauthorized'];
 
 	public function __construct($fileroot, $photoroot)
 	{
@@ -339,7 +339,7 @@ class Services
     * Send an email to currently logged-in user
 	*/
 
-    public function sendEmail($address, $subject, $body, $altbody)
+    public function sendEmail($address, $subject, $body, $altbody, $from=false)
     {
     	$mail = new \PHPMailer;
 
@@ -360,7 +360,7 @@ class Services
 			}
 		}
 
-		$mail->From = $this->config->site_email;
+		$mail->From = $from ? $from : $this->config->site_email;
 		$mail->FromName = $this->config->site_name;
 		$mail->addAddress($address);
 		$mail->isHTML(true);
@@ -391,8 +391,8 @@ class Services
     		array_push($arr,$row);
 
     	if ($returnSingletonAsObject && count($arr)==1)
-    		return json_encode($arr[0],JSON_NUMERIC_CHECK);
-    	return json_encode($arr,JSON_NUMERIC_CHECK);
+    		return $arr[0];
+    	return $arr;
     }
 
     public function updateTable($table, $where, $data, $allowedFields=NULL)
@@ -410,13 +410,14 @@ class Services
     public function getContainerPath($idcontainer)
     {
     	$pathArray = array();
-
+   		$stmt = $this->dbh->prepare("SELECT idparent, url, access FROM containers WHERE id=:idcontainer");
+ 
     	while (1) {
-    		$result = $this->dbh->query("SELECT idparent, url FROM containers WHERE id=$idcontainer");
-    		$container = $result->fetchObject();
+    		$stmt->execute(['idcontainer'=>$idcontainer]);
+    		$container = $stmt->fetchObject();
     		if (!$container)
     			break;
-    		$pathArray[] = $container->url;
+    		$pathArray[] = ($container->access==0 ? '_' : '') . $container->url;
     		if ($container->idparent==0)
     			break;
     		$idcontainer = $container->idparent;
@@ -481,11 +482,17 @@ class Services
     	$pathArray = explode('/',$path);
     	$user = $this->getSessionUser();
     	$onUserBranch = FALSE;
+   		$stmt = $this->dbh->prepare("SELECT id, type, idparent, position, name, description, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers WHERE url=:url AND idparent=:idparent");
 
-    	$currentContainer = (object) ['id'=>0, 'type'=>'folder', 'idparent'=>0, 'name'=>'', 'url'=>'', 'urlsuffix'=>'', 'access'=>0, 'featuredphoto'=>0, 'maxdownloadsize'=>0, 'downloadgallery'=>0, 'downloadfee'=>0, 'idpayment'=>0, 'buyprints'=>0, 'markup'=>0];
+    	$currentContainer = (object) ['id'=>0];
     	for ($i=0;$i<count($pathArray);$i++) {
-    		$result = $this->dbh->query("SELECT id, type, idparent, position, name, description, url, urlsuffix, access, featuredphoto, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers WHERE url='$pathArray[$i]' AND idparent=" . $currentContainer->id);
-    		$currentContainer = $result->fetchObject();
+    		$url = ltrim($pathArray[$i],'_');
+ 			$stmt->execute([
+				'url'=>ltrim($pathArray[$i],'_'),
+				'idparent'=>$currentContainer->id
+				]);
+
+    		$currentContainer = $stmt->fetchObject();
 
     		if (!$currentContainer)
     			return FALSE;

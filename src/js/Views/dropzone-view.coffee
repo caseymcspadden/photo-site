@@ -41,6 +41,9 @@ module.exports = Backbone.View.extend
 	selectedContainerChanged: (m) ->
 		container = this.model.get('selectedContainer')
 
+	open: ->
+		this.$el.foundation 'open'
+
 	close: ->
 		this.$('.filedrop').html ''
 

@@ -71,6 +71,20 @@ module.exports = Backbone.Model.extend
 		)
 		ids
 
+	addSelectedPhotosToGallery: (idgallery,remove) ->		
+		ids = this.getSelectedPhotos !remove
+
+		this.removeSelectedPhotos(false) if remove
+
+		$.ajax(
+			url: config.servicesBase +  '/containers/' + idgallery + '/containerphotos'
+			type: 'POST'
+			context: this
+			data: {ids: ids.join(',')}
+			#success: (json) ->
+			#	console.log json
+		)
+
 	removeSelectedPhotos: (deletePhotos) ->
 		ids = this.getSelectedPhotos true
 

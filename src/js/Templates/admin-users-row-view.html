@@ -9,7 +9,7 @@
 <option value="0">NONE</option>
 <%
 	containers.each(function(container) {
-		print('<option value="' + container.id + '"' + (container.id==idcontainer ? ' selected' : '') + '>' + container.get('type') + ' - ' + container.get('name') + '</option>');
+		print('<option value="' + container.id + '"' + (container.id==idcontainer ? ' selected' : '') + '>' + container.get('path') + '</option>');
 	});
 %>
 </select>

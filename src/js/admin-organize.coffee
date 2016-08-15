@@ -8,10 +8,10 @@ AdminFoldersView = require('../../require/admin-folders-view')
 AdminMainView = require('../../require/admin-main-view')
 
 viewModel = new ViewModel {allowDragDrop: true}
+
 session = new Session()
 settings = new Settings null, {session: session}
-
-adminSettingsView = new AdminSettingsView {el: '.admin-settings-view', model:settings, viewModel: viewModel}
+adminSettingsView = new AdminSettingsView {el: '#admin-editSettings', model:settings}
 
 adminFoldersView = new AdminFoldersView({el: '#adminFoldersView', model: viewModel})
 adminMainView = new AdminMainView({el: '#adminMainView', model: viewModel})

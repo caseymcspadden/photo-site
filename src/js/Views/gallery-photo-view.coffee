@@ -27,6 +27,9 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
 		this.listenTo this.cart, 'add' , this.cartItemAdded
 		this.speed = 3000
+		width = $(window).width()
+		this.slideSize = 'M'
+		this.slideSize = 'S' if width <= 450
 
 	render: ->
 		data = this.model.toJSON()
@@ -109,8 +112,7 @@ module.exports = BaseView.extend
 
 	changePhoto: (m) ->
 		photo = m.get 'currentPhoto'
-		console.log m
-		this.$('.content img').attr 'src' , config.urlBase + '/photos/M/' + photo.id + '.jpg'
+		this.$('.content img').attr 'src' , config.urlBase + '/photos/' + this.slideSize + '/' + photo.id + '.jpg'
 		test = this.cart.where {idphoto: photo.id}
 		if test.length==0
 			this.$('.buy-product').removeClass('in-cart')

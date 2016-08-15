@@ -7,10 +7,12 @@
  else {
 	 url = urlBase + '/galleries';
 	 for (i=0;i<breadcrumbs.length;i++) {
-	 	url += '/' + breadcrumbs[i] 
-	 	print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
-	 	if (i<breadcrumbs.length-1)
-	 		print(' &gt; ');
+	 	url += '/' + breadcrumbs[i]
+	 	if (breadcrumbs[i].charAt(0)!='_') {
+	 		print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
+	 		if (i<breadcrumbs.length-1)
+	 			print(' &gt; ');
+	 	}
 	 }
  }
 %>

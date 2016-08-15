@@ -22,6 +22,9 @@ module.exports = BaseView.extend
 		this.controlsTemplate = templates['slideshow-view']
 		this.slideTemplate = templates['slide-view']
 		this.listenTo this.collection, 'reset', this.addAll
+		width = $(window).width()
+		this.slideSize = 'L'
+		this.slideSize = 'S' if width <= 450
 
 	#render: ->
 	#	this.$el.html this.template()
@@ -55,6 +58,7 @@ module.exports = BaseView.extend
 		json = m.toJSON()
 		json.position = this.counter++
 		json.urlBase = config.urlBase
+		json.slideSize = this.slideSize
 		this.$el.append this.slideTemplate(json) 
 		#this.$('.controls').before this.slideTemplate(json) 
 

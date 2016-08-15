@@ -1,4 +1,23 @@
-<button type="button" class="close-button" data-close aria-label="Close">
-	<span aria-hidden="true">&times;</span>
-</button>
-<h4>Contact</h4>
+<form id="contact-form">
+<div class="large-12 columns">
+	<h2>Contact Me</h2>
+	<div id="form-name" class="large-12 columns field">
+		<label><span class="field-label">Your Name <span class="invalid hide">(required)</span></span>
+			<input type="text" name="name">
+		</label>
+	</div>
+	<div id="form-email" class="large-12 columns field">
+		<label><span class="field-label">Your Email <span class="invalid hide">(required)</span></span>
+			<input type="text" name="email">
+		</label>
+	</div>
+	<div id="form-message" class="large-12 columns field">
+		<label><span class="field-label">Message <span class="invalid hide">(required)</span></span>
+			<textarea name="message" rows="6"></textarea>
+		</label>
+	</div>
+	<div class="large-12 columns text-right">
+		<input type="submit" class="button" value="Submit">
+	</div>
+</div>
+</form>

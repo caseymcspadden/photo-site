@@ -47,6 +47,13 @@ module.exports = BaseView.extend
 		this.currentPhoto = photo		
 
 	open: ->
+		#unassigned = true
+		#this.model.containers.every( (container) ->
+		#	if container.get('type')=='gallery'
+		#		console.log container.photos
+		#	true
+		#	#return container.get('type')=='folder'
+		#, this)
 		this.selectMode = 0
 		this.$el.foundation 'open'
 		this.selectedContainer = this.model.get 'selectedContainer'

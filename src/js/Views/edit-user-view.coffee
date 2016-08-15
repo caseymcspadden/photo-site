@@ -34,6 +34,7 @@ module.exports = BaseView.extend
 		if this.model
 			this.model.save(
 				data
+				wait: true
 				error: (model, response, options) ->
 					self.$('.error-message').html response.responseJSON.message
 					self.$('.error-message').removeClass('hide')
@@ -48,6 +49,8 @@ module.exports = BaseView.extend
 					self.$('.error-message').html response.responseJSON.message
 					self.$('.error-message').removeClass('hide')
 				success: (model, response, options) ->
+					response['password'] = response['repeat-password'] = ''
+					model.set response
 					self.$el.foundation 'close'
 			)
 		this

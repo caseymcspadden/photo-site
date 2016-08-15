@@ -1,18 +1,20 @@
 $ = require 'jquery'
 require 'foundation'
-#Products = require('../../require/products')
-#AdminProductsView = require('../../require/admin-products-view')
 AdminStoreView = require('../../require/admin-store-view')
-
-#products = new Products
-#adminProductsView = new AdminProductsView {el: '.admin-products-view', collection: products}
-
-#adminProductsView.render()
+Session = require('../../require/session')
+Settings = require('../../require/settings')
+AdminSettingsView = require('../../require/admin-settings-view')
 
 adminStoreView = new AdminStoreView {el: '.admin-store-view'}
 
+session = new Session()
+settings = new Settings null, {session: session}
+adminSettingsView = new AdminSettingsView {el: '#admin-editSettings', model:settings}
+
 adminStoreView.render()
+adminSettingsView.render()
+
+session.fetch()
 
 $ ->
 	$(document).foundation()
-	#products.fetch {reset: true}

@@ -9,4 +9,4 @@ module.exports = Backbone.Collection.extend
 	comparator: 'position'
 
 	initialize: (attributes, options) ->
-		this.masterPhotoCollection = options.masterPhotoCollection
+		this.masterPhotoCollection = options.masterPhotoCollection if options

@@ -1,5 +1,6 @@
 Backbone = require 'backbone'
 templates = require './jst'
+config = require './config'
 
 module.exports = Backbone.View.extend
 	className: 'reveal form login-view'
@@ -29,7 +30,7 @@ module.exports = Backbone.View.extend
 	loginSuccess: (m) ->
 		if m.get 'success'
 			this.$el.foundation 'close'
-			document.location.reload() if m.get('id')!=0
+			document.location = config.urlBase + '/galleries/' + m.get('homepath') if m.get('id')!=0
 
 	forgotPassword: (e) ->
 		e.preventDefault()

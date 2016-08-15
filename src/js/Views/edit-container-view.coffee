@@ -25,7 +25,8 @@ module.exports = BaseView.extend
 		downloadfee: 0
 		idpayment: 0
 		buyprints: 0
-		markup: 100			
+		markup: 100
+		isclient: 0	
 
 	initialize: (options) ->		
 		this.accesslink = ''
@@ -107,6 +108,7 @@ module.exports = BaseView.extend
 		this.$('input[name="name"]').val data.name
 		this.$('input[name="description"]').val data.description
 		this.$('input[name="url"]').val data.url
+		this.$('select[name="isclient"]').val data.isclient
 		this.$('select[name="access"]').val data.access
 		this.$('select[name="maxdownloadsize"]').val data.maxdownloadsize
 		this.$('select[name="downloadgallery"]').val data.downloadgallery

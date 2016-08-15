@@ -31,9 +31,22 @@ $container['commerce'] = function($container) {
 };
 
 $app->get('/bamenda/testemail', function($request, $response, $args) {
-  $result = $this->services->sendEmail('Test Email', '<p>This is a test</p>', 'This is a test');
+  $result = $this->services->sendEmail('casey@crossriver.com', 'Test Email', '<p>This is a test</p>', 'This is a test', 'casey@crossriver.org');
   $response->getBody()->write(json_encode($result));
   return $response->withHeader('Content-Type','application/json');
+});
+
+$app->post('/bamenda/contact', function($request, $response, $args) {
+  $vals = $request->getParsedBody();
+  
+  $result = $this->services->sendEmail('casey@caseymcspadden.com', 
+                                       'Website Contact', 
+                                       $vals['name'] . '<br/><br/>' . $vals['message'], 
+                                       $vals['name'] . '\n\n' . $vals['message'], 
+                                       $vals['email']);
+
+  $response->getBody()->write(json_encode($result));
+  return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
 $app->post('/pwinty/callback', function($request, $response, $args) {
@@ -311,13 +324,13 @@ $app->put('/bamenda/catalog', function($request, $response, $args) {
 
 $app->get('/bamenda/shipping', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM shipping");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
 $app->get('/bamenda/products', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT id, api, idapi, type, description, hsize, vsize, hsizeprod, vsizeprod, hres, vres, price, shippingtype, active FROM products ORDER BY type, id");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -362,7 +375,7 @@ $app->post('/bamenda/products', function($request, $response, $args) {
 });
 
 $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) {
-   $parsedBody = $request->getParsedBody();
+  $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) 
     $this->services->updateTable('products', "id=$args[id]", $parsedBody, array('api', 'idapi', 'type', 'description', 'hsize', 'vsize', 'hsizeprod', 'vsizeprod', 'hres', 'vres', 'price', 'shippingtype', 'active'));
   $response->getBody()->write(json_encode($parsedBody));
@@ -371,7 +384,7 @@ $app->put('/bamenda/products/{id:[0-9]*}', function($request, $response, $args) 
 
 $app->get('/bamenda/productattributes', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT PA.idproduct, PA.idattribute , A.name, A.title, A.validvalues, A.defaultvalue FROM productattributes PA INNER JOIN attributes A ON A.id=PA.idattribute ORDER BY idproduct, idattribute");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -380,7 +393,7 @@ $app->get('/bamenda/downloads', function($request, $response, $args) {
     $json = $this->services->unauthorizedJSON;
   else
     $json = $this->services->fetchJSON("SELECT C.id, C.name, C.downloadfee, P.idpaypal FROM containers C LEFT JOIN payments P ON P.id=C.idpayment WHERE C.downloadgallery=1");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -389,7 +402,7 @@ $app->get('/bamenda/settings/{id:[0-9]*}', function($request, $response, $args) 
     $json = $this->services->unauthorizedJSON;
   else
     $json = $this->services->fetchJSON("SELECT * FROM settings WHERE iduser=$args[id]", true);
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -406,7 +419,7 @@ $app->get('/bamenda/users', function($request, $response, $args) {
     $json = $this->services->unauthorizedJSON;
   else
     $json = $this->services->fetchJSON("SELECT id, email, isactive, dt, isadmin, name, company, idcontainer FROM users");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -421,12 +434,12 @@ $app->put('/bamenda/users/{id:[0-9]*}', function($request, $response, $args) {
       $result = $this->services->changePassword($args['id'], $vals['password'], $vals['repeat-password']); 
     if ($result['error']==false) {
       $this->services->dbh->query("UPDATE users SET name='$vals[name]', company='$vals[company]', email='$vals[email]', idcontainer=$vals[idcontainer], isadmin=$vals[isadmin], isactive=$vals[isactive] WHERE id=$args[id]");
-      $json = $this->services->fetchJSON("SELECT * FROM users WHERE id=$args[id]",true);
+      $json = $this->services->fetchJSON("SELECT id, email, isactive, dt, isadmin, name, company, idcontainer FROM users WHERE id=$args[id]",true);
     }
     else
-      $json = json_encode($result);
+      $json = $result;
   } 
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
@@ -445,11 +458,11 @@ $app->post('/bamenda/users', function($request, $response, $args) {
        'idcontainer'=>$vals['idcontainer']
       ],NULL,true);
     if ($result['error']==true)
-      $json = json_encode($result);
+      $json = $result;
     else
-      $json = $this->services->fetchJSON("SELECT * FROM users WHERE email='$vals[email]'",true);
+      $json = $this->services->fetchJSON("SELECT id, email, isactive, dt, isadmin, name, company, idcontainer FROM users WHERE email='$vals[email]'",true);
   }
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
@@ -481,14 +494,15 @@ $app->post('/bamenda/session', function($request, $response, $args) {
   else
     $result = $this->services->login($vals['email'], $vals['password'], $vals['remember']);
   
-  $json = json_encode($result);
+  $json = $result;
 
   if (!$result['error'] && !$vals['forgot']) {
     setcookie($this->services->cookie_name, $result['hash'], $result['expire'], $this->services->cookie_path, $this->services->cookie_domain, $this->services->cookie_secure, $this->services->cookie_http);
-    $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company FROM {$this->services->table_sessions} S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
+    $json = $this->services->fetchJSON("SELECT S.hash, S.expiredate, U.id, U.isadmin, U.email, U.name, U.company, U.idcontainer FROM {$this->services->table_sessions} S INNER JOIN users U ON U.id=S.uid WHERE S.hash='$result[hash]'",true);
+    $json->homepath = $this->services->getContainerPath($json->idcontainer);
   }
   
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json')->withStatus($result['error'] ? 400 : 200);
 });
 
@@ -497,7 +511,7 @@ $app->get('/bamenda/photos', function($request, $response, $args) {
     $json = $this->services->unauthorizedJSON;
   else
     $json = $this->services->fetchJSON("SELECT * FROM photos");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -531,13 +545,13 @@ $app->get('/bamenda/photos/{id:[0-9]*}', function($request, $response, $args) {
     $json = $this->services->unauthorizedJSON;
   else
     $json = $this->services->fetchJSON("SELECT * FROM photos WHERE id=$args[id]",true);
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
 $app->get('/bamenda/featuredphotos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.fileName, P.title, P.description, S.featuredgallery FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id INNER JOIN settings S ON S.featuredgallery=CP.idcontainer WHERE S.iduser=1 ORDER BY CP.position");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -556,8 +570,8 @@ $app->get('/bamenda/pathfromcontainer/{id:[0-9]+}', function($request, $response
 });
 
 $app->get('/bamenda/containers', function($request, $response, $args) {
-  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers ORDER BY idparent, position");
-  $response->getBody()->write($json);
+  $json = $this->services->fetchJSON("SELECT id, type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup, isclient FROM containers ORDER BY idparent, position");
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');    
 });
 
@@ -568,7 +582,23 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
     $row = $result->fetch();
     $position = $row ? 1 + $row[0] : 1;
     $vals['urlsuffix'] = $this->services->getRandomKey(6);
-    $this->services->dbh->query("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, buyprints, markup) VALUES ('$vals[type]', $vals[idparent], $position, '$vals[name]','$vals[description]', '$vals[url]', '$vals[urlsuffix]', $vals[access], $vals[maxdownloadsize], $vals[downloadgallery], $vals[downloadfee], $vals[buyprints], $vals[markup])");
+    $stmt = $this->services->dbh->prepare("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, buyprints, markup, isclient) VALUES (:type, :idparent, :position, :name, :description, :url, :urlsuffix, :access, :maxdownloadsize, :downloadgallery, :downloadfee, :buyprints, :markup, :isclient)");
+    $stmt->execute([
+      'type'=>$vals['type'], 
+      'idparent'=>$vals['idparent'], 
+      'position'=>$position, 
+      'name'=>$vals['name'], 
+      'description'=>$vals['description'], 
+      'url'=>$vals['url'], 
+      'urlsuffix'=>$vals['urlsuffix'], 
+      'access'=>$vals['access'], 
+      'maxdownloadsize'=>$vals['maxdownloadsize'], 
+      'downloadgallery'=>$vals['downloadgallery'], 
+      'downloadfee'=>$vals['downloadfee'], 
+      'buyprints'=>$vals['buyprints'], 
+      'markup'=>$vals['markup'], 
+      'isclient'=>$vals['isclient']
+      ]);
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
   $response->getBody()->write(json_encode($vals));
@@ -587,10 +617,32 @@ $app->put('/bamenda/containers', function($request, $response, $args) {
 $app->put('/bamenda/containers/{id}', function($request, $response, $args) {
   $vals = $request->getParsedBody();
   if ($this->services->isAdmin()) {
-    $this->services->dbh->query("UPDATE containers SET idparent=$vals[idparent], position=$vals[position], name='$vals[name]', description='$vals[description]', url='$vals[url]', urlsuffix='$vals[urlsuffix]', access=$vals[access], featuredphoto=$vals[featuredphoto], maxdownloadsize=$vals[maxdownloadsize], downloadgallery=$vals[downloadgallery], downloadfee=$vals[downloadfee], buyprints=$vals[buyprints], markup=$vals[markup] WHERE id=$args[id]");
+    $stmt = $this->services->dbh->prepare("UPDATE containers SET idparent=:idparent, position=:position, name=:name, description=:description, url=:url, urlsuffix=:urlsuffix, access=:access, featuredphoto=:featuredphoto, maxdownloadsize=:maxdownloadsize, downloadgallery=:downloadgallery, downloadfee=:downloadfee, buyprints=:buyprints, markup=:markup, isclient=:isclient WHERE id=:id");
+    $stmt->execute([
+      'idparent'=>$vals['idparent'], 
+      'position'=>$vals['position'], 
+      'name'=>$vals['name'], 
+      'description'=>$vals['description'], 
+      'url'=>$vals['url'], 
+      'urlsuffix'=>$vals['urlsuffix'], 
+      'access'=>$vals['access'], 
+      'featuredphoto'=>$vals['featuredphoto'], 
+      'maxdownloadsize'=>$vals['maxdownloadsize'], 
+      'downloadgallery'=>$vals['downloadgallery'], 
+      'downloadfee'=>$vals['downloadfee'], 
+      'buyprints'=>$vals['buyprints'], 
+      'markup'=>$vals['markup'], 
+      'isclient'=>$vals['isclient'],
+      'id'=>$args['id']
+      ]);
+    $stmt = $this->services->dbh->prepare("UPDATE photos P INNER JOIN containerphotos CP ON CP.idphoto = P.id SET P.isclientphoto=:isclientphoto WHERE CP.idcontainer=:idcontainer");
+    $stmt->execute([
+      'isclientphoto'=>$vals['isclient'], 
+      'idcontainer'=>$args['id']
+      ]);
   }
-  $json = $this->services->fetchJSON("SELECT type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup FROM containers WHERE id=$args[id]");
-  $response->getBody()->write($json);
+  $json = $this->services->fetchJSON("SELECT type, idparent, position, featuredphoto, name, description, url, urlsuffix, access, watermark, maxdownloadsize, downloadgallery, downloadfee, idpayment, buyprints, markup, isclient FROM containers WHERE id=$args[id]");
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -613,9 +665,29 @@ $app->delete('/bamenda/containers/{id}', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+$app->get('/bamenda/containerpaths', function($request, $response, $args) {
+  $containers = array();
+  $result = $this->services->dbh->query("SELECT id, type, idparent, name FROM containers");
+  while ($row=$result->fetchObject()) 
+    $containers[$row->id] = $row;
+  foreach ($containers as $k => $v) {
+    $patharray = array();
+    $current = $v;
+    while (TRUE) {
+      $patharray[] = $current->name;
+      if ($current->idparent==0)
+        break;
+      $current = $containers[$current->idparent];
+    }
+    $v->path = implode(' > ',array_reverse($patharray));
+  }
+  $response->getBody()->write(json_encode(array_values($containers),JSON_NUMERIC_CHECK));
+  return $response->withHeader('Content-Type','application/json');    
+});
+
 $app->get('/bamenda/containers/{id:[0-9]+}/products', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.api, P.idapi, P.type, P.description, P.hsize, P.vsize, P.hres, P.vres, P.price*(100+C.markup)/100 AS price FROM products P INNER JOIN containers C ON C.id=$args[id] WHERE P.active=1");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -634,13 +706,13 @@ $app->get('/bamenda/containers/{idcontainer:[0-9]+}/photos/{idphoto:[0-9]+}/prod
 
 $app->get('/bamenda/containers/{id:[0-9]+}/containers', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT * FROM containers WHERE idparent = $args[id] ORDER BY position");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
 $app->get('/bamenda/containers/{id:[0-9]+}/photos', function($request, $response, $args) {
   $json = $this->services->fetchJSON("SELECT P.id, P.title, P.description FROM photos P INNER JOIN containerphotos CP ON CP.idphoto=P.id WHERE CP.idcontainer=$args[id] ORDER BY CP.position");
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');
 });
 
@@ -653,30 +725,42 @@ $app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, 
   return $response->withHeader('Content-Type','application/json');
 });
 
+// Add photos to container
+
 $app->post('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   
   if ($this->services->isAdmin()) {
     $ids = explode(',', $parsedBody['ids']);
-    $result = $this->services->dbh->query("SELECT MAX(position) FROM containerphotos WHERE idcontainer=$args[id]");
-    $row = $result->fetch();
+    $stmt = $this->services->dbh->prepare("SELECT MAX(position) FROM containerphotos WHERE idcontainer=:id");
+    $stmt->execute(['id'=>$args['id']]);
+    $row = $stmt->fetch();
     $position = $row ? $row[0]+1 : 1;
+    //error_log("start position = $position");
+    $stmt = $this->services->dbh->prepare('INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES (:idcontainer, :idphoto, :position)');
     foreach($ids as $id) {
-      $this->services->dbh->query("INSERT INTO containerphotos (idcontainer,idphoto,position) VALUES ($args[id],$id,$position)");
-      $position++;
+      $result = $stmt->execute(['idcontainer'=>$args['id'], 'idphoto'=>$id, 'position'=>$position]);
+      if ($result) {
+          //error_log("   adding $id at position $position");
+          $position++;
+      }
     }
   }
   $response->getBody()->write(json_encode($parsedBody));
   return $response->withHeader('Content-Type','application/json');
 });
 
+// Change containerphoto positions
+
 $app->put('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
   $parsedBody = $request->getParsedBody();
   if ($this->services->isAdmin()) {
+    $stmt = $this->services->dbh->prepare("UPDATE containerphotos SET position=:position WHERE idcontainer=:idcontainer AND idphoto=:idphoto");
     $ids = explode(',', $parsedBody['ids']);
     $position = 1;
+    $idcontainer = $args['id'];
     foreach($ids as $id) {
-      $this->services->dbh->query("UPDATE containerphotos SET position=$position WHERE idcontainer=$args[id] AND idphoto=$id");
+      $stmt->execute(['position'=>$position, 'idcontainer'=>$idcontainer, 'idphoto'=>$id]);
       $position++;
     }
   }
@@ -861,7 +945,6 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
       $json['attrs'] = $vals->attrs;
       $this->services->dbh->query("INSERT INTO cartitems (idcart, idphoto, idcontainer, idproduct, price, quantity, attrs, cropx, cropy, cropwidth, cropheight) VALUES ('$idcart', $json[idphoto], $json[idcontainer], $json[idproduct], $json[price], $json[quantity], '$json[attrs]', $json[cropx], $json[cropy], $json[cropwidth], $json[cropheight])");
       $json['id'] = $this->services->dbh->lastInsertId();
-      $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'PUT':
       $json = $request->getParsedBody();
@@ -879,7 +962,6 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
         $json['cropheight'] = $vals->cropheight;
       }
       $this->services->dbh->query("UPDATE cartitems SET idproduct=$json[idproduct], price=$json[price], quantity=$json[quantity], attrs='$json[attrs]', cropx=$json[cropx], cropy=$json[cropy], cropwidth=$json[cropwidth], cropheight=$json[cropheight] WHERE id=$args[path]");
-      $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     case 'DELETE':
       $json = $request->getParsedBody();
@@ -887,13 +969,12 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
         $this->services->dbh->query("DELETE FROM cartitems WHERE id=$args[path]");
       else
         $this->services->dbh->query("DELETE C.*, CI.* FROM carts C INNER JOIN cartitems CI ON CI.idcart=C.id WHERE C.id='$idcart'");
-      $json = json_encode($json,JSON_NUMERIC_CHECK);
       break;
     default:
       $json = array('error'=>'unrecognized request');
       break;
   }
-  $response->getBody()->write($json);
+  $response->getBody()->write(json_encode($json,JSON_NUMERIC_CHECK));
   return $response->withHeader('Content-Type','application/json');    
 });
 
