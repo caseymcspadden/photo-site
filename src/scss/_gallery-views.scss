@@ -83,10 +83,14 @@
 			height: 100%;
 			vertical-align: middle;
 		}
-		img {
+		.selected-photo {
 			vertical-align: middle;
-			max-height: rem-calc(370);
+			max-height: 370px;
 			cursor: pointer;
+			@include breakpoint(medium up) {
+				border: 2px solid $white;
+			}				
+			//border: 2px solid $white;
 		}
 	}
 	

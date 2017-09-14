@@ -12,7 +12,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git://github.com/caseymcspadden/webapp6.git"
+    "url": "git://github.com/caseymcspadden/photo-site.git"
   },
   "devDependencies": {
     "backbone": "^1.2.3",
@@ -59,7 +59,7 @@
   },
   "browser": {
     "jquery": "./node_modules/jquery/dist/jquery.js",
-    "foundation": "./node_modules/foundation-sites/dist/foundation.js"
+    "foundation": "./node_modules/foundation-sites/dist/js/foundation.js"
   },
   "browserify-shim": {
     "jquery": "$",

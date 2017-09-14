@@ -2,12 +2,7 @@
 
 @import "settings";
 @import "common";
-@import "gallery-views";
-@import "photo-view";
-@import "photo-thumbnail";
 @import "cart-summary-view";
-@import "choose-photos-view";
-@import "breadcrumbs";
 @import "../../node_modules/foundation-sites/scss/foundation";
 
 @include foundation-global-styles;
@@ -46,9 +41,10 @@
 @include foundation-tooltip;
 @include foundation-top-bar;
 
-.tooltip {
-  z-index: 1006;
-}
-
 @import "../../node_modules/font-awesome/scss/font-awesome.scss";
 
+.hilite {
+    color: $white;
+    &:visited {color: $white;}   
+    &:hover {color: $secondary-color;}
+}

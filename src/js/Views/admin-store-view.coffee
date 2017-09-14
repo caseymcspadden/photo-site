@@ -3,36 +3,36 @@ templates = require './jst'
 config = require './config'
 Products = require('./products')
 Orders = require('./orders')
-Downloads = require('./downloads')
+Archives = require('./archives')
 AdminCatalogView = require ('./admin-catalog-view')
 AdminOrdersView = require ('./admin-orders-view')
-AdminDownloadsView = require ('./admin-downloads-view')
+AdminArchivesView = require ('./admin-archives-view')
 
 module.exports = BaseView.extend
 	events:
 		'click .catalog-menu' : 'openCatalog'
 		'click .orders-menu' : 'openOrders'
-		'click .downloads-menu' : 'openDownloads'
+		'click .archives-menu' : 'openArchives'
 
 	fetched:
 		catalog: false
 		orders: false
-		downloads: false
+		archives: false
 
 	initialize: (options) ->
 		this.template = templates['admin-store-view']
 		this.products = new Products
 		this.orders = new Orders
-		this.downloads = new Downloads
+		this.archives = new Archives
 		this.adminCatalogView = new AdminCatalogView {collection: this.products}
 		this.adminOrdersView = new AdminOrdersView {collection: this.orders}
-		this.adminDownloadsView = new AdminDownloadsView {collection: this.downloads}
+		this.adminArchivesView = new AdminArchivesView {collection: this.archives}
 
 	render: ->
 		this.$el.html this.template()
 		this.assign this.adminCatalogView, '.admin-catalog-view'
 		this.assign this.adminOrdersView, '.admin-orders-view'
-		this.assign this.adminDownloadsView, '.admin-downloads-view'
+		this.assign this.adminArchivesView, '.admin-archives-view'
 		this.openCatalog()
 
 	openCatalog: (e) ->
@@ -51,10 +51,10 @@ module.exports = BaseView.extend
 		this.$('.store-view').addClass 'hide'
 		this.$('.admin-orders-view').removeClass 'hide'
 
-	openDownloads: (e) ->
+	openArchives: (e) ->
 		e.preventDefault() if e
-		if !this.fetched.downloads
-			this.downloads.fetch {reset: true}
-			this.fetched.downloads = true
+		if !this.fetched.archives
+			this.archives.fetch {reset: true}
+			this.fetched.archives = true
 		this.$('.store-view').addClass 'hide'
-		this.$('.admin-downloads-view').removeClass 'hide'
+		this.$('.admin-archives-view').removeClass 'hide'

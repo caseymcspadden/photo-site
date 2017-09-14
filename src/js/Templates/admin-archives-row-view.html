@@ -1,0 +1,8 @@
+<% var sizes = {1: 'Small', 2: 'Medium', 3: 'Large', 4: 'X-Large', 5: 'Full'}; %>
+<td><%= id %></td>
+<td><%= dt %></td>
+<td><a href="<%= urlBase %>/galleries/<%= path %>" target="_blank"><%= path %></td>
+<td><%= sizes[imagesize] %></td>
+<td><%= downloadfee.toFixed(2) %></td>
+<td><a class="show-payment" href="#"><%= idpaypal %></a></td>
+<td><%= downloads %></td>

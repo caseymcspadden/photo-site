@@ -10,6 +10,7 @@ module.exports = BaseView.extend
 		'change select[name="access"]' : 'changeAccess'
 		'change select[name="downloadgallery"]' : 'changeDownloadGallery'
 		'click .tabselector li' : 'selectTab'
+		'click #allactive' : 'selectActiveProducts'
 
 	defaultData:
 		createNew: false
@@ -38,13 +39,29 @@ module.exports = BaseView.extend
 		if this.model.get('newContainerType') != null
 			this.defaultData.createNew = true
 			this.defaultData.type = this.model.get('newContainerType')
-		this.setFormValues()
+		this.products = []
+		this.$('select[name="products"]').html ''
+		self = this
+		$.get(config.servicesBase + '/products' , (json) ->
+			_.each json , (product) ->
+				self.products.push product
+				$option = $("<option></option>").attr("value",product.id).text(product.description)
+				self.$('select[name="products"]').append $option
+			self.setFormValues()
+		)
 		this.$('.tabpanel').addClass('hide')
 		this.$('#panel-general').removeClass('hide')
 		this.$('#panel-general').removeClass('hide')
 		this.$('.tabselector li').removeClass('selected')
 		this.$('#tab-general').addClass('selected')
 		this.$el.foundation 'open'
+
+	selectActiveProducts: (e) ->
+		for product in this.products
+			if product.active and e.target.checked
+				this.$('select[name="products"] option[value="' + product.id + '"]').prop('selected',true)
+			else
+				this.$('select[name="products"] option[value="' + product.id + '"]').prop('selected',false)
 
 	selectTab: (e) ->
 		e.preventDefault()
@@ -61,12 +78,14 @@ module.exports = BaseView.extend
 		data = {}
 		for elem in arr
 			data[elem.name]=elem.value
+		arr = self.$('select[name="products"]').val()
+		data['products'] = if arr then arr.toString() else 
 		container = this.model.get 'selectedContainer'	
 		if this.defaultData.createNew
 			data.type = this.defaultData.type
 			this.model.createContainer data
 		else
-			container.save data
+			container.save data , {wait:true}
 		this.$('.close-button').trigger('click')
 
 	nameChanged: (e) ->
@@ -102,8 +121,13 @@ module.exports = BaseView.extend
 		data = this.defaultData
 		if container and newType == null
 			data = container.toJSON()
+			self = this
+			$.get(config.servicesBase + '/containers/' + container.id + '/containerproducts' , (json) ->
+				ids = json.ids.split(',')
+				for id in ids
+					self.$('select[name="products"] option[value="' + id + '"]').prop 'selected' , true
+			)
 
-		console.log data.path
 		this.$('.title').html if newType==null then 'Edit ' + container.get('type') else 'New ' + newType
 		this.$('input[name="name"]').val data.name
 		this.$('input[name="description"]').val data.description

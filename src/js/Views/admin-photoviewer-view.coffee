@@ -58,4 +58,4 @@ module.exports = BaseView.extend
 		this.assign this.photoTextEditor , '.photo-text-editor'
 
 	photoChanged: (m) ->
-		this.$('.view-image').attr('src' , config.urlBase + '/photos/' + m.get('viewPhotoSize') + '/' + m.get('viewPhoto').id + '.jpg')
+		this.$('.view-image').attr('src' , config.urlBase + '/photos/' + m.get('viewPhotoSize') + '/' + m.get('viewPhoto').get('uid') + '.jpg')

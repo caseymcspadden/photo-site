@@ -15,7 +15,7 @@ ul.mtree {
   
   // Styles for all link elements, change to '* >:first-child' if not using anchor <a>
   a {
-    @extend %mtree-transition;
+   // @extend %mtree-transition;
     display: block;
   }
   

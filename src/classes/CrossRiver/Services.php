@@ -407,7 +407,7 @@ class Services
 
     }
 
-    public function getContainerPath($idcontainer)
+    public function getContainerPath($idcontainer, $showAccess=false)
     {
     	$pathArray = array();
    		$stmt = $this->dbh->prepare("SELECT idparent, url, access FROM containers WHERE id=:idcontainer");
@@ -417,12 +417,12 @@ class Services
     		$container = $stmt->fetchObject();
     		if (!$container)
     			break;
-    		$pathArray[] = ($container->access==0 ? '_' : '') . $container->url;
+    		$pathArray[] = (($container->access==0 && $showAccess) ? '_' : '') . $container->url;
     		if ($container->idparent==0)
     			break;
     		$idcontainer = $container->idparent;
     	}
-    	return implode('/',array_reverse($pathArray));
+    	return array_reverse($pathArray);
     }
 
     public function userOwnsContainer($iduser, $idcontainer)

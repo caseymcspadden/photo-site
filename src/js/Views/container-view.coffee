@@ -8,12 +8,12 @@ module.exports = Backbone.View.extend
 
 	initialize: (options) ->
 		this.template = templates['container-view']
-		this.listenTo this.model, 'change', this.render
+		this.listenTo this.model, 'change:name change:access change:featuredPhoto change:buyprints', this.render
 		this.listenTo this.model, 'remove', this.remove
 
 	featuredPhotoSource: ->
-		if this.model.get('featuredphoto') != 0 
-			return config.urlBase + '/photos/T/' + this.model.get('featuredphoto') + '.jpg'
+		if this.model.get('featuredphoto')
+			return config.urlBase + '/photos/T/' + this.model.get('uid') + '.jpg'
 		else if this.model.get('type') == 'folder' 
 			return config.urlBase + '/images/thumbnail-folder.jpg'
 		return config.urlBase + '/images/thumbnail-gallery.jpg'		

@@ -7,12 +7,16 @@
 	.summary {
 		margin-bottom: 0.5rem;
 		line-height: 1.2rem;
-		color: white;
+		color: $white;
 		&.name {
 			color: $light-gray;
 		}
 		&.status {
 			color: $secondary-color;
+		}
+		a {
+			color: $white;
+			text-decoration: underline;
 		}
 	}
 

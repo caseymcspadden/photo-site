@@ -42,4 +42,4 @@ module.exports = BaseView.extend
 
 	changePhoto: (m) ->
 		photo = m.get 'currentPhoto'
-		this.$('img.photo').attr 'src' , config.urlBase + '/photos/L/' + photo.id + '.jpg'
+		this.$('img.photo').attr 'src' , config.urlBase + '/photos/L/' + photo.uid + '.jpg'

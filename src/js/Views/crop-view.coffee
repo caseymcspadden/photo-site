@@ -23,14 +23,13 @@ module.exports = BaseView.extend
 	open: (cartitem)->
 		this.cartitem = cartitem
 		item = cartitem.toJSON()
-		console.log item
 		this.$('.cropper-face').removeClass 'warning'
 		this.$('.error-message').addClass 'hide'
 		this.$('.save-crop').removeClass 'disabled'
 
 		this.$el.foundation 'open'
 		$image = this.$('.crop-photo')
-		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('idphoto') + '.jpg'
+		$image.attr 'src' , config.urlBase + '/photos/M/' + cartitem.get('uid') + '.jpg'
 		cropheight = item.cropheight * item.height / 100
 		cropwidth = item.cropwidth * item.width / 100
 		aspect = cropwidth / cropheight
@@ -64,7 +63,6 @@ module.exports = BaseView.extend
 					self.$('.error-message').addClass 'hide'
 					self.$('.save-crop').removeClass 'disabled'
 			built: (e) ->
-				console.log this
 				imageData = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
 				minheight = if item.width > item.height then imageData.naturalHeight*item.hres/item.height else imageData.naturalHeight*item.vres/item.height

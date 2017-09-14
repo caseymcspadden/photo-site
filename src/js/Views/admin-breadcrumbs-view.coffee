@@ -18,10 +18,10 @@ module.exports = BaseView.extend
 		html = ''
 		
 		for i in [breadcrumbs.length-1..0]
-			fid = breadcrumbs[i].get 'featuredphoto'
+			uid = breadcrumbs[i].get 'uid'
 			name = breadcrumbs[i].get 'name'
-			if fid!=0
-				src = config.urlBase + '/photos/T/' + fid + '.jpg'
+			if uid
+				src = config.urlBase + '/photos/T/' + uid + '.jpg'
 			else if breadcrumbs[i].get('type') == 'folder'
 				src = config.urlBase + '/images/thumbnail-folder.jpg'
 			else

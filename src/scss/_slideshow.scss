@@ -51,7 +51,9 @@
 			opacity: 0;
 			transition: opacity 1.2s;
 			//height: 550px;
-
+			@include breakpoint(medium up) {
+				border: 2px solid $white;
+			}				
 			&.show {
 				opacity: 1;
 			}

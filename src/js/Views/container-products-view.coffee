@@ -60,8 +60,9 @@ module.exports = BaseView.extend
 		this.$el.foundation 'close'
 
 	addOne: (product) ->
+		return if !product.get('active') or !product.get('idproduct')
 		price = product.get('price')/100
-		$option = $("<option></option>").attr("value",product.id).text(product.get('description') + ': $' + price.toFixed(2))		
+		$option = $("<option></option>").attr("value",product.id).text(product.get('description') + ': $' + price.toFixed(2))
 		if this.cartitem and this.cartitem.get('idproduct') == product.id
 			$option.attr 'selected' , true
 		this.$('#products').append $option
