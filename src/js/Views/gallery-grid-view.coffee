@@ -42,9 +42,9 @@ module.exports = BaseView.extend
 
 	showHide: (model) ->
 		if model.get 'showGrid'
-			this.$el.removeClass 'hide'
+			this.$el.fadeIn()
 		else 
-			this.$el.addClass('hide')
+			this.$el.hide()
 
 	currentPhotoChanged: (model) ->
 		photo = model.get "currentPhoto"

@@ -2,5 +2,6 @@
 <div class='container-info'><%= name %></div>
 <div class='container-description'>
 <%= type=='folder' ? '<i class="fa fa-folder"></i>' : '<i class="fa fa-picture-o"></i>' %>
-<%= access==0 ? '<i class="fa fa-unlock"></i>' : (access==1 ? '<i class="fa fa-unlock-alt"></i>' : '<i class="fa fa-lock"></i>') %>
+<%= access==0 ? '<i class="fa fa-ban"></i>' : (access==1 ? '<i class="fa fa-unlock"></i>' : (access==2 ? '<i class="fa fa-unlock-alt"></i>' : '<i class="fa fa-lock"></i>')) %>
+<%= buyprints ? '<i class="fa fa-cart-arrow-down"></i>' : '' %>
 </div>

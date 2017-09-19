@@ -1,4 +1,5 @@
 $ = require 'jquery'
+require 'foundation'
 Session = require './session'
 LoginView = require './login-view'
 SessionMenuView = require './session-menu-view'

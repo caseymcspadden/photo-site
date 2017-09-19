@@ -26,7 +26,7 @@ module.exports = Backbone.View.extend
 		self = this	
 		downloadingImage.onload = ->
 			self.$('img')[0].src = downloadingImage.src
-		downloadingImage.src = this.urlBase + '/photos/T/' + this.model.id + '.jpg'
+		downloadingImage.src = this.urlBase + '/photos/T/' + this.model.uid + '.jpg'
 
 	setFocus: (e) ->
 		this.$('a').focus()

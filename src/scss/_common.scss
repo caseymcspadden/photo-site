@@ -82,6 +82,7 @@ a {
 }
 
 .top-bar-right {
+  float: right;
   a {
     &.top-item {
       border-top: 2px solid $body-background;

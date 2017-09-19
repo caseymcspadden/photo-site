@@ -12,14 +12,14 @@ session = new Session
 loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 
-galleries = new Galleries
+#galleries = new Galleries
 folderView = new FolderView {collection: galleries, el: '.folder-view'}
 
 $('body').append loginView.render().el
 
 $ ->
 	session.fetch()
-	galleries.fetch {reset: true}
+	#galleries.fetch {reset: true}
 
 $(document).foundation()
 #new Foundation.DropdownMenu($('.dropdown'))

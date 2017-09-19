@@ -60,6 +60,13 @@ $app->get('/galleries/[{path:.*}]', function($request, $response, $args) {
     }
 });
 
+$app->get('/realestate', function ($request, $response, $args) {
+    return $this->view->render($response, 'realestate.html' , [
+        'webroot'=>$this->services->webroot,
+        'islogged'=>$this->services->isLogged()
+    ]);
+});
+
 $app->get('/about', function ($request, $response, $args) {
     return $this->view->render($response, 'about.html' , [
         'webroot'=>$this->services->webroot,

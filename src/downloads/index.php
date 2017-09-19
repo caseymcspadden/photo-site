@@ -26,8 +26,9 @@ $dbh = new \PDO("mysql:host=localhost;dbname=" . $config['mysqldb'],  $config['m
 
 if ($downloadtype=='archive') {
 	$filename =  $arr[1];
-	$result = $dbh->query("SELECT * FROM archives WHERE id='$filename'");
-	$archive = $result->fetchObject();
+	$stmt = $dbh->prepare("SELECT * FROM archives WHERE id=?");
+	$stmt->execute([$filename]);
+	$archive = $stmt->fetchObject();
 	if (!$archive)
 		exit ('Not a valid file link');
 	$dbh->query("UPDATE archives SET downloads=downloads+1 WHERE id='$filename'");
@@ -52,7 +53,7 @@ else if ($downloadtype=='file') {
 	$idgallery = $arr[1];
 	$urlsuffix = $arr[2];
 	$id = $arr[3];
-	$result = $dbh->query("SELECT C.access, C.maxdownloadsize, C.downloadgallery, C.downloadfee, C.idpayment, P.title FROM containers C INNER JOIN containerphotos CP ON CP.idcontainer=C.id INNER JOIN photos P ON P.id=CP.idphoto WHERE C.id=$idgallery AND C.urlsuffix='$urlsuffix' AND CP.idphoto=$id");
+	$result = $dbh->query("SELECT C.access, C.maxdownloadsize, C.downloadgallery, C.downloadfee, C.idpayment, P.title, P.uid FROM containers C INNER JOIN containerphotos CP ON CP.idcontainer=C.id INNER JOIN photos P ON P.id=CP.idphoto WHERE C.id=$idgallery AND C.urlsuffix='$urlsuffix' AND CP.idphoto=$id");
 	if ($result===FALSE)
 		exit ('Not a valid file link');
 	$photo = $result->fetchObject();
@@ -62,9 +63,9 @@ else if ($downloadtype=='file') {
 		exit ('Permission denied');
 	$size = $photo->maxdownloadsize;
 	if ($size==5) 
-		$arr = glob($fileroot . '/photos/' . sprintf("%02d",$id%100) . '/' . $id . '_*.jpg');
+		$arr = glob($fileroot . '/photos/' . substr($photo->uid,strlen($photo->uid)-2) . '/' . $photo->uid . '_*.jpg');
   	else
-  		$arr = glob($photoroot . '/' . sprintf("%02d",$id%100) . '/' . $id . '_' . $sizemap[$size] . '.jpg');
+  		$arr = glob($photoroot . '/' . substr($photo->uid,strlen($photo->uid)-2) . '/' . $photo->uid . '_' . $sizemap[$size] . '.jpg');
   	if (count($arr)==0)
 		exit ('File not found');
 
@@ -89,14 +90,14 @@ else if ($downloadtype=='print') {
 	$photo = explode('.',$arr[2]);
 	$idphoto = $photo[0];
 
-	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.printid='$printid' AND idphoto=$idphoto");
+	$result = $dbh->query("SELECT OI.* , P.uid FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder INNER JOIN photos P ON P.id = OI.idphoto WHERE O.printid='$printid' AND idphoto=$idphoto");
 
 	$item = $result->fetchObject();
 
 	if (!$item)
 		exit ('Invalid photo id');
 
-	$arr = glob($fileroot . '/photos/' . sprintf("%02d",$idphoto%100) . '/' . $idphoto . '_*.jpg');
+	$arr = glob($fileroot . '/photos/' . substr($item->uid,strlen($item->uid)-2) . '/' . $item->uid . '_*.jpg');
 
 	if (count($arr)!=1)
 		exit ('Photo does not exist on server');
@@ -129,14 +130,14 @@ else if ($downloadtype=='orderedphoto') {
 	$photo = explode('.',$arr[2]);
 	$id = $photo[0];
 
-	$result = $dbh->query("SELECT OI.* FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder WHERE O.orderid='$orderid' AND OI.id=$id");
+	$result = $dbh->query("SELECT OI.*, P.uid FROM orderitems OI INNER JOIN orders O ON O.id=OI.idorder INNER JOIN photos P ON P.id=OI.idphoto WHERE O.orderid='$orderid' AND OI.id=$id");
 
 	$item = $result->fetchObject();
 
 	if (!$item)
 		exit ('Invalid photo id');
 
-	$arr = glob($photoroot . '/' . sprintf("%02d",$item->idphoto%100) . '/' . $item->idphoto . '_S.jpg');
+	$arr = glob($photoroot . '/' . substr($item->uid,strlen($item->uid)-2) . '/' . $item->uid . '_S.jpg');
 
 	if (count($arr)!=1)
 		exit ('Photo does not exist on server');
@@ -169,14 +170,14 @@ else if ($downloadtype=='cartphoto') {
 	$photo = explode('.',$arr[2]);
 	$id = $photo[0];
 
-	$result = $dbh->query("SELECT * FROM cartitems WHERE idcart='$idcart' AND id=$id");
+	$result = $dbh->query("SELECT CI.*, P.uid FROM cartitems CI INNER JOIN photos P ON P.id=CI.idphoto WHERE CI.idcart='$idcart' AND CI.id=$id");
 
 	$item = $result->fetchObject();
 
 	if (!$item)
 		exit ('Invalid photo id');
 
-	$arr = glob($photoroot . '/' . sprintf("%02d",$item->idphoto%100) . '/' . $item->idphoto . '_S.jpg');
+	$arr = glob($photoroot . '/' . substr($item->uid,strlen($item->uid)-2) . '/' . $item->uid . '_S.jpg');
 
 	if (count($arr)!=1)
 		exit ('Photo does not exist on server');

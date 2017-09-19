@@ -10,7 +10,8 @@ module.exports = BaseView.extend
 	events:
 		'click .prev' : 'shiftLeft'
 		'click .next' : 'shiftRight'
-		'click img.selected-photo' : 'viewImage'
+		#'click img.selected-photo' : 'viewImage'
+		'click img.selected-photo' : 'selectedPhotoClicked'
 		'click .download-gallery' : 'downloadGallery'
 		'click .download-photo' : 'downloadPhoto'
 		'click .buy-product' : 'buyProduct'
@@ -25,11 +26,12 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:buyprints', this.updateProducts
 		this.listenTo this.model, 'change:currentPhoto', this.changePhoto
 		this.listenTo this.model, 'change:downloadgallery change:maxdownloadsize change:buyprints', this.updateAccess
+		this.listenTo this.model, 'change:showGrid', this.showGridChanged
 		this.listenTo this.cart, 'add' , this.cartItemAdded
 		this.speed = 3000
-		width = $(window).width()
+		this.width = $(window).width()
 		this.slideSize = 'M'
-		this.slideSize = 'S' if width <= 450
+		this.slideSize = 'S' if this.width <= 450
 
 	render: ->
 		data = this.model.toJSON()
@@ -39,11 +41,6 @@ module.exports = BaseView.extend
 		this.assign this.containerProductsView, '.container-products-view'
 		this.assign this.downloadGalleryView, '.download-gallery-view'
 		this
-
-	###
-	updateProducts: (m) ->
-		this.containerProductsView.updateProducts m.id
-	###
 	
 	updateAccess: (m) ->
 		data = this.model.toJSON()
@@ -51,18 +48,21 @@ module.exports = BaseView.extend
 			this.$('.download-photo').removeClass('hide')
 		this.$('.download-gallery').removeClass('hide') if data.downloadgallery>1
 		this.$('.buy-product').removeClass('hide') if m.get('buyprints')
-	
-	viewImage: (e) ->
-		e.preventDefault()
+
+	selectedPhotoClicked: (e) ->
+		e.preventDefault();
 		this.model.set 'showGrid' , !this.model.get('showGrid')
-		if this.model.get('showGrid')
+
+	showGridChanged: (m) ->
+		if m.get('showGrid')
+			this.$('.selected-photo').css({'max-height':'370px'}) if this.width > 450
 			window.clearInterval this.interval
 		else
+			this.$('.selected-photo').animate({'max-height':'450px'}) if this.width > 450
 			self = this
 			this.interval = window.setInterval( ->
 				self.model.offsetCurrentPhoto(1)
 			, this.speed)
-		#this.photoView.open()
 
 	downloadGallery: (e) ->
 		e.preventDefault()
@@ -77,22 +77,17 @@ module.exports = BaseView.extend
 		e.preventDefault()
 		this.containerProductsView.open this.model.get('currentPhoto').id , this.model.id, null
 
-	###
-	selectProduct: (idproduct, context) ->
-		photo = context.model.get 'currentPhoto'
-		test = context.cart.where {idphoto: photo.id}
-		if test.length==0
-			context.cart.create {idcontainer: context.model.id, idphoto: photo.id, idproduct: idproduct}
-	###
-
 	keyUp: (e) ->
-		offset = switch e.keyCode
-			when 37 then -1
-			when 38 then -3
-			when 39 then 1
-			when 40 then 3
-			else 0
-		this.model.offsetCurrentPhoto offset
+		if e.keyCode==27 and !this.model.get 'showGrid'
+			this.model.set 'showGrid' , true
+		else
+			offset = switch e.keyCode
+				when 37 then -1
+				when 38 then -3
+				when 39 then 1
+				when 40 then 3
+				else 0
+			this.model.offsetCurrentPhoto offset
 
 	shiftLeft: ->
 		this.model.offsetCurrentPhoto -1
@@ -112,7 +107,7 @@ module.exports = BaseView.extend
 
 	changePhoto: (m) ->
 		photo = m.get 'currentPhoto'
-		this.$('.content img').attr 'src' , config.urlBase + '/photos/' + this.slideSize + '/' + photo.id + '.jpg'
+		this.$('.selected-photo').hide().attr('src' ,config.urlBase + '/photos/' + this.slideSize + '/' + photo.get('uid') + '.jpg').fadeIn()
 		test = this.cart.where {idphoto: photo.id}
 		if test.length==0
 			this.$('.buy-product').removeClass('in-cart')
