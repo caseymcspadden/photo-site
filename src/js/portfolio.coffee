@@ -6,7 +6,6 @@ Session = require('../../require/session')
 LoginView = require('../../require/login-view')
 SessionMenuView = require('../../require/session-menu-view')
 Galleries = require('../../require/containers')
-FolderView = require('../../require/folder-view')
 
 session = new Session
 loginView = new LoginView {model: session}

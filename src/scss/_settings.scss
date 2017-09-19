@@ -101,17 +101,7 @@ $global-button-cursor: auto;
 $global-color-pick-contrast-tolerance: 0;
 $print-transparent-backgrounds: true;
 
-<<<<<<< HEAD
-$foundation-palette: (
-  primary: #384b9f,
-  secondary: #f05c23,
-  success: #3adb76,
-  warning: #ffae00,
-  alert: #ec5840
-);
-=======
 @include add-foundation-colors;
->>>>>>> fd474f87e4fc0a56b8616253b55927bfe9c4c796
 
 // 2. Breakpoints
 // --------------
