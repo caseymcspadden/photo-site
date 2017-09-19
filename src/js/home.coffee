@@ -1,5 +1,5 @@
-$ = require 'jquery'
-require 'foundation'
+#$ = require 'jquery'
+#require 'foundation'
 #Backbone = require 'backbone'
 FeaturedPhotos = require('../../require/featuredphotos')
 SlideshowView = require('../../require/slideshow-view')
