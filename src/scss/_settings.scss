@@ -66,7 +66,7 @@
 // ---------
 
 $global-font-size: 100%;
-$global-width: rem-calc(960);
+$global-width: rem-calc(1000);
 $global-lineheight: 1.5;
 $foundation-palette: (
   primary: #384b9f,
@@ -95,7 +95,7 @@ $global-radius: 0;
 $global-menu-padding: 0.7rem 1rem;
 $global-menu-nested-margin: 1rem;
 $global-text-direction: ltr;
-$global-flexbox: true;
+//$global-flexbox: true;
 $global-prototype-breakpoints: false;
 $global-button-cursor: auto;
 $global-color-pick-contrast-tolerance: 0;
@@ -119,6 +119,7 @@ $breakpoint-classes: (small medium large);
 // 3. The Grid
 // -----------
 
+$xy-grid: true;
 $grid-row-width: $global-width;
 $grid-column-count: 12;
 $grid-column-gutter: (
@@ -398,7 +399,7 @@ $dropdownmenu-padding: $global-menu-padding;
 $dropdownmenu-nested-margin: 0;
 $dropdownmenu-submenu-padding: $dropdownmenu-padding;
 $dropdownmenu-border: 0px solid $medium-gray;
-$dropdown-menu-item-color-active: get-color(primary);
+$dropdown-menu-item-color-active: $white; //get-color(primary);
 $dropdown-menu-item-background-active: transparent;
 
 // 19. Flexbox Utilities
@@ -415,28 +416,28 @@ $fieldset-padding: rem-calc(20);
 $fieldset-margin: rem-calc(18 0);
 $legend-padding: rem-calc(0 3);
 $form-spacing: rem-calc(16);
-$helptext-color: $black;
+$helptext-color: #333;
 $helptext-font-size: rem-calc(13);
 $helptext-font-style: italic;
 $input-prefix-color: $black;
 $input-prefix-background: $light-gray;
 $input-prefix-border: 1px solid $medium-gray;
 $input-prefix-padding: 1rem;
-$form-label-color: $black;
+$form-label-color: $light-gray;
 $form-label-font-size: rem-calc(14);
 $form-label-font-weight: $global-weight-normal;
 $form-label-line-height: 1.8;
-$select-background: $white;
-$select-triangle-color: $dark-gray;
+$select-background: $black;
+$select-triangle-color: #aaa;
 $select-radius: $global-radius;
-$input-color: $black;
+$input-color: $white;
 $input-placeholder-color: $medium-gray;
 $input-font-family: inherit;
 $input-font-size: rem-calc(16);
 $input-font-weight: $global-weight-normal;
 $input-line-height: $global-lineheight;
-$input-background: $white;
-$input-background-focus: $white;
+$input-background: $black;
+$input-background-focus: lighten($black, 10%);
 $input-background-disabled: $light-gray;
 $input-border: 1px solid $medium-gray;
 $input-border-focus: 1px solid $dark-gray;

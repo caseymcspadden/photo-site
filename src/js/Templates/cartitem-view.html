@@ -1,13 +1,13 @@
-<div class="large-5 columns">
+<div class="large-5 cell">
 <div class="cropped-view">
 </div>
 </div>
-<div class="large-7 columns">
-	<div class="large-12 columns product-description"><%= description %></div>
-	<div class="large-4 columns">$<span class="unit-price"><% print((price/100).toFixed(2)); %></span></div>
-	<div class="large-4 columns"><a class="decrease-quantity" href="#">-</a><span class="quantity"><%= quantity %></span><a class="increase-quantity" href="#">+</a></div>
-	<div class="large-4 columns text-right">$<span class="total-price"><% print((quantity*price/100).toFixed(2)); %></span></div>
-	<div class="large-12 columns small button-group">
+<div class="large-7 cell">
+	<div class="large-12 cell product-description"><%= description %></div>
+	<div class="large-4 cell">$<span class="unit-price"><% print((price/100).toFixed(2)); %></span></div>
+	<div class="large-4 cell"><a class="decrease-quantity" href="#">-</a><span class="quantity"><%= quantity %></span><a class="increase-quantity" href="#">+</a></div>
+	<div class="large-4 cell text-right">$<span class="total-price"><% print((quantity*price/100).toFixed(2)); %></span></div>
+	<div class="large-12 cell small button-group">
 		<a class="button crop-item">Crop</a>
 		<a class="button remove-item">Remove</a>
 		<a class="button change-product">Change Product</a>
@@ -18,7 +18,7 @@
 			validvalues = attributes[i].validvalues.split(',');
 			if (validvalues.length>1) {
 				selected = attributes[i].name in itemattributes ? itemattributes[attributes[i].name] : null;
-				print('<div class="large-12 columns">');
+				print('<div class="large-12 cell">');
 				print('<select name="' + attributes[i].name + '">');
 				for (j=0;j<validvalues.length;j++) {
 					print('<option value="' + validvalues[j] + '"' +  (selected==validvalues[j] ? ' selected' : '') + '>' + attributes[i].title + ': ' + validvalues[j] + '</option>');

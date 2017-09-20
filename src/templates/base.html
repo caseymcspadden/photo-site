@@ -12,33 +12,35 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 </head>
 <body>
-  <div class="row">
-  
-    <div class="large-12 columns top-bar client">
-      <div class="top-bar-left menu-text">
-        <a class="title-main" href="{{webroot}}/">Cross River</a> <span class="title-sub">photography by Casey McSpadden</span>
+  <div class="grid-container">
+    <div class="grid-x">
+    
+      <div class="large-12 cell top-bar client">
+        <div class="top-bar-left menu-text">
+          <a class="title-main" href="{{webroot}}/">Cross River</a> <span class="title-sub">photography by Casey McSpadden</span>
+        </div>
+        <div class="show-cart">
+          <div class="cart-summary-view"></div>
+        </div>
       </div>
-      <div class="show-cart">
-        <div class="cart-summary-view"></div>
+      
+      <div class="large-12 cell">
+        <div class="top-bar-right">
+          <ul class="dropdown menu" data-dropdown-menu>
+            <li><a class="top-item" href="{{webroot}}/galleries/portfolio">PORTFOLIO</a></li>
+            <li><a class="top-item" href="#">MORE</a>
+              <ul class="menu session-menu"></ul>
+            </li>
+          </ul>
+        </div>
       </div>
+    
     </div>
     
-    <div class="large-12 columns">
-      <div class="top-bar-right">
-        <ul class="dropdown menu" data-dropdown-menu>
-          <li><a class="top-item" href="{{webroot}}/galleries/portfolio">PORTFOLIO</a></li>
-          <li><a class="top-item" href="#">MORE</a>
-            <ul class="menu session-menu"></ul>
-          </li>
-        </ul>
-      </div>
+    <div class="grid-x" id="mainContent">
+      {% block content %}
+      {% endblock %}
     </div>
-  
-  </div>
-  
-  <div class="row" id="mainContent">
-    {% block content %}
-    {% endblock %}
   </div>
  
   {% block script %}
