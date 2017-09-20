@@ -5,106 +5,108 @@
 <h2 class="title"></h2>
 
 <form method="post">
-
-<div class="large-3 columns">
-	<ul class="tabselector">
-		<li id="tab-general" class="selected">General</li>
-		<li id="tab-security">Security</li>
-		<li id="tab-sales">Sales</li>
-	</ul>
-</div>
-
-<div class="large-9 columns">
-	<div class="tabcontent">
-		<div class="tabpanel" id="panel-general">
-			<label>Name
-				<input type="text" name="name">
-			</label>
-			<label>Description
-				<input type="text" name="description">
-			</label>
-			<label>Custom url
-				<input type="text" name="url">
-			</label>
-			<label>Client container?
-				<select name="isclient">
-					<option value="0">No</option>
-					<option value="1">Yes</option>
-				</select>
-			</label>
+<div class = "grid-container">
+	<div class="grid-x grid-padding-x">
+		<div class="large-3 cell">
+			<ul class="tabselector">
+				<li id="tab-general" class="selected">General</li>
+				<li id="tab-security">Security</li>
+				<li id="tab-sales">Sales</li>
+			</ul>
 		</div>
 
-		<div class="tabpanel hide" id="panel-security">
-			<label>Access
-				<select name="access">
-					<option value="0">Private</option>
-					<option value="1">Public</option>
-					<option value="2">Public with link</option>
-					<option value="3">Login required</option>
-				</select>
-			</label>
+		<div class="large-9 cell">
+			<div class="tabcontent">
+				<div class="tabpanel" id="panel-general">
+					<label>Name
+						<input type="text" name="name">
+					</label>
+					<label>Description
+						<input type="text" name="description">
+					</label>
+					<label>Custom url
+						<input type="text" name="url">
+					</label>
+					<label>Client container?
+						<select name="isclient">
+							<option value="0">No</option>
+							<option value="1">Yes</option>
+						</select>
+					</label>
+				</div>
 
-			<label>Maximum download image size
-				<select name="maxdownloadsize">
-					<option value="1">Small (height=300)</option>
-					<option value="2">Medium (height=450)</option>
-					<option value="3">Large (height=600)</option>
-					<option value="4">X-large (height=960)</option>
-					<option value="5">Full Resolution</option>
-				</select>
-			</label>
+				<div class="tabpanel hide" id="panel-security">
+					<label>Access
+						<select name="access">
+							<option value="0">Private</option>
+							<option value="1">Public</option>
+							<option value="2">Public with link</option>
+							<option value="3">Login required</option>
+						</select>
+					</label>
 
-			<label>Allow gallery downloads?
-				<select name="downloadgallery">
-					<option value="0">Never</option>
-					<option value="1">Single photos only</option>
-					<option value="2">Yes, after payment</option>
-					<option value="3">Always</option>
-				</select>
-			</label>
+					<label>Maximum download image size
+						<select name="maxdownloadsize">
+							<option value="1">Small (height=300)</option>
+							<option value="2">Medium (height=450)</option>
+							<option value="3">Large (height=600)</option>
+							<option value="4">X-large (height=960)</option>
+							<option value="5">Full Resolution</option>
+						</select>
+					</label>
 
-			<label class="download-payment">Download fee
-				<input type="text" name="downloadfee">
-			</label>
+					<label>Allow gallery downloads?
+						<select name="downloadgallery">
+							<option value="0">Never</option>
+							<option value="1">Single photos only</option>
+							<option value="2">Yes, after payment</option>
+							<option value="3">Always</option>
+						</select>
+					</label>
 
-			<label class="download-payment">Payment id
-				<input type="text" name="idpayment">
-			</label>
+					<label class="download-payment">Download fee
+						<input type="text" name="downloadfee">
+					</label>
 
+					<label class="download-payment">Payment id
+						<input type="text" name="idpayment">
+					</label>
+
+				</div>
+
+				<div class="tabpanel hide" id="panel-sales">
+					<label>Allow print purchases?
+						<select name="buyprints">
+							<option value="0">No</option>
+							<option value="1">Yes</option>
+						</select>
+					</label>
+
+					<label>Allowed products (<input type="checkbox" id="allactive">all active</input>)
+						<select multiple name="products">
+						</select>
+					</label>
+
+					<label>Markup percent
+						<input type="text" name="markup">
+					</label>
+
+				</div>
+
+				<div class="tabpanel hide" id="panel-test2">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos explicabo cumque repudiandae facere modi pariatur aperiam commodi labore amet, expedita architecto beatae a officiis quos dicta perferendis dolor saepe facilis alias id illum nulla. Esse veritatis cumque sint eaque suscipit voluptatibus minima, labore eos molestiae? Cum recusandae voluptates fugit, dolor, cupiditate hic harum, mollitia eaque consequuntur ad a saepe. Deleniti sint, dignissimos fugiat quibusdam laboriosam nostrum aperiam quis maxime quaerat recusandae fugit beatae non quo necessitatibus rem nisi quae ducimus delectus facere autem, sed. Quam aut, repellendus doloribus quidem nam dolores eum, illum eaque neque ea, beatae rem quos sed?
+				</div>
+
+				<div class="tabpanel hide" id="panel-test3">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rem iure, numquam itaque velit soluta hic eum deleniti praesentium illum assumenda, at. Porro, in. Sequi, est odio. Quisquam repellat, deleniti, placeat reiciendis maxime beatae ab quod accusantium. Commodi similique maiores inventore eaque provident itaque dolorum delectus, impedit, hic nobis quasi, molestiae placeat praesentium nam, ducimus vero. Delectus nihil veniam asperiores aperiam magni amet ducimus, eius quo minima vel accusantium perferendis quam dolores atque neque placeat sint necessitatibus inventore temporibus eligendi rem sed itaque odit recusandae? Magnam consequatur similique aperiam sed, quae odio, quibusdam laudantium non? Mollitia est praesentium eius a eaque!
+				</div>
+			</div>
 		</div>
 
-		<div class="tabpanel hide" id="panel-sales">
-			<label>Allow print purchases?
-				<select name="buyprints">
-					<option value="0">No</option>
-					<option value="1">Yes</option>
-				</select>
-			</label>
-
-			<label>Allowed products (<input type="checkbox" id="allactive">all active</input>)
-				<select multiple name="products">
-				</select>
-			</label>
-
-			<label>Markup percent
-				<input type="text" name="markup">
-			</label>
-
-		</div>
-
-		<div class="tabpanel hide" id="panel-test2">
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos explicabo cumque repudiandae facere modi pariatur aperiam commodi labore amet, expedita architecto beatae a officiis quos dicta perferendis dolor saepe facilis alias id illum nulla. Esse veritatis cumque sint eaque suscipit voluptatibus minima, labore eos molestiae? Cum recusandae voluptates fugit, dolor, cupiditate hic harum, mollitia eaque consequuntur ad a saepe. Deleniti sint, dignissimos fugiat quibusdam laboriosam nostrum aperiam quis maxime quaerat recusandae fugit beatae non quo necessitatibus rem nisi quae ducimus delectus facere autem, sed. Quam aut, repellendus doloribus quidem nam dolores eum, illum eaque neque ea, beatae rem quos sed?
-		</div>
-
-		<div class="tabpanel hide" id="panel-test3">
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rem iure, numquam itaque velit soluta hic eum deleniti praesentium illum assumenda, at. Porro, in. Sequi, est odio. Quisquam repellat, deleniti, placeat reiciendis maxime beatae ab quod accusantium. Commodi similique maiores inventore eaque provident itaque dolorum delectus, impedit, hic nobis quasi, molestiae placeat praesentium nam, ducimus vero. Delectus nihil veniam asperiores aperiam magni amet ducimus, eius quo minima vel accusantium perferendis quam dolores atque neque placeat sint necessitatibus inventore temporibus eligendi rem sed itaque odit recusandae? Magnam consequatur similique aperiam sed, quae odio, quibusdam laudantium non? Mollitia est praesentium eius a eaque!
+		<div class="large-12 cell">
+			<p class="access-link" hide><%= urlBase %><span class="access-path"></span></p>
+			<input type="submit" class="button" value="Submit">
 		</div>
 	</div>
 </div>
-
-<div class="large-12 columns">
-	<p class="access-link" hide><%= urlBase %><span class="access-path"></span></p>
-	<input type="submit" class="button" value="Submit">
-</div>
-
 <form>

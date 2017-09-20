@@ -22,5 +22,5 @@ Base.initialize '.session-menu', '.cart-summary-view'
 $ ->
 	Base.onLoad()
 	featuredPhotos.fetch {reset: true}
-
+	
 $(document).foundation()

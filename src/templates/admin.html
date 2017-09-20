@@ -9,22 +9,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 </head>
 <body>
-<div class="top-bar admin">
-<ul class="menu large-10 columns">
-  <li class="menu-text">Admin</li>
-  <li><a href="{{adminroot}}/organize">ORGANIZE</a></li>
-  <li><a href="{{adminroot}}/users">USERS</a></li>
-  <li><a href="{{adminroot}}/store">STORE</a></li>
-  <li><a href="{{webroot}}/">SITE</a></li>
-</ul>
-<ul class="menu large-2 columns align-right">
-  <li><a href="#" class="admin-settings" data-open="admin-editSettings"><i class="fa fa-gear"></i></a></li>
-</ul>
+<div class="grid-x">  
+
+  <div class="large-12 cell top-bar admin">
+    <ul class="menu">
+      <li class="menu-text">Admin</li>
+      <li><a href="{{adminroot}}/organize">ORGANIZE</a></li>
+      <li><a href="{{adminroot}}/users">USERS</a></li>
+      <li><a href="{{adminroot}}/store">STORE</a></li>
+      <li><a href="{{webroot}}/">SITE</a></li>
+    </ul>
+    <ul class="menu align-right">
+      <li><a href="#" class="admin-settings" data-open="admin-editSettings"><i class="fa fa-gear"></i></a></li>
+    </ul>
+  </div>
+
 </div>
 
-<div class="admin-wrapper">
-  {% block content %}
-  {% endblock %}
+<div class="grid-x">
+  <div class="large-12 cell admin-wrapper">
+    {% block content %}
+    {% endblock %}
+  </div>
 </div>
 
 <div class="reveal form admin-settings-view" id="admin-editSettings" data-reveal>

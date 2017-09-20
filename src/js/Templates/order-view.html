@@ -1,82 +1,84 @@
-<div class="large-6 columns">
-	<h2>Summary</h2>
-	<div class="large-6 columns summary name">
-		Order Number
-	</div>
-	<div class="large-6 columns summary">
-		<%= orderid %>
-	</div>
-	<div class="large-6 columns summary name">
-	Order Date
-	</div>
-	<div class="large-6 columns summary">
-	<%= (new Date(dt)).toLocaleDateString() %>
-	</div>
-	<div class="large-6 columns summary name">
-	Ship To
-	</div>
-	<div class="large-6 columns summary">
-	<%= name %><br/>
-	<%= address %><br/>
-	<% if (address2) { %>
-	<%= address2 %><br/>
-	<% } %>
-	<%= city %>, <%= state %> <%= zip %>
-	</div>
-	<div class="large-6 columns summary name">
-	Items
-	</div>
-	<div class="large-6 columns summary">
-	<%= items %>
-	</div>
-	<div class="large-6 columns summary name">
-	Amount
-	</div>
-	<div class="large-6 columns summary">
-	$<%= amount.toFixed(2) %>
-	</div>
-	<div class="large-6 columns summary name">
-	Shipping
-	</div>
-	<div class="large-6 columns summary">
-	$<%= shipping.toFixed(2) %>
-	</div>
-	<div class="large-6 columns summary name">
-	Total
-	</div>
-	<div class="large-6 columns summary">
-	$<%= (amount+shipping).toFixed(2) %>
-	</div>
-	<div class="large-6 columns summary name">
-	Payment
-	</div>
-	<div class="large-6 columns summary">
-	<%= cardnumber %>
-	</div>
-</div>
-
-<div class="large-6 columns">
-	<h2>Status</h2>
-	<div class="large-12 columns summary status">
-	<%= status %>
-	</div>
-	<% for (var i=0;i<shipments.length;i++) { shipment=shipments[i]; %>
-		<div class="large-12 columns summary">
-			Shipment <%= i+1 %><br/>
-			Estimated Arrival: <%= (new Date(shipment.latestarrivaldate)).toLocaleDateString() %><br/>
-			<% if (shipment.trackingnumber) { %>
-				Tracking Number: <%= shipment.trackingnumber %><br/>
-			<% } %>
-			<% if (shipment.trackingurl) { %>
-				<a target="_blank" href="<%= shipment.trackingurl %>"><%= shipment.trackingurl %></a><br/>
-			<% } %>
-			<%= shipment.shippedon.substring(0,4)=='0000' ? 'Not yet shipped' : 'Shipped: ' + shipment.shippedon %>
+<div class="grid-x grid-padding-x">
+	<div class="large-6 cell">
+		<h2>Summary</h2>
+		<div class="large-6 cell summary name">
+			Order Number
 		</div>
-	<% } %>
-</div>
+		<div class="large-6 cell summary">
+			<%= orderid %>
+		</div>
+		<div class="large-6 cell summary name">
+		Order Date
+		</div>
+		<div class="large-6 cell summary">
+		<%= (new Date(dt)).toLocaleDateString() %>
+		</div>
+		<div class="large-6 cell summary name">
+		Ship To
+		</div>
+		<div class="large-6 cell summary">
+		<%= name %><br/>
+		<%= address %><br/>
+		<% if (address2) { %>
+		<%= address2 %><br/>
+		<% } %>
+		<%= city %>, <%= state %> <%= zip %>
+		</div>
+		<div class="large-6 cell summary name">
+		Items
+		</div>
+		<div class="large-6 cell summary">
+		<%= items %>
+		</div>
+		<div class="large-6 cell summary name">
+		Amount
+		</div>
+		<div class="large-6 cell summary">
+		$<%= amount.toFixed(2) %>
+		</div>
+		<div class="large-6 cell summary name">
+		Shipping
+		</div>
+		<div class="large-6 cell summary">
+		$<%= shipping.toFixed(2) %>
+		</div>
+		<div class="large-6 cell summary name">
+		Total
+		</div>
+		<div class="large-6 cell summary">
+		$<%= (amount+shipping).toFixed(2) %>
+		</div>
+		<div class="large-6 cell summary name">
+		Payment
+		</div>
+		<div class="large-6 cell summary">
+		<%= cardnumber %>
+		</div>
+	</div>
 
-<div class="large-12 columns">
-<h2>Order</h2>
-<div class="order-items">
-</div>
+	<div class="large-6 cell">
+		<h2>Status</h2>
+		<div class="large-12 cell summary status">
+		<%= status %>
+		</div>
+		<% for (var i=0;i<shipments.length;i++) { shipment=shipments[i]; %>
+			<div class="large-12 cell summary">
+				Shipment <%= i+1 %><br/>
+				Estimated Arrival: <%= (new Date(shipment.latestarrivaldate)).toLocaleDateString() %><br/>
+				<% if (shipment.trackingnumber) { %>
+					Tracking Number: <%= shipment.trackingnumber %><br/>
+				<% } %>
+				<% if (shipment.trackingurl) { %>
+					<a target="_blank" href="<%= shipment.trackingurl %>"><%= shipment.trackingurl %></a><br/>
+				<% } %>
+				<%= shipment.shippedon.substring(0,4)=='0000' ? 'Not yet shipped' : 'Shipped: ' + shipment.shippedon %>
+			</div>
+		<% } %>
+	</div>
+
+	<div class="large-12 cell">
+		<h2>Order</h2>
+		<div class="order-items">
+		</div>	
+	</div>
 </div>
