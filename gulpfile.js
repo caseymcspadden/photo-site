@@ -65,7 +65,11 @@ gulp.task('jst', function() {
     .pipe(processhtml({ collapseWhitespace: false, removeComments: true, removeCommentsFromCDATA: true }))
 
     // Convert to JST and assign to app.templates which we'll define once all files are concatenated in
-    .pipe(jst({ prepend: 'templates["%s"] = ' }))
+    .pipe(jst({
+      prepend: 'templates["%s"] = '
+      //useFilePath: ['^[0-9a-z_]?\:?\\?[[0-9a-z_]\-_\\]*\\+([[0-9a-z_]-_]+)(\.[[0-9a-z_]-_]+)', '$2']
+      //useFilePath:  ['^.*\/(.+?)(\.[^.]*$|$)', '$1']
+      }))
 
     // Concatenate all files together and insert a comma before each newLine
     .pipe(concat('jst.js', { newLine: ',\n' }))
