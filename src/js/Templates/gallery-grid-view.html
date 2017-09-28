@@ -1,24 +1,24 @@
 <div class="grid">
-<div class="gallery-breadcrumbs">
-<%
- if (breadcrumbs.length==1) {
- 	print('<span class="single-crumb">' + breadcrumbs[0] + '</span>');
- }
- else {
-	 url = urlBase + '/galleries';
-	 for (i=0;i<breadcrumbs.length;i++) {
-	 	url += '/' + breadcrumbs[i]
-	 	if (breadcrumbs[i].charAt(0)!='_') {
-	 		print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
-	 		if (i<breadcrumbs.length-1)
-	 			print(' &gt; ');
-	 	}
+	<div class="gallery-breadcrumbs">
+	<%
+	 if (breadcrumbs.length==1) {
+	 	print('<span class="single-crumb">' + breadcrumbs[0] + '</span>');
 	 }
- }
-%>
-</div>
-<div class="content"></div>
-<span class="prev">&lt;</span><span class="next">&gt;</span>
+	 else {
+		 url = urlBase + '/galleries';
+		 for (i=0;i<breadcrumbs.length;i++) {
+		 	url += '/' + breadcrumbs[i]
+		 	if (breadcrumbs[i].charAt(0)!='_') {
+		 		print('<a href="' + url + '">' + breadcrumbs[i] + '</a>');
+		 		if (i<breadcrumbs.length-1)
+		 			print(' &gt; ');
+		 	}
+		 }
+	 }
+	%>
+	</div>
+	<div class="content"></div>
+	<span class="prev">&lt;</span><span class="next">&gt;</span>
 </div>
 <div class="pager">
 	<select>

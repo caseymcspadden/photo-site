@@ -1,7 +1,13 @@
 .photo-thumbnail {
   position: relative;
-  width: 104px;
-  height: 104px;
+  @include breakpoint(medium) {
+    width: 104px;
+    height: 104px;
+  }
+  @include breakpoint(medium down) {
+    width: 48px;
+    height: 48px;
+  }
   overflow: hidden;
   float: left;
   margin: 4px;

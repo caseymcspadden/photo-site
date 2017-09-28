@@ -16,6 +16,7 @@ module.exports = BaseView.extend
 		this.$el.html this.template()
 
 	selectAllClicked: (e) ->
+		return if !this.collection
 		this.collection.each (photo) ->
 			photo.set 'chosen' , e.target.checked
 

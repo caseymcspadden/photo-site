@@ -18,12 +18,14 @@ module.exports = BaseView.extend
 		this.idphoto = 0
 		this.containerProducts = new ContainerProducts
 		this.photos = if this.model then this.model.photos else null
-		this.choosePhotosView = new ChoosePhotosView {collection: this.photos}
+		if this.photos
+			this.choosePhotosView = new ChoosePhotosView {collection: this.photos}
 		this.listenTo this.containerProducts, 'reset', this.addAll
 
 	render: ->
 		this.$el.html this.template()
-		this.assign this.choosePhotosView, '.choose-photos-view'
+		if this.choosePhotosView
+			this.assign this.choosePhotosView, '.choose-photos-view'
 
 	open: (idphoto, idcontainer, cartitem) ->
 		this.cartitem = cartitem

@@ -38,22 +38,31 @@
 
 		.content {
 			width: rem-calc(336);
-			min-height: rem-calc(450);
+			@include breakpoint(medium) {	
+				min-height: rem-calc(450);
+			}
+			@include breakpoint(medium down) {	
+				min-height: rem-calc(125);
+			}
 			//@include breakpoint(medium up) {
 			 //	min-height: rem-calc(450);
 			//}
 		}
 		
-		.photo-thumbnail {
-		  img {
-			    &.selected {
+		//.photo-thumbnail {
+		  //img {
+			//    &.selected {
 			      //border: 2px solid $body-background;
-			    }
-			}
- 		}
+			  //  }
+			//}
+ 		//}
  	}
 	
 	.pager {
+		@include breakpoint(medium down) {
+			display: none;
+		}
+	
 		text-align: center;
 		width: 100%;
 		select {

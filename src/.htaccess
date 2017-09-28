@@ -1,13 +1,13 @@
 RewriteEngine On
 
 #RewriteCond %{HTTP_HOST} !^www\.
-#RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [R=301,L]
+#RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
-#RewriteCond %{HTTPS} off
-#RewriteCond %{REQUEST_URI} !^/(pwinty|cameroon)
-#RewriteRule ^(.*)$ http://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/(pwinty|cameroon)
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-#RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?caseymcspadden.com [NC]
+#RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?caseymcspadden [NC]
 #RewriteRule \.(jpg|jpeg|png|gif)$ - [NC,F,L]
 
 RewriteRule ^photos/(T|S|M|L|X)/([a-z0-9]+([a-z0-9][a-z0-9])).jpg photos/$3/$2_$1.jpg [NC,L]

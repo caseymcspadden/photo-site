@@ -8,7 +8,17 @@ module.exports = BaseView.extend
 		'change .pager select' : 'changePage'
 		'click .prev' : 'scrollLeft'
 		'click .next' : 'scrollRight'
+		'touchstart' : 'touchStart'
+		'touchmove' : 'touchMove'
+		'touchend' : 'touchEnd'
 		'keyup' : 'keyUp'
+
+	startX : 0
+	startY : 0
+	startTime : 0
+	threshold : 100
+	allowedTime : 300
+	yTolerance : 100
 
 	initialize: (options) ->
 		this.template = templates['gallery-grid-view']
@@ -30,6 +40,31 @@ module.exports = BaseView.extend
 
 		this.$el.html this.template {urlBase: config.urlBase, breadcrumbs: breadcrumbs}
 		this
+
+	touchStart: (e) ->
+		touchobj = e.changedTouches[0]
+		this.startX = touchobj.pageX
+		this.startY = touchobj.pageY
+		this.startTime = new Date().getTime()
+		#e.preventDefault()
+
+	touchMove: (e) ->
+		e.preventDefault()
+
+	touchEnd: (e) ->
+        touchobj = e.changedTouches[0]
+        deltaX = touchobj.pageX - this.startX
+        deltaY = touchobj.pageY - this.startY
+        elapsedTime = new Date().getTime() - this.startTime
+        if elapsedTime <= this.allowedTime and Math.abs(deltaX) >= this.threshold and Math.abs(deltaY) <= this.yTolerance
+        	this.handleSwipe(deltaX > 0)
+        #e.preventDefault()
+
+    handleSwipe: (isRight) ->
+    	if (isRight)
+    		this.scrollLeft()
+    	else
+    		this.scrollRight()
 
 	keyUp: (e) ->
 		offset = switch e.keyCode

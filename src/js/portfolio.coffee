@@ -12,7 +12,7 @@ loginView = new LoginView {model: session}
 sessionMenuView = new SessionMenuView({el: '.session-menu', model: session})
 
 #galleries = new Galleries
-folderView = new FolderView {collection: galleries, el: '.folder-view'}
+#folderView = new FolderView {collection: galleries, el: '.folder-view'}
 
 $('body').append loginView.render().el
 

@@ -62,7 +62,7 @@ module.exports = BaseView.extend
 					self.$('.cropper-face').removeClass 'warning'
 					self.$('.error-message').addClass 'hide'
 					self.$('.save-crop').removeClass 'disabled'
-			built: (e) ->
+			ready: () ->
 				imageData = $image.cropper('getImageData')
 				canvas = $image.cropper('getCanvasData')
 				minheight = if item.width > item.height then imageData.naturalHeight*item.hres/item.height else imageData.naturalHeight*item.vres/item.height
