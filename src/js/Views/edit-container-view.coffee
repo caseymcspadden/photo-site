@@ -123,16 +123,17 @@ module.exports = BaseView.extend
 			data = container.toJSON()
 			self = this
 			$.get(config.servicesBase + '/containers/' + container.id + '/containerproducts' , (json) ->
-				ids = json.ids.split(',')
-				for id in ids
-					self.$('select[name="products"] option[value="' + id + '"]').prop 'selected' , true
+				if json.ids
+					ids = json.ids.split(',')
+					for id in ids
+						self.$('select[name="products"] option[value="' + id + '"]').prop 'selected' , true
 			)
 
 		this.$('.title').html if newType==null then 'Edit ' + container.get('type') else 'New ' + newType
 		this.$('input[name="name"]').val data.name
 		this.$('input[name="description"]').val data.description
 		this.$('input[name="url"]').val data.url
-		this.$('select[name="isclient"]').val data.isclient
+		#this.$('select[name="isclient"]').val data.isclient
 		this.$('select[name="access"]').val data.access
 		this.$('select[name="maxdownloadsize"]').val data.maxdownloadsize
 		this.$('select[name="downloadgallery"]').val data.downloadgallery

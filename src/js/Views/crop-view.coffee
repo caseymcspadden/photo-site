@@ -70,10 +70,10 @@ module.exports = BaseView.extend
 				minheight = Math.round(minheight+1)
 				minwidth = Math.round(minwidth+1)
 				data = {}
-				data.width = Math.round(item.cropwidth * imageData.width / 100)
-				data.height = Math.round(item.cropheight * imageData.height / 100)
-				data.left = Math.round(canvas.left + item.cropx * imageData.width / 100)
-				data.top = Math.round(canvas.top + item.cropy * imageData.height / 100)
+				data.width = Math.floor(item.cropwidth * imageData.width / 100)
+				data.height = Math.floor(item.cropheight * imageData.height / 100)
+				data.left = Math.floor(canvas.left + item.cropx * imageData.width / 100)
+				data.top = Math.floor(canvas.top + item.cropy * imageData.height / 100)
 				$image.cropper 'setCropBoxData' , data
 		})
 

@@ -5,9 +5,10 @@ config = require './config'
 
 module.exports = BaseView.extend
 	events:
-		'change .pager select' : 'changePage'
-		'click .prev' : 'scrollLeft'
-		'click .next' : 'scrollRight'
+		#'change .pager select' : 'changePage'
+		'click .page' : 'changePage'
+		'click .pagination-previous a' : 'scrollLeft'
+		'click .pagination-next a' : 'scrollRight'
 		'touchstart' : 'touchStart'
 		'touchmove' : 'touchMove'
 		'touchend' : 'touchEnd'
@@ -87,7 +88,7 @@ module.exports = BaseView.extend
 		return if !photo
 		index = model.photos.indexOf photo
 		page = Math.floor(index/12)
-		this.$('.pager select').val page
+		#this.$('.pager select').val page
 		this.showPage page
 
 	addAll: (collection) ->
@@ -98,8 +99,11 @@ module.exports = BaseView.extend
 			this.gridPages[this.gridPages.length-1].addPhoto collection.at(i)
 
 		for i in [0...this.gridPages.length]
-			this.$('.pager select').append $("<option></option>").attr("value",i).text('' + (i+1) + ' of ' + this.gridPages.length)
-
+			#this.$('.pager select').append $("<option></option>").attr("value",i).text('' + (i+1) + ' of ' + this.gridPages.length)
+			#this.$('.pager .pagination').append $("<li></li>").text('<a href="#" aria-label="Page ' + (i+1) + '">' + (i+1) + '</a>')
+			this.$('.pagination').append $('<li><a class="page page-' + i + '" href="#" aria-label="Page ' + (i+1) + '">' + (i+1) + '</a></li>')
+		this.$('.pagination').append $('<li class="pagination-next"><a href="#" aria-label="Next page"><span class="show-for-sr">page</span></a></li>')
+	
 		this.showPage 0
 		this.model.set 'currentPhoto', this.model.photos.at 0
 
@@ -107,12 +111,14 @@ module.exports = BaseView.extend
 		this.model.offsetCurrentPhoto -12
 
 	scrollRight: ->
-		index = this.model.photos.indexOf this.model.get('currentPhoto')
-		this.model.offsetCurrentPhoto Math.min(12, this.model.photos.length-index-1)
+		#index = this.model.photos.indexOf this.model.get('currentPhoto')
+		#this.model.offsetCurrentPhoto Math.min(12, this.model.photos.length-index-1)
+		this.model.offsetCurrentPhoto 12
 
 	changePage: (e) ->
-		page = e.target.value
-		this.showPage e.target.value
+		page = $(e.target).text() - 1
+		#page = e.target.value
+		this.showPage page
 		this.model.photos.at(page*12).set 'selected' , true
 
 	showPage: (page) ->
@@ -122,3 +128,13 @@ module.exports = BaseView.extend
 		this.currentPage = page
 		this.assign this.gridPages[page] , '.content'
 		this.$('a').focus()
+		this.$('.pagination a').removeClass('current')
+		this.$('.pagination a.page-' + page).addClass('current')
+		this.$('.pagination-previous a').removeClass('disabled')
+		this.$('.pagination-next a').removeClass('disabled')
+		if page == 0
+			this.$('.pagination-previous a').addClass('disabled')
+		if page == this.gridPages.length - 1
+			this.$('.pagination-next a').addClass('disabled')
+
+

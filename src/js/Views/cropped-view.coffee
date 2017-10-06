@@ -7,6 +7,7 @@ config = require './config'
 module.exports = BaseView.extend
 	events:
 		'onload img' : 'render'
+		'click .crop-rect' : 'doCrop'
 
 	initialize: (options) ->
 		this.template = templates['cropped-view']
@@ -24,4 +25,7 @@ module.exports = BaseView.extend
 		this.$('img').css {height: this.height + 'px'}
 		this.$el.css {height: this.height+'px', width: this.width+'px'}
 		this
+
+	doCrop: (e) ->
+		this.trigger 'cropImage', e, this.model
  
