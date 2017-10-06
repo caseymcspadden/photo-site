@@ -21,12 +21,15 @@ $container['view'] = function ($container) {
 };
 
 $container['services'] = function($container) {  
-    return new CrossRiver\Services('/Users/caseymcspadden/sites/photo-site/fileroot','/Users/caseymcspadden/sites/photo-site/build/photos');
+   return new CrossRiver\Services('/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot',
+        '/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/build/photos');
+    //return new CrossRiver\Services('/Users/caseymcspadden/sites/photo-site/fileroot','/Users/caseymcspadden/sites/photo-site/build/photos');
     //return new CrossRiver\Services('/fileroot','/var/www/html/photos');
 };
 
 $container['commerce'] = function($container) {
-    return new CrossRiver\Commerce('/Users/caseymcspadden/sites/photo-site/fileroot');
+    return new CrossRiver\Commerce('/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot');
+    //return new CrossRiver\Commerce('/Users/caseymcspadden/sites/photo-site/fileroot');
     //return new CrossRiver\Commerce('/fileroot');
 };
 

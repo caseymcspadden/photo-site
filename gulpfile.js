@@ -66,8 +66,9 @@ gulp.task('jst', function() {
 
     // Convert to JST and assign to app.templates which we'll define once all files are concatenated in
     .pipe(jst({
-      prepend: 'templates["%s"] = '
-      //useFilePath: ['^[0-9a-z_]?\:?\\?[[0-9a-z_]\-_\\]*\\+([[0-9a-z_]-_]+)(\.[[0-9a-z_]-_]+)', '$2']
+      prepend: 'templates["%s"] = ',
+      useFilePath: ['(\\w?\\:?\\\\?[\\w\\-_\\\\]*\\\\+)([\\w-_]+)(\\.[\\w-_]+)', '$2']
+
       //useFilePath:  ['^.*\/(.+?)(\.[^.]*$|$)', '$1']
       }))
 
