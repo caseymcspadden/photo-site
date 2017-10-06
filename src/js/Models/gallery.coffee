@@ -39,8 +39,10 @@ module.exports = Backbone.Model.extend
 		photo = this.get "currentPhoto"
 		return if !photo
 		index = offset + this.photos.indexOf photo
-		index = 0 if index >= this.photos.length
-		index = this.photos.length-1 if index < 0
+		#index = 0 if index >= this.photos.lengths
+		#index = this.photos.length-1 if index < 0
+		index = 0 if index < 0
+		index = this.photos.length-1 if index >= this.photos.length
 		#return if index<0 or index>=this.photos.length
 		photo = this.photos.at index
 		this.set 'currentPhoto', photo		

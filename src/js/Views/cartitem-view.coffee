@@ -26,6 +26,7 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:quantity', this.quantityChanged
 		this.listenTo this.model, 'change:idproduct', this.productChanged
 		this.listenTo this.model, 'destroy', this.remove
+		this.listenTo this.croppedView, 'cropImage', this.cropItem
 
 	render: ->
 		data = this.model.toJSON()
