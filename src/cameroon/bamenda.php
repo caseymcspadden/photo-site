@@ -43,6 +43,11 @@ $app->get('/bamenda/test', function($request, $response, $args) {
   return $response->withHeader('Content-Type','application/json');
 });
 
+
+$app->post('/bamenda/token', function($request, $response, $args) {
+  return $this->services->oauth2->handleTokenRequest(\OAuth2\Request::createFromGlobals())->send();
+});
+
 $app->get('/bamenda/test2', function($request, $response, $args) {
   $fileroot = '/Users/caseymcspadden/sites/photo-site/fileroot';
   $photoroot ='/Users/caseymcspadden/sites/photo-site/build';

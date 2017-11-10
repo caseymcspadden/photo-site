@@ -25,19 +25,34 @@ class Services
 		$config = array();
 
 		foreach ($contents as $line) {
-			$kv = explode('=', $line);
-			$config[trim($kv[0])] = trim($kv[1]);
+			$pos = strpos($line,'=');
+			if ($pos) {
+				$k = trim(substr($line,0,$pos));
+				$v = trim(substr($line,$pos+1));
+				$config[$k] = $v;
+			}
 		}
 
-		$this->dbh = new \PDO("mysql:host=localhost;dbname=" . $config['mysqldb'],  $config['mysqluser'] , $config['mysqlpwd']);
+		$dsn = 'mysql:host=localhost;dbname=' . $config['mysqldb'];
 
-		if(!$this->dbh) {
+		$this->dbh = new \PDO($dsn,  $config['mysqluser'] , $config['mysqlpwd']);
+		$this->oauth2storage = new \OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $config['mysqluser'], 'password' => $config['mysqlpwd']));
+
+		// Pass a storage object or array of storage objects to the OAuth2 server class
+
+		if(!$this->dbh || !$this->oauth2storage) {
     		$this->error = true;
     		return;
     	}
 
 		$this->config = new \PHPAuth\Config($this->dbh);
 		$this->auth = new \PHPAuth\Auth($this->dbh, $this->config);
+		$this->oauth2 = new \OAuth2\Server($this->oauth2storage);
+
+		$this->oauth2->addGrantType(new \OAuth2\GrantType\ClientCredentials($this->oauth2storage));	
+		$this->oauth2->addGrantType(new \OAuth2\GrantType\AuthorizationCode($this->oauth2storage));		
+		$this->oauth2->addGrantType(new \OAuth2\GrantType\UserCredentials($this->oauth2storage));
+		$this->oauth2->addGrantType(new \OAuth2\GrantType\ClientCredentials($this->oauth2storage));
 	}
 
 	public function __get($setting)

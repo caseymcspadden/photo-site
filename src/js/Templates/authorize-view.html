@@ -1,0 +1,18 @@
+<div class ="grid-x">
+	<div class="large-12 cell">
+		<h2>Authorize <%= params.client_id %></h2>
+		<p><strong><%= params.client_id %></strong> is requesting access to your photos. Click the button below to authorize the request.</p>
+		<form method="post">
+		  <% if (uid==0) { %>	
+			  <label>Email
+			    <input type="text" name="email">
+			  </label>
+			  <label>Password
+			  	<input type="password" name="password">
+			  </label>
+		  <% } %>
+		  <input type="submit" class="button" name="authorized" value="Yes">
+		  <input type="submit" class="alert button" name="authorized" value="No">
+		</form>
+	</div>
+</div>

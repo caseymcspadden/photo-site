@@ -12,7 +12,8 @@ module.exports = BaseView.extend
 		this.listenTo this.model, 'change:id' , this.render
 		#this.render this.model
 
-	render: (m) ->
+	render: () ->
+		m = this.model
 		data = 
 			uid: if m.id then m.id else 0
 			config: config
