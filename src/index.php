@@ -27,8 +27,8 @@ $container['notFoundHandler'] = function ($container) {
 };
 
 $container['services'] = function($container) {
-    return new CrossRiver\Services('/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot',
-        '/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/build/photos');
+    return new CrossRiver\Services('/Users/Casey/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot',
+        '/Users/Casey/Projects/caseymcspadden/CaseyMcSpaddenSite/build/photos');
     //return new CrossRiver\Services('/Users/caseymcspadden/sites/photo-site/fileroot','/Users/caseymcspadden/sites/photo-site/build/photos');
     //return new CrossRiver\Services('/fileroot','/var/www/html/photos');
 };
