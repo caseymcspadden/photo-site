@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+  
+<div class ="grid-x">
+	<div class="large-12 cell">
+		<h2>Authorize {{clientId}}</h2>
+		<p><strong>{{clientId}}</strong> is requesting access to your photos. Click the button below to authorize the request.</p>
+		<form method="post">
+		  {% if not islogged %}	
+			  <label>Email
+			    <input type="text" name="email">
+			  </label>
+			  <label>Password
+			  	<input type="password" name="password">
+			  </label>
+		  {% endif %}
+		  {% if badCredentials %}
+		  <p><strong>Unrecognized email and/or password. Please try again.</strong></p>
+		  {% endif %}
+		  <input type="submit" class="button" name="authorized" value="Yes">
+		  <input type="submit" class="alert button" name="authorized" value="No">
+		</form>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{{webroot}}/js/app.bundle.js"></script>
+{% endblock %}
