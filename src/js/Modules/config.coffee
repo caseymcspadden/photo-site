@@ -1,8 +1,8 @@
 Config = ->
 
-Config.prototype.urlBase = 'http://caseymcspadden'
-Config.prototype.servicesBase = 'http://caseymcspadden/bamenda'
-Config.prototype.adminBase = 'http://caseymcspadden/mamfe'
+Config.prototype.urlBase = 'https://caseymcspadden'
+Config.prototype.servicesBase = 'https://caseymcspadden/bamenda'
+Config.prototype.adminBase = 'https://caseymcspadden/mamfe'
 
 ###
 Config.prototype.urlBase = 'https://caseymcspadden:8890'

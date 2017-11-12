@@ -21,8 +21,8 @@ $container['view'] = function ($container) {
 };
 
 $container['services'] = function($container) {  
-   return new CrossRiver\Services('/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot',
-        '/Users/Casey/Documents/Projects/caseymcspadden/CaseyMcSpaddenSite/build/photos');
+   return new CrossRiver\Services('/Users/Casey/Projects/caseymcspadden/CaseyMcSpaddenSite/fileroot',
+        '/Users/Casey/Projects/caseymcspadden/CaseyMcSpaddenSite/build/photos');
     //return new CrossRiver\Services('/Users/caseymcspadden/sites/photo-site/fileroot','/Users/caseymcspadden/sites/photo-site/build/photos');
     //return new CrossRiver\Services('/fileroot','/var/www/html/photos');
 };
@@ -701,7 +701,7 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
     $row = $result->fetch();
     $position = $row ? 1 + $row[0] : 1;
     $vals['urlsuffix'] = $this->services->getRandomKey(6);
-    $stmt = $this->services->dbh->prepare("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, buyprints, markup, isclient) VALUES (:type, :idparent, :position, :name, :description, :url, :urlsuffix, :access, :maxdownloadsize, :downloadgallery, :downloadfee, :buyprints, :markup, :isclient)");
+    $stmt = $this->services->dbh->prepare("INSERT INTO containers (type, idparent, position, name, description, url, urlsuffix, access, maxdownloadsize, downloadgallery, downloadfee, buyprints, markup) VALUES (:type, :idparent, :position, :name, :description, :url, :urlsuffix, :access, :maxdownloadsize, :downloadgallery, :downloadfee, :buyprints, :markup)");
     $stmt->execute([
       'type'=>$vals['type'], 
       'idparent'=>$vals['idparent'], 
@@ -715,8 +715,7 @@ $app->post('/bamenda/containers', function($request, $response, $args) {
       'downloadgallery'=>$vals['downloadgallery'], 
       'downloadfee'=>$vals['downloadfee'], 
       'buyprints'=>$vals['buyprints'], 
-      'markup'=>$vals['markup'], 
-      'isclient'=>$vals['isclient']
+      'markup'=>$vals['markup']
       ]);
     $vals['id'] = $this->services->dbh->lastInsertId();
   }
@@ -860,6 +859,7 @@ $app->get('/bamenda/containers/{id:[0-9]+}/photos', function($request, $response
 });
 
 $app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+  $arr = array();
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
   while ($row = $result->fetch())
     $arr[] = $row[0];
@@ -1126,6 +1126,7 @@ $app->post('/bamenda/upload', function($request, $response, $args) {
       return;
     $dbh = $this->services->dbh;
     $fileroot = $this->services->fileroot;
+
     $photoroot = $this->services->photoroot;
     $fileSizes = [
       //'X3'=>[1600,1200],
