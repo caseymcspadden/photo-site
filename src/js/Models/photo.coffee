@@ -17,6 +17,7 @@ module.exports = Backbone.Model.extend
 		exifImageDescription: ""
 		exifMake: ""
 		exifModel: ""
+		exifLensModel: ""
 		exifArtist: ""
 		exifCopyright: ""
 		exifExposureTime: ""

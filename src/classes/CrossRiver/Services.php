@@ -14,6 +14,7 @@ class Services
 	public $remoteUrlBase = 'https://www.caseymcspadden.com';
 	public $webroot = '';
 	public $dbh;
+	public $exifReader;
 	public $error = false;
 	public $unauthorizedJSON = ['error'=>'unauthorized'];
 
@@ -43,6 +44,21 @@ class Services
 		if(!$this->dbh || !$this->oauth2storage) {
     		$this->error = true;
     		return;
+    	}
+
+    	if (isset($config['exiftoolPath']))
+    	{
+    		error_log($config['exiftoolPath']);
+			$adapter = new \PHPExif\Adapter\Exiftool(
+    			array(
+        		'toolPath'  => $config['exiftoolPath']
+    			)
+			);
+			$this->exifReader = new \PHPExif\Reader\Reader($adapter);    		
+    	}
+    	else
+    	{
+    		$this->exifReader = \PHPExif\Reader\Reader::factory(\PHPExif\Reader\Reader::TYPE_NATIVE); 
     	}
 
 		$this->config = new \PHPAuth\Config($this->dbh);

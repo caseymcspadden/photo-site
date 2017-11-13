@@ -857,6 +857,7 @@ $app->get('/bamenda/containers/{id:[0-9]+}/photos', function($request, $response
 });
 
 $app->get('/bamenda/containers/{id:[0-9]+}/containerphotos', function($request, $response, $args) {
+  $arr = array();
   $result = $this->services->dbh->query("SELECT idphoto FROM containerphotos WHERE idcontainer=$args[id] ORDER BY position");
   while ($row = $result->fetch())
     $arr[] = $row[0];
@@ -1121,6 +1122,7 @@ $app->any('/bamenda/cart[/{path:.*}]', function($request, $response, $args) {
 $app->post('/bamenda/upload', function($request, $response, $args) {
     if (!$this->services->isAdmin())
       return;
+
     $dbh = $this->services->dbh;
     $fileroot = $this->services->fileroot;
     $photoroot = $this->services->photoroot;
@@ -1154,21 +1156,38 @@ $app->post('/bamenda/upload', function($request, $response, $args) {
         'DateTimeOriginal' => '',
         'MeteringMode' => '0',
         'Flash' => '0',
-        'FocalLength' => '' 
+        'FocalLength' => '',
+        'LensModel' => ''
     ];
     //$watermark = imagecreatefrompng($fileroot . '/watermark.png');
     //$wmsize = getimagesize($fileroot . '/watermark.png');
     $stmt = $dbh->prepare("INSERT INTO photos 
          (uid, fileName, fileSize, width, height, hash, extension, exifImageDescription, exifMake, exifModel, exifArtist, exifCopyright, exifExposureTime,
-          exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength) VALUES 
+          exifFNumber, exifExposureProgram, exifISOSpeedRatings, exifDateTimeOriginal, exifMeteringMode, exifFlash, exifFocalLength, exifLensModel) VALUES 
          (:uid, :fileName, :fileSize, :width, :height, :hash, :extension, :exifImageDescription, :exifMake, :exifModel, :exifArtist, :exifCopyright, :exifExposureTime,
-          :exifFNumber, :exifExposureProgram, :exifISOSpeedRatings, :exifDateTimeOriginal, :exifMeteringMode, :exifFlash, :exifFocalLength)");
+          :exifFNumber, :exifExposureProgram, :exifISOSpeedRatings, :exifDateTimeOriginal, :exifMeteringMode, :exifFlash, :exifFocalLength, :exifLensModel)");
 
     $insertIds = array();
     for ($i=0; $i<count($_FILES['file']['tmp_name']);$i++) {
           $tmp = $_FILES['file']['tmp_name'][$i];
           $name = $_FILES['file']['name'][$i];
-          $exif =  array_merge($exifDefaults, exif_read_data($tmp));
+   
+          $exifRead = $this->services->exifReader->read($tmp)->getRawData();
+          $exifData = array();
+
+          foreach ($exifRead as $key => $value) 
+          {
+            $arr = explode(':', $key);
+            if (count($arr)==2)
+            {
+              if ($arr[0]=='IFD0' || $arr[0]=='IFD1' || $arr[0]=='ExifIFD')
+                $exifData[$arr[1]] = $value;
+            }
+            else
+              $exifData[$key] = $value;
+          }
+   
+          $exif =  array_merge($exifDefaults, $exifData);
      
           $allowedTypes = array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF);
           $detectedType = exif_imagetype($tmp);
@@ -1206,7 +1225,8 @@ $app->post('/bamenda/upload', function($request, $response, $args) {
             'exifDateTimeOriginal'=>$exif['DateTimeOriginal'],
             'exifMeteringMode'=>$exif['MeteringMode'],
             'exifFlash'=>$exif['Flash'],
-            'exifFocalLength'=>$exif['FocalLength']
+            'exifFocalLength'=>$exif['FocalLength'],
+            'exifLensModel'=>$exif['LensModel']
          ]);
 
           $id = $dbh->lastInsertId();

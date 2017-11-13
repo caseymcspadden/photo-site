@@ -8,10 +8,10 @@ DownloadGalleryView = require './download-gallery-view'
 module.exports = BaseView.extend
 
 	events:
-		'click .prev' : 'shiftLeft'
-		'click .next' : 'shiftRight'
+		#'click .prev' : 'shiftLeft'
+		#'click .next' : 'shiftRight'
 		#'click img.selected-photo' : 'viewImage'
-		'click img.selected-photo' : 'selectedPhotoClicked'
+		'click img.selected-photo,.slideshow' : 'toggleSlideshow'
 		'click .download-gallery' : 'downloadGallery'
 		'click .download-photo' : 'downloadPhoto'
 		'click .buy-product' : 'buyProduct'
@@ -49,7 +49,7 @@ module.exports = BaseView.extend
 		this.$('.download-gallery').removeClass('hide') if data.downloadgallery>1
 		this.$('.buy-product').removeClass('hide') if m.get('buyprints')
 
-	selectedPhotoClicked: (e) ->
+	toggleSlideshow: (e) ->
 		e.preventDefault();
 		this.model.set 'showGrid' , !this.model.get('showGrid')
 

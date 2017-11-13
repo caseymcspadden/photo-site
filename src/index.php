@@ -45,6 +45,11 @@ $app->get('/', function (Request $request, Response $response, $args) {
   ]);
 })->setName('home');
 
+$app->get('/phpinfo', function (Request $request, Response $response, $args) {
+  $response->getBody()->write(phpinfo());
+  return $response;
+});
+
 $app->get('/authorize', function (Request $request, Response $response, $args) {
   $request2 = \OAuth2\Request::createFromGlobals();
   $response2 = new \OAuth2\Response();

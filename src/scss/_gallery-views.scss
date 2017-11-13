@@ -132,9 +132,6 @@
 			}
 		}
 		.tools {
-			overflow: hidden;
-			text-align: right;
-			margin-right: 1rem;
 			.download-gallery {
 					@include breakpoint(medium down) {
 					display: none;
@@ -148,6 +145,16 @@
 				color: $white;
 				&.in-cart {color: $body-font-color;}
 				margin-left: 1rem;
+			}
+			&.toolsleft {
+				float: left;
+				text-align: left;
+				margin-left: 1rem;				
+			}
+			&.toolsright {
+				text-align: right;
+				overflow: hidden;
+				margin-right: 1rem;
 			}
 		}		
 	}
