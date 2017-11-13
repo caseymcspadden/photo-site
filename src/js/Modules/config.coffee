@@ -1,7 +1,14 @@
 Config = ->
+
+Config.prototype.urlBase = 'https://caseymcspadden'
+Config.prototype.servicesBase = 'https://caseymcspadden/bamenda'
+Config.prototype.adminBase = 'https://caseymcspadden/mamfe'
+
+###
 Config.prototype.urlBase = 'https://caseymcspadden:8890'
 Config.prototype.servicesBase = 'https://caseymcspadden:8890/bamenda'
 Config.prototype.adminBase = 'https://caseymcspadden:8890/mamfe'
+###
 
 ###
 Config.prototype.urlBase = 'https://www.caseymcspadden.com'
